@@ -1,0 +1,201 @@
+// ============================================================
+// WALLET SCREEN (Driver)
+// ============================================================
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  StatusBar,
+  Alert,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { useApp } from '../../context/AppContext';
+import Header from '../../components/Header';
+import WalletCard from '../../components/WalletCard';
+import Input from '../../components/Input';
+import Button from '../../components/Button';
+import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+
+const WalletScreen = ({ navigation }: { navigation: any }) => {
+  const { getDriverData } = useApp();
+  const driver = getDriverData();
+
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [network, setNetwork]               = useState('');
+  const [phone, setPhone]                   = useState('');
+  const [loading, setLoading]               = useState(false);
+
+  const handleWithdraw = () => {
+    if (!driver) return;
+    const amount = parseFloat(withdrawAmount);
+    if (!withdrawAmount || isNaN(amount) || amount <= 0) {
+      Alert.alert('Invalid Amount', 'Please enter a valid withdrawal amount');
+      return;
+    }
+    if (amount > driver.walletBalance) {
+      Alert.alert('Insufficient Balance', 'Amount exceeds your current wallet balance');
+      return;
+    }
+    if (!network.trim() || !phone.trim()) {
+      Alert.alert('Missing Info', 'Please enter your mobile money network and number');
+      return;
+    }
+
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      Alert.alert(
+        'Request Submitted',
+        `Withdrawal of GH₵${amount} to ${network} (${phone}) has been submitted.\n\nFunds arrive within 24 hours in demo mode.`,
+        [{ text: 'OK', onPress: () => { setWithdrawAmount(''); setNetwork(''); setPhone(''); } }]
+      );
+    }, 1500);
+  };
+
+  if (!driver) return null;
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" />
+      <Header title="Wallet" onBack={() => navigation.goBack()} />
+
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        <WalletCard
+          balance={driver.walletBalance}
+          todayEarnings={driver.todayEarnings}
+          totalTrips={driver.totalTrips}
+        />
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Earnings Summary</Text>
+          <View style={styles.earningsGrid}>
+            {[
+              { label: 'Today', value: driver.todayEarnings, color: COLORS.textPrimary },
+              { label: 'This Week', value: driver.todayEarnings * 5.5, color: COLORS.textPrimary },
+              { label: 'This Month', value: driver.walletBalance, color: COLORS.success },
+            ].map((item, idx) => (
+              <View key={item.label} style={styles.earningCard}>
+                <Text style={[styles.earningValue, { color: item.color }]}>
+                  GH₵{item.value.toFixed(2)}
+                </Text>
+                <Text style={styles.earningLabel}>{item.label}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Withdraw Funds</Text>
+          <View style={styles.withdrawCard}>
+            <View style={styles.withdrawHeader}>
+              <Ionicons name="phone-portrait" size={20} color={COLORS.primaryDark} />
+              <Text style={styles.withdrawHeaderText}>Mobile Money Transfer</Text>
+            </View>
+
+            <Input
+              label="Amount (GH₵)"
+              placeholder={`Max: GH₵${driver.walletBalance.toFixed(2)}`}
+              value={withdrawAmount}
+              onChangeText={setWithdrawAmount}
+              keyboardType="numeric"
+              iconName="cash-outline"
+            />
+            <Input
+              label="Network"
+              placeholder="e.g. MTN, Vodafone, AirtelTigo"
+              value={network}
+              onChangeText={setNetwork}
+              iconName="wifi-outline"
+            />
+            <Input
+              label="Mobile Money Number"
+              placeholder="+233 XX XXX XXXX"
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+              iconName="call-outline"
+              autoCapitalize="none"
+            />
+
+            <Button
+              title="Request Withdrawal"
+              onPress={handleWithdraw}
+              loading={loading}
+              icon={<Ionicons name="arrow-up-circle" size={20} color={COLORS.textPrimary} />}
+            />
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: COLORS.background },
+  scroll: { padding: SPACING.lg, gap: SPACING.xl, paddingBottom: 100 },
+
+  section: { gap: SPACING.md },
+  sectionTitle: {
+    color: COLORS.textPrimary,
+    fontSize: FONT_SIZE.md,
+    fontWeight: '800',
+  },
+
+  earningsGrid: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  earningCard: {
+    flex: 1,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    alignItems: 'center',
+    gap: 4,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOW.sm,
+  },
+  earningValue: {
+    fontSize: FONT_SIZE.base,
+    fontWeight: '900',
+  },
+  earningLabel: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+
+  withdrawCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    gap: SPACING.sm,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOW.md,
+  },
+  withdrawHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+    paddingBottom: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  withdrawHeaderText: {
+    color: COLORS.textPrimary,
+    fontSize: FONT_SIZE.base,
+    fontWeight: '800',
+  },
+});
+
+export default WalletScreen;
