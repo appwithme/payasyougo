@@ -52,3 +52,18 @@ export async function waitForPayment(
 
   throw new Error('Timed out waiting for MoMo approval');
 }
+
+export async function rateDriverTrip(
+  transactionId: string,
+  stars: number
+): Promise<{
+  transaction: Transaction;
+  driverRating: number;
+  ratingCount: number;
+  yourRating: number;
+}> {
+  return apiRequest(`/api/transactions/${encodeURIComponent(transactionId)}/rate`, {
+    method: 'POST',
+    body: { stars },
+  });
+}
