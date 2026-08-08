@@ -11,6 +11,7 @@ import { FloatingTabBar, floatingTabScreenOptions } from './FloatingTabBar';
 import PassengerDashboardScreen from '../screens/passenger/PassengerDashboardScreen';
 import BookTripScreen from '../screens/passenger/BookTripScreen';
 import EnterDriverIdScreen from '../screens/passenger/EnterDriverIdScreen';
+import ScanDriverQrScreen from '../screens/passenger/ScanDriverQrScreen';
 import ConfirmTripScreen from '../screens/passenger/ConfirmTripScreen';
 import PaymentSuccessScreen from '../screens/passenger/PaymentSuccessScreen';
 import TripHistoryScreen from '../screens/passenger/TripHistoryScreen';
@@ -29,6 +30,7 @@ const HomeStack = () => (
     <HomeStackNav.Screen name="PassengerDashboard" component={PassengerDashboardScreen} />
     <HomeStackNav.Screen name="BookTrip" component={BookTripScreen} />
     <HomeStackNav.Screen name="EnterDriverId" component={EnterDriverIdScreen} />
+    <HomeStackNav.Screen name="ScanDriverQr" component={ScanDriverQrScreen} />
     <HomeStackNav.Screen name="ConfirmTrip" component={ConfirmTripScreen} />
     <HomeStackNav.Screen name="PaymentSuccess" component={PaymentSuccessScreen} />
     <HomeStackNav.Screen name="TripHistory" component={TripHistoryScreen} />
@@ -46,6 +48,7 @@ const BookStack = () => (
   <BookStackNav.Navigator screenOptions={{ headerShown: false }}>
     <BookStackNav.Screen name="BookTrip" component={BookTripScreen} />
     <BookStackNav.Screen name="EnterDriverId" component={EnterDriverIdScreen} />
+    <BookStackNav.Screen name="ScanDriverQr" component={ScanDriverQrScreen} />
     <BookStackNav.Screen name="ConfirmTrip" component={ConfirmTripScreen} />
     <BookStackNav.Screen name="PaymentSuccess" component={PaymentSuccessScreen} />
   </BookStackNav.Navigator>
