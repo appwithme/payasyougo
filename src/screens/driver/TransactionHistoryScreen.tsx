@@ -15,9 +15,11 @@ import { useApp } from '../../context/AppContext';
 import Header from '../../components/Header';
 import TransactionCard from '../../components/TransactionCard';
 import { COLORS, FONT_SIZE, SPACING, RADIUS } from '../../theme/colors';
+import { useTabBarPadding } from '../../navigation/FloatingTabBar';
 
 const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
   const { driverTransactions, getDriverData } = useApp();
+  const tabPad = useTabBarPadding();
   const driver = getDriverData();
   const totalEarned = driverTransactions.reduce((sum, t) => sum + t.amount, 0);
 
@@ -59,7 +61,7 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
           renderItem={({ item }) => (
             <TransactionCard item={item} mode="driver" />
           )}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[styles.list, { paddingBottom: tabPad }]}
           showsVerticalScrollIndicator={false}
         />
       )}
@@ -104,7 +106,6 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingHorizontal: SPACING.lg,
-    paddingBottom: 100,
   },
   empty: {
     flex: 1,
