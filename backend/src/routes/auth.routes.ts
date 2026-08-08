@@ -62,4 +62,16 @@ router.get('/me', requireAuth, async (req: AuthRequest, res, next) => {
   }
 });
 
+router.patch('/me/avatar', requireAuth, async (req: AuthRequest, res, next) => {
+  try {
+    const user = await auth.updateAvatar(req.user!.sub, req.body);
+    res.json({ user });
+  } catch (err) {
+    if (err instanceof Error && err.name === 'ZodError') {
+      return next(new AppError('Invalid avatar payload'));
+    }
+    next(err);
+  }
+});
+
 export default router;
