@@ -5,11 +5,11 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Image,
   ImageSourcePropType,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
@@ -20,6 +20,7 @@ import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { useTabBarPadding } from '../../navigation/FloatingTabBar';
 import { MoMoProvider } from '../../types';
+import { DriverWalletStackParamList } from '../../types/navigation';
 
 const PROVIDERS: {
   id: MoMoProvider;
@@ -39,6 +40,8 @@ const PROVIDERS: {
 ];
 
 const WalletScreen = () => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<DriverWalletStackParamList>>();
   const { getDriverData, withdrawDriverFunds, refreshDriverWallet } = useApp();
   const tabPad = useTabBarPadding();
   const driver = getDriverData();
@@ -97,10 +100,15 @@ const WalletScreen = () => {
     }
 
     setWithdrawAmount('');
-    Alert.alert(
-      'Withdrawal sent',
-      `GH₵${amount.toFixed(2)} is on its way to your ${provider === 'MTN' ? 'MTN MoMo' : 'Telecel Cash'} wallet.`
-    );
+    navigation.navigate('WithdrawalSuccess', {
+      amount: result.withdrawal?.amount ?? amount,
+      provider,
+      momoPhone: result.withdrawal?.momoPhone || phone.trim(),
+      reference: result.withdrawal?.reference,
+      demo: result.demo,
+      walletBalance: result.walletBalance,
+      createdAt: result.withdrawal?.createdAt,
+    });
   };
 
   if (!driver) return null;
