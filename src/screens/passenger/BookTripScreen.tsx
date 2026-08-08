@@ -42,15 +42,15 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" />
-      <Header title="Make payment" onBack={() => navigation.goBack()} transparent />
+      <Header title="Select route" onBack={() => navigation.goBack()} transparent />
 
       <ScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.label}>Route</Text>
-        <Text style={styles.sublabel}>Choose pickup and drop-off</Text>
+        <Text style={styles.label}>Where to?</Text>
+        <Text style={styles.sublabel}>Pick your campus pickup and drop-off</Text>
 
         <View style={styles.selectorWrapper}>
           <RouteSelector onRouteChange={setSelectedRoute} />
@@ -58,7 +58,6 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
 
         {canContinue && (
           <View style={styles.fareSection}>
-            <Text style={styles.sectionLabel}>Fare</Text>
             <FareCard
               from={selectedRoute.from}
               to={selectedRoute.to}
@@ -69,13 +68,14 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
 
         <Button
           title="Continue"
+          variant="ink"
           onPress={handleContinue}
           disabled={!canContinue}
           style={styles.btn}
         />
 
         {!canContinue && (
-          <Text style={styles.tip}>Select a route to continue.</Text>
+          <Text style={styles.tip}>Select pickup and drop-off to continue.</Text>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -85,18 +85,16 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   scroll: { padding: SPACING.lg, paddingBottom: 40 },
-  label: { ...type.subheading },
-  sublabel: { ...type.caption, marginTop: 4 },
+  label: { ...type.heading },
+  sublabel: { ...type.body, marginTop: 6 },
   selectorWrapper: {
-    marginTop: SPACING.md,
-    marginBottom: SPACING.xl,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.lg,
   },
   fareSection: {
-    gap: SPACING.sm,
     marginBottom: SPACING.xl,
   },
-  sectionLabel: { ...type.label },
-  btn: { marginTop: SPACING.md },
+  btn: { marginTop: SPACING.sm },
   tip: {
     ...type.caption,
     textAlign: 'center',

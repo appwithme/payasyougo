@@ -12,7 +12,8 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
 import TransactionCard from '../../components/TransactionCard';
-import { COLORS, SPACING, RADIUS } from '../../theme/colors';
+import Button from '../../components/Button';
+import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
 
 const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
@@ -27,7 +28,7 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
       <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
         <View style={styles.headerTitle}>
           <Text style={styles.greeting}>Hi, {firstName}</Text>
-          <Text style={styles.subGreeting}>Ready to pay?</Text>
+          <Text style={styles.subGreeting}>Pay a campus fare</Text>
         </View>
         <TouchableOpacity
           style={styles.avatarBtn}
@@ -38,17 +39,33 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
       </Animated.View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <TouchableOpacity
-          style={styles.searchRow}
-          activeOpacity={0.85}
-          onPress={() => navigation.navigate('BookTrip')}
-        >
-          <View style={styles.searchIcon}>
-            <Ionicons name="search-outline" size={18} color={COLORS.ink} />
+        <View style={styles.payCard}>
+          <View style={styles.payCardHeader}>
+            <View style={styles.payIcon}>
+              <Ionicons name="navigate-outline" size={22} color={COLORS.ink} />
+            </View>
+            <View style={styles.payCopy}>
+              <Text style={styles.payTitle}>New payment</Text>
+              <Text style={styles.paySubtitle}>Choose a route, then pay with MoMo</Text>
+            </View>
           </View>
-          <Text style={styles.searchPlaceholder}>Select route</Text>
-          <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
-        </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.searchRow}
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate('BookTrip')}
+          >
+            <Ionicons name="search-outline" size={18} color={COLORS.textMuted} />
+            <Text style={styles.searchPlaceholder}>Where are you going?</Text>
+          </TouchableOpacity>
+
+          <Button
+            title="Select route"
+            variant="ink"
+            onPress={() => navigation.navigate('BookTrip')}
+            icon={<Ionicons name="arrow-forward" size={18} color={COLORS.white} />}
+          />
+        </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -60,8 +77,11 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
 
           {recentTrips.length === 0 ? (
             <View style={styles.empty}>
-              <Ionicons name="bus-outline" size={40} color={COLORS.textMuted} />
-              <Text style={styles.emptyText}>No trips yet — book your first campus ride.</Text>
+              <View style={styles.emptyIcon}>
+                <Ionicons name="receipt-outline" size={22} color={COLORS.textMuted} />
+              </View>
+              <Text style={styles.emptyTitle}>No trips yet</Text>
+              <Text style={styles.emptyText}>Your payments will appear here.</Text>
             </View>
           ) : (
             recentTrips.map((trip) => (
@@ -101,30 +121,47 @@ const styles = StyleSheet.create({
     color: COLORS.ink,
   },
   scroll: { padding: SPACING.lg, paddingBottom: 110 },
-  searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  payCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: 16,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
     borderWidth: 1,
     borderColor: COLORS.border,
     marginBottom: SPACING.xl,
     gap: SPACING.md,
+    ...SHADOW.sm,
   },
-  searchIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: COLORS.surfaceAlt,
+  payCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  payIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  payCopy: { flex: 1 },
+  payTitle: { ...type.subheading },
+  paySubtitle: { ...type.caption, marginTop: 2 },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surfaceAlt,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    gap: SPACING.sm,
+  },
   searchPlaceholder: {
-    ...type.bodyBold,
+    ...type.body,
+    color: COLORS.textMuted,
     flex: 1,
-    color: COLORS.textSecondary,
   },
   section: { marginBottom: SPACING.xl },
   sectionHeader: {
@@ -144,6 +181,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
   },
+  emptyIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: COLORS.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  emptyTitle: { ...type.label },
   emptyText: { ...type.caption, textAlign: 'center' },
 });
 

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { fetchRoutes } from '../services/routesService';
-import { COLORS, SPACING, RADIUS } from '../theme/colors';
+import { COLORS, SPACING, RADIUS, SHADOW } from '../theme/colors';
 import { type } from '../theme/typography';
 import { RouteInfo } from '../types';
 
@@ -97,7 +97,9 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
         onPress={() => setOpenPicker('from')}
         activeOpacity={0.8}
       >
-        <View style={styles.dotFrom} />
+        <View style={styles.iconWell}>
+          <Ionicons name="locate-outline" size={18} color={COLORS.textSecondary} />
+        </View>
         <View style={styles.selectorContent}>
           <Text style={styles.selectorLabel}>From</Text>
           <Text style={[styles.selectorValue, !from && styles.placeholder]}>
@@ -107,7 +109,7 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
         <Ionicons name="chevron-down" size={18} color={COLORS.textMuted} />
       </TouchableOpacity>
 
-      <View style={styles.connectorLine} />
+      <View style={styles.rowDivider} />
 
       <TouchableOpacity
         style={styles.selector}
@@ -116,7 +118,9 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
         }}
         activeOpacity={from ? 0.8 : 0.4}
       >
-        <View style={styles.dotTo} />
+        <View style={styles.iconWell}>
+          <Ionicons name="flag-outline" size={18} color={COLORS.textSecondary} />
+        </View>
         <View style={styles.selectorContent}>
           <Text style={styles.selectorLabel}>To</Text>
           <Text style={[styles.selectorValue, !to && styles.placeholder]}>
@@ -158,6 +162,9 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
                   onPress={() => handleSelect(item)}
                   activeOpacity={0.7}
                 >
+                  <View style={styles.optionIcon}>
+                    <Ionicons name="location-outline" size={18} color={COLORS.textSecondary} />
+                  </View>
                   <Text style={styles.optionText}>{item}</Text>
                   <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
                 </TouchableOpacity>
@@ -174,9 +181,10 @@ const styles = StyleSheet.create({
   wrapper: {
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
-    padding: SPACING.lg,
+    padding: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.border,
+    ...SHADOW.sm,
   },
   centered: {
     alignItems: 'center',
@@ -194,27 +202,22 @@ const styles = StyleSheet.create({
   selector: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: SPACING.xs,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.xs,
+    gap: SPACING.md,
   },
-  dotFrom: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: COLORS.ink,
-    marginRight: SPACING.md,
+  iconWell: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: COLORS.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  dotTo: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: COLORS.primary,
-    marginRight: SPACING.md,
-  },
-  connectorLine: {
-    width: 1,
-    height: 20,
+  rowDivider: {
+    height: 1,
     backgroundColor: COLORS.border,
-    marginLeft: 4.5,
+    marginLeft: 56,
     marginVertical: 2,
   },
   selectorContent: { flex: 1 },
@@ -230,7 +233,8 @@ const styles = StyleSheet.create({
   noRoute: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: SPACING.md,
+    marginTop: SPACING.sm,
+    paddingHorizontal: SPACING.xs,
     gap: 6,
   },
   noRouteText: {
@@ -265,12 +269,20 @@ const styles = StyleSheet.create({
   optionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: SPACING.md,
     paddingVertical: SPACING.md,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  optionText: { ...type.bodyBold },
+  optionIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: COLORS.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  optionText: { ...type.bodyBold, flex: 1 },
 });
 
 export default RouteSelector;

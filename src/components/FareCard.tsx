@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, RADIUS } from '../theme/colors';
+import { COLORS, SPACING, RADIUS, SHADOW } from '../theme/colors';
 import { type } from '../theme/typography';
 
 const FareCard = ({ from, to, fare }: { from: string | null; to: string | null; fare: number }) => {
@@ -11,21 +11,33 @@ const FareCard = ({ from, to, fare }: { from: string | null; to: string | null; 
     <View style={styles.card}>
       <View style={styles.route}>
         <View style={styles.locationRow}>
-          <Ionicons name="ellipse" size={8} color={COLORS.ink} />
-          <Text style={styles.locationText}>{from}</Text>
+          <View style={styles.iconWell}>
+            <Ionicons name="locate-outline" size={16} color={COLORS.textSecondary} />
+          </View>
+          <View style={styles.locationTextWrap}>
+            <Text style={styles.locationLabel}>From</Text>
+            <Text style={styles.locationText} numberOfLines={1}>
+              {from}
+            </Text>
+          </View>
         </View>
 
-        <View style={styles.connector} />
-
         <View style={styles.locationRow}>
-          <Ionicons name="ellipse" size={8} color={COLORS.primary} />
-          <Text style={styles.locationText}>{to}</Text>
+          <View style={styles.iconWell}>
+            <Ionicons name="flag-outline" size={16} color={COLORS.textSecondary} />
+          </View>
+          <View style={styles.locationTextWrap}>
+            <Text style={styles.locationLabel}>To</Text>
+            <Text style={styles.locationText} numberOfLines={1}>
+              {to}
+            </Text>
+          </View>
         </View>
       </View>
 
       <View style={styles.fareBlock}>
         <Text style={styles.fareLabel}>Fixed fare</Text>
-        <Text style={styles.fareAmount}>GH₵{fare}</Text>
+        <Text style={styles.fareAmount}>GH₵{Number(fare).toFixed(2)}</Text>
       </View>
     </View>
   );
@@ -38,36 +50,42 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     borderWidth: 1,
     borderColor: COLORS.border,
-    flexDirection: 'row',
-    alignItems: 'center',
+    ...SHADOW.sm,
     gap: SPACING.lg,
   },
   route: {
-    flex: 1,
-    gap: 6,
+    gap: SPACING.md,
   },
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: SPACING.md,
   },
-  locationText: { ...type.bodyBold, flex: 1 },
-  connector: {
-    width: 1,
-    height: 14,
-    backgroundColor: COLORS.border,
-    marginLeft: 3.5,
+  iconWell: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: COLORS.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  locationTextWrap: { flex: 1 },
+  locationLabel: { ...type.caption, fontSize: 11 },
+  locationText: { ...type.bodyBold, marginTop: 1 },
   fareBlock: {
-    alignItems: 'flex-end',
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    paddingTop: SPACING.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   fareLabel: { ...type.caption },
   fareAmount: {
     fontFamily: 'Sora_700Bold',
-    fontSize: 28,
+    fontSize: 24,
     color: COLORS.ink,
     letterSpacing: -0.5,
-    marginTop: 2,
   },
 });
 
