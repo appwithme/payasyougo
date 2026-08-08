@@ -129,7 +129,10 @@ const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: an
 
           {foundDriver ? (
             <Animated.View entering={FadeInUp.duration(350)} style={styles.driverBlock}>
-              <Text style={styles.sectionLabel}>Paying</Text>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionLabel}>Paying</Text>
+                <Text style={styles.sectionHint}>Verified match</Text>
+              </View>
               <DriverCard driver={foundDriver} />
             </Animated.View>
           ) : null}
@@ -218,7 +221,17 @@ const styles = StyleSheet.create({
   hint: { ...type.caption },
 
   driverBlock: { gap: SPACING.sm },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   sectionLabel: { ...type.label },
+  sectionHint: {
+    ...type.caption,
+    color: COLORS.success,
+    fontFamily: 'DMSans_700Bold',
+  },
 
   footer: {
     paddingHorizontal: SPACING.lg,
