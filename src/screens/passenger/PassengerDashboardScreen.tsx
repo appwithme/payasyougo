@@ -2,6 +2,7 @@ import React from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -13,14 +14,18 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
 import TransactionCard from '../../components/TransactionCard';
 import Button from '../../components/Button';
-import BrandMark from '../../components/BrandMark';
+import UserAvatar from '../../components/UserAvatar';
 import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
+
+const MOMO_ICON = require('../../../assets/brand/momo-icon.png');
 
 const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
   const { currentUser, passengerTrips } = useApp();
   const recentTrips = passengerTrips.slice(0, 3);
   const firstName = currentUser?.name?.split(' ')[0] || 'Passenger';
+  const avatar =
+    currentUser && 'avatar' in currentUser ? currentUser.avatar : null;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -32,17 +37,17 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
           <Text style={styles.subGreeting}>Pay a campus fare</Text>
         </View>
         <TouchableOpacity
-          style={styles.avatarBtn}
           onPress={() => navigation.navigate('PassengerProfile')}
+          activeOpacity={0.85}
         >
-          <Text style={styles.avatarText}>{firstName.charAt(0)}</Text>
+          <UserAvatar name={currentUser?.name} uri={avatar} size={48} />
         </TouchableOpacity>
       </Animated.View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Animated.View entering={FadeInUp.delay(80).duration(450)} style={styles.payCard}>
           <View style={styles.payCardHeader}>
-            <BrandMark size={48} />
+            <Image source={MOMO_ICON} style={styles.momoIcon} resizeMode="cover" />
             <View style={styles.payCopy}>
               <Text style={styles.payTitle}>Pay for a ride</Text>
               <Text style={styles.paySubtitle}>Choose a route, then pay with MoMo</Text>
@@ -102,19 +107,6 @@ const styles = StyleSheet.create({
   headerTitle: { gap: 4 },
   greeting: { ...type.heading },
   subGreeting: { ...type.caption },
-  avatarBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    backgroundColor: COLORS.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: {
-    fontFamily: 'Sora_700Bold',
-    fontSize: 18,
-    color: COLORS.ink,
-  },
   scroll: { padding: SPACING.lg, paddingBottom: 110 },
   payCard: {
     backgroundColor: COLORS.surface,
@@ -130,6 +122,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
+  },
+  momoIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
   },
   payCopy: { flex: 1 },
   payTitle: { ...type.subheading },
