@@ -10,13 +10,13 @@ function mapDriverPublic(driver: {
   walletBalance: any;
   todayEarnings: any;
   totalTrips: number;
-  user: { fullName: string; phone: string; email: string | null };
+  user: { fullName: string; phone: string | null; email: string | null };
 }) {
   return {
     id: driver.uniqueCode,
     driverRecordId: driver.id,
     name: driver.user.fullName,
-    phone: driver.user.phone,
+    phone: driver.user.phone || '',
     email: driver.user.email || '',
     vehicle: driver.vehicleInfo,
     rating: driver.rating,

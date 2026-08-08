@@ -95,6 +95,18 @@ Register from the app, or use these seeded **admin test** accounts:
 
 Re-seed anytime with `cd backend && npm run prisma:seed`.
 
+### Google sign-in (passengers only)
+
+1. Create OAuth client IDs in [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (Web + iOS + Android)
+2. Paste into root `.env`:
+   ```env
+   EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=...
+   EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=...
+   EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=...
+   ```
+3. Paste the same IDs into `backend/.env` as `GOOGLE_WEB_CLIENT_ID`, `GOOGLE_IOS_CLIENT_ID`, `GOOGLE_ANDROID_CLIENT_ID`
+4. Restart API + Expo
+
 ---
 
 ## Project Structure
