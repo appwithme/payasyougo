@@ -46,8 +46,9 @@ You are on **test keys**. Real MoMo numbers are declined.
 | Network | Test number | Notes |
 |---------|-------------|--------|
 | MTN | `0551234987` | Official Paystack Ghana test MoMo number |
+| Telecel | — | No Paystack sandbox number. Use live keys + a real Telecel Cash number in production. |
 
-In the app Confirm payment screen, use that number with the **MTN** tile.
+In the app Confirm payment screen, use `0551234987` with the **MTN** tile for test payments. Telecel is wired (`vod`) and should work once you switch to **live** keys.
 
 ## 6. Paystack webhook (optional for local)
 

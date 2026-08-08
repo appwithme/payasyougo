@@ -140,21 +140,24 @@ With `sk_test_…` keys, **real phone numbers are declined**. Use Paystack’s o
 | Network | Test number | Notes |
 |:--------|:------------|:------|
 | **MTN** | `0551234987` | No PIN / OTP in test |
+| **Telecel** | — | Paystack does **not** publish a Telecel/Vodafone sandbox number. Telecel cannot be end-to-end tested on test keys. |
 
 ```text
 Declined. Please use the test mobile money number
 since you are doing a test transaction.
 ```
 
-↑ That error means you’re on test keys with a live number — switch to `0551234987`.
+↑ That error means you’re on test keys with a live number — switch to `0551234987` (MTN tile).
 
 ### Going live later
 
 1. Switch to Paystack **live** keys  
-2. Use real passenger MoMo numbers  
+2. Use real passenger MoMo numbers (MTN **or** Telecel Cash)  
 3. Enable Ghana MoMo (GHS) on the Paystack business  
 4. Optionally set a webhook: `POST /api/payments/webhook`  
    (the app also **polls** payment status, so local testing works without ngrok)
+
+In **live / production**, Telecel works the same as MTN: the app sends provider `vod` to Paystack, and the passenger approves on their real Telecel Cash number. No special sandbox workaround is needed once live keys are enabled.
 
 ---
 
