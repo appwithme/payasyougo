@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../../context/AppContext';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
+import GoogleSignInButton from '../../components/GoogleSignInButton';
 import { COLORS, FONT_SIZE, SPACING, RADIUS } from '../../theme/colors';
 
 const PassengerSignupScreen = ({ navigation }: { navigation: any }) => {
@@ -130,6 +131,16 @@ const PassengerSignupScreen = ({ navigation }: { navigation: any }) => {
 
           <Button title="Create Account" onPress={handleRegister} loading={loading} style={styles.btn} />
 
+          <View style={styles.dividerRow}>
+            <View style={styles.divider} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.divider} />
+          </View>
+
+          <GoogleSignInButton
+            onError={(msg) => setErrors((prev) => ({ ...prev, form: msg }))}
+          />
+
           <TouchableOpacity
             onPress={() => navigation.navigate('PassengerLogin')}
             style={styles.loginLink}
@@ -182,6 +193,18 @@ const styles = StyleSheet.create({
   errorText: { color: COLORS.error, flex: 1, fontWeight: '700', fontSize: FONT_SIZE.sm },
   form: { gap: SPACING.md },
   btn: { marginTop: SPACING.md },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: SPACING.md,
+  },
+  divider: { flex: 1, height: 1, backgroundColor: COLORS.border },
+  dividerText: {
+    color: COLORS.textMuted,
+    fontSize: FONT_SIZE.sm,
+    fontWeight: '600',
+  },
   loginLink: {
     flexDirection: 'row',
     justifyContent: 'center',
