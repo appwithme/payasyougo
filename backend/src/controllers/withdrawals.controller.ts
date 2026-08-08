@@ -1,5 +1,6 @@
 import { Role, TransactionStatus } from '@prisma/client';
 import { z } from 'zod';
+import { isWithdrawDemoMode } from '../config/env';
 import { prisma } from '../lib/prisma';
 import { AppError } from '../middleware/errorHandler';
 import {
@@ -57,6 +58,7 @@ export async function initiateWithdrawal(userId: string, body: unknown) {
   const amount = Math.round(input.amount * 100) / 100;
   const momoPhone = normalizePhone(input.momoPhone);
   const providerLabel = normalizeProviderLabel(input.provider);
+  const demoMode = isWithdrawDemoMode();
 
   if (amount < MIN_WITHDRAW_GHS) {
     throw new AppError(`Minimum withdrawal is GH₵${MIN_WITHDRAW_GHS.toFixed(2)}`);
@@ -84,7 +86,9 @@ export async function initiateWithdrawal(userId: string, body: unknown) {
     throw new AppError(`Insufficient balance. Available: GH₵${balance.toFixed(2)}`);
   }
 
-  const reference = `wd_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  const reference = demoMode
+    ? `wd_test_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+    : `wd_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
   let withdrawal;
   try {
@@ -97,6 +101,31 @@ export async function initiateWithdrawal(userId: string, body: unknown) {
     });
   } catch (err: any) {
     throw new AppError(err?.message || 'Could not reserve withdrawal amount', 400);
+  }
+
+  // sk_test_ / WITHDRAW_DEMO_MODE: Paystack Starter cannot Transfer — simulate MoMo payout.
+  if (demoMode) {
+    await completeWithdrawal({
+      withdrawalId: withdrawal.id,
+      paystackRef: reference,
+      transferCode: `TEST_TRF_${withdrawal.id.slice(0, 8)}`,
+      recipientCode: `TEST_RCP_${momoPhone}`,
+    });
+
+    const fresh = await prisma.withdrawal.findUniqueOrThrow({
+      where: { id: withdrawal.id },
+    });
+    const wallet = await myWallet(userId);
+
+    return {
+      withdrawalId: fresh.id,
+      reference: fresh.paystackRef || reference,
+      status: fresh.status.toLowerCase(),
+      displayText: `Test withdrawal of GH₵${amount.toFixed(2)} sent to ${providerLabel} ${momoPhone}.`,
+      demo: true,
+      withdrawal: formatWithdrawal(fresh),
+      wallet,
+    };
   }
 
   try {
@@ -121,7 +150,6 @@ export async function initiateWithdrawal(userId: string, body: unknown) {
       });
     }
 
-    // Test mode often returns success immediately
     if (transfer.status === 'success') {
       await completeWithdrawal({
         withdrawalId: withdrawal.id,
@@ -129,21 +157,13 @@ export async function initiateWithdrawal(userId: string, body: unknown) {
         transferCode: transfer.transferCode,
         recipientCode: recipient.recipientCode,
       });
-    } else if (
-      transfer.status === 'failed' ||
-      transfer.status === 'reversed' ||
-      transfer.status === 'otp'
-    ) {
-      // otp means dashboard approval — treat as not auto-completed; leave pending
-      // unless it's clearly failed
-      if (transfer.status === 'failed' || transfer.status === 'reversed') {
-        await failAndRefundWithdrawal({
-          withdrawalId: withdrawal.id,
-          reason: `Transfer ${transfer.status}`,
-          paystackRef: transfer.reference || reference,
-          transferCode: transfer.transferCode,
-        });
-      }
+    } else if (transfer.status === 'failed' || transfer.status === 'reversed') {
+      await failAndRefundWithdrawal({
+        withdrawalId: withdrawal.id,
+        reason: `Transfer ${transfer.status}`,
+        paystackRef: transfer.reference || reference,
+        transferCode: transfer.transferCode,
+      });
     }
 
     const fresh = await prisma.withdrawal.findUniqueOrThrow({
@@ -190,12 +210,11 @@ function friendlyPayoutError(message: string): string {
     lower.includes('starter business') ||
     lower.includes('you cannot initiate')
   ) {
-    return 'Paystack test account cannot send MoMo payouts yet. Upgrade transfers in the Paystack dashboard, or use live keys with a funded balance.';
+    return 'Paystack starter accounts cannot send MoMo payouts. Use sk_test_ keys (demo withdrawals) or enable Transfers.';
   }
   if (lower.includes('insufficient') && lower.includes('balance')) {
     return 'Paystack payout balance is too low. Fund your Paystack balance first.';
   }
-  // Don't leak raw Prisma internals to the app UI
   if (lower.includes('prisma') || lower.includes('transaction api')) {
     return 'Could not complete withdrawal. Please try again.';
   }
@@ -211,7 +230,12 @@ export async function withdrawalStatus(userId: string, withdrawalId: string) {
     throw new AppError('Withdrawal not found', 404);
   }
 
-  if (row.status === TransactionStatus.PENDING && row.paystackRef) {
+  // Demo refs never hit Paystack verify
+  if (
+    row.status === TransactionStatus.PENDING &&
+    row.paystackRef &&
+    !row.paystackRef.startsWith('wd_test_')
+  ) {
     try {
       const verified = await verifyTransfer(row.paystackRef);
       const status = String(verified.status || '').toLowerCase();
