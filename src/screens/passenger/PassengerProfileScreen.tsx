@@ -138,6 +138,15 @@ const PassengerProfileScreen = ({ navigation }: { navigation: any }) => {
               {passenger?.name || 'Passenger'}
             </Text>
             <Text style={styles.heroRole}>Passenger</Text>
+
+            <TouchableOpacity
+              style={styles.editProfileBtn}
+              onPress={() => navigation.navigate('EditProfile')}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="create-outline" size={15} color={COLORS.ink} />
+              <Text style={styles.editProfileText}>Edit profile</Text>
+            </TouchableOpacity>
           </Animated.View>
         </SafeAreaView>
       </LinearGradient>
@@ -180,6 +189,21 @@ const PassengerProfileScreen = ({ navigation }: { navigation: any }) => {
             <Animated.View entering={FadeInUp.delay(240).duration(420)} style={styles.actions}>
               <TouchableOpacity
                 style={styles.primaryAction}
+                onPress={() => navigation.navigate('Settings')}
+                activeOpacity={0.85}
+              >
+                <View style={styles.actionIcon}>
+                  <Ionicons name="settings-outline" size={18} color={COLORS.ink} />
+                </View>
+                <View style={styles.actionCopy}>
+                  <Text style={styles.actionTitle}>Settings</Text>
+                  <Text style={styles.actionHint}>Support and app info</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.primaryAction}
                 onPress={() => navigation.navigate('HistoryTab' as never)}
                 activeOpacity={0.85}
               >
@@ -214,14 +238,21 @@ function DetailRow({
   label,
   value,
   muted,
+  onPress,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   value: string;
   muted?: boolean;
+  onPress?: () => void;
 }) {
   return (
-    <View style={styles.detailRow}>
+    <TouchableOpacity
+      style={styles.detailRow}
+      onPress={onPress}
+      activeOpacity={0.75}
+      disabled={!onPress}
+    >
       <View style={styles.detailIcon}>
         <Ionicons name={icon} size={16} color={COLORS.ink} />
       </View>
@@ -234,7 +265,10 @@ function DetailRow({
           {value}
         </Text>
       </View>
-    </View>
+      {onPress ? (
+        <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
+      ) : null}
+    </TouchableOpacity>
   );
 }
 
@@ -297,6 +331,21 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.55)',
     letterSpacing: 0.6,
     textTransform: 'uppercase',
+  },
+  editProfileBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: COLORS.primary,
+  },
+  editProfileText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 13,
+    color: COLORS.ink,
   },
 
   sheet: {
