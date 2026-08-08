@@ -72,10 +72,13 @@ const PaymentSuccessScreen = ({ navigation, route }: { navigation: any; route: a
     }
   };
 
-  const goHome = () => navigation.popToTop();
+  const goHome = () => {
+    navigation.popToTop();
+    navigation.navigate('HomeTab' as never);
+  };
   const goHistory = () => {
     navigation.popToTop();
-    navigation.navigate('TripHistory');
+    navigation.navigate('HistoryTab' as never);
   };
 
   return (
