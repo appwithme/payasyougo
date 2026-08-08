@@ -106,7 +106,8 @@ async function main() {
         create: {
           uniqueCode: TEST_ACCOUNTS.driver.uniqueCode,
           vehicleInfo: TEST_ACCOUNTS.driver.vehicleInfo,
-          rating: 5.0,
+          rating: 0,
+          ratingCount: 0,
         },
       },
     },
@@ -119,7 +120,8 @@ async function main() {
         userId: driverUser.id,
         uniqueCode: TEST_ACCOUNTS.driver.uniqueCode,
         vehicleInfo: TEST_ACCOUNTS.driver.vehicleInfo,
-        rating: 5.0,
+        rating: 0,
+        ratingCount: 0,
       },
     });
   } else {
