@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { usePassengerGoogleAuth } from '../services/googleAuth';
+import { useGoogleIdTokenRequest } from '../services/googleAuth';
 import { useApp } from '../context/AppContext';
 import { COLORS, RADIUS, SPACING } from '../theme/colors';
 import { type } from '../theme/typography';
@@ -12,23 +12,8 @@ type Props = {
 
 export default function GoogleSignInButton({ onError }: Props) {
   const { loginPassengerWithGoogle } = useApp();
+  const { configured, ready, promptAsync } = useGoogleIdTokenRequest();
   const [busy, setBusy] = useState(false);
-
-  const { configured, ready, promptAsync } = usePassengerGoogleAuth(
-    async () => {
-      // AuthSession success is handled inside the hook via API;
-      // we also support direct idToken path from hook — context already applied there.
-      // Hook calls onSuccess with user after API — apply via context below if needed.
-      setBusy(false);
-    },
-    (msg) => {
-      setBusy(false);
-      onError?.(msg);
-    }
-  );
-
-  // Re-wire: hook currently applies via onSuccess with user but doesn't call context.
-  // Fix by using a dedicated flow in this button instead.
 
   if (!configured) {
     return (
@@ -45,24 +30,22 @@ export default function GoogleSignInButton({ onError }: Props) {
     try {
       const result = await promptAsync();
       if (result.type !== 'success') {
-        setBusy(false);
         if (result.type === 'error') {
-          onError?.(result.error?.message || 'Google sign-in cancelled');
+          onError?.(result.error?.message || 'Google sign-in failed');
         }
         return;
       }
       const idToken = result.params.id_token;
       if (!idToken) {
-        setBusy(false);
         onError?.('Google did not return an ID token');
         return;
       }
       const auth = await loginPassengerWithGoogle(idToken);
-      setBusy(false);
       if (!auth.success) onError?.(auth.error || 'Google sign-in failed');
     } catch (err: any) {
-      setBusy(false);
       onError?.(err?.message || 'Google sign-in failed');
+    } finally {
+      setBusy(false);
     }
   };
 
