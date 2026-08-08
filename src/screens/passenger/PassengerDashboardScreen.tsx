@@ -13,6 +13,7 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
 import TransactionCard from '../../components/TransactionCard';
 import Button from '../../components/Button';
+import CustomBrandMark from '../../components/CustomBrandMark';
 import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
 
@@ -41,11 +42,9 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Animated.View entering={FadeInUp.delay(80).duration(450)} style={styles.payCard}>
           <View style={styles.payCardHeader}>
-            <View style={styles.payIcon}>
-              <Ionicons name="navigate-outline" size={22} color={COLORS.ink} />
-            </View>
+            <CustomBrandMark size={48} />
             <View style={styles.payCopy}>
-              <Text style={styles.payTitle}>New payment</Text>
+              <Text style={styles.payTitle}>Pay for a ride</Text>
               <Text style={styles.paySubtitle}>Choose a route, then pay with MoMo</Text>
             </View>
           </View>

@@ -1,98 +1,72 @@
 import React from 'react';
-import { View, Image, StyleSheet, ViewStyle, ImageStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import CustomBrandMark from './CustomBrandMark';
-import { COLORS, SHADOW } from '../theme/colors';
+import { COLORS } from '../theme/colors';
 
 type Props = {
   size?: number;
   style?: ViewStyle;
   /**
-   * `pin3d` — hand-crafted gradient pin (splash/hero)
-   * `icon` — App Store tile
-   * `pin` — lightweight flat pin for small UI chrome
+   * `pin3d` / `icon` / `squircle` — custom amber tile mark
+   * `pin` — compact route chip
    */
   variant?: 'pin3d' | 'icon' | 'pin' | 'squircle';
 };
 
-const LOGO_ICON = require('../../assets/brand/logo-3d-icon.png');
-
 /**
- * Brand mark — custom gradient pin for splash/hero,
- * flat geometric pin for small UI.
+ * Brand mark — always the hand-built geometric tile (no AI bitmaps).
  */
 export default function BrandMark({ size = 72, style, variant = 'pin3d' }: Props) {
-  if (variant === 'pin3d') {
-    return <CustomBrandMark size={size} style={style} />;
+  if (variant === 'pin') {
+    return <MiniPin size={size} style={style} />;
   }
-
-  if (variant === 'icon' || variant === 'squircle') {
-    return (
-      <View
-        style={[
-          {
-            width: size,
-            height: size,
-            borderRadius: size * 0.22,
-            overflow: 'hidden',
-          },
-          style,
-        ]}
-      >
-        <Image source={LOGO_ICON} style={styles.fill as ImageStyle} resizeMode="cover" />
-      </View>
-    );
-  }
-
-  return <MapPin size={size} style={style} />;
+  return <CustomBrandMark size={size} style={style} />;
 }
 
-/** Flat pin for tiny UI (tabs, chips) — keep lightweight */
-export function MapPin({ size = 40, style }: { size?: number; style?: ViewStyle }) {
-  const head = size * 0.72;
-  const hole = size * 0.22;
-
+function MiniPin({ size = 40, style }: { size?: number; style?: ViewStyle }) {
+  const dot = size * 0.22;
   return (
-    <View style={[{ width: size, height: size, alignItems: 'center' }, style]}>
-      <View
-        style={{
-          width: head,
-          height: head,
-          borderRadius: head / 2,
+    <View
+      style={[
+        {
+          width: size,
+          height: size,
+          borderRadius: size * 0.28,
           backgroundColor: COLORS.primary,
           alignItems: 'center',
           justifyContent: 'center',
-          ...SHADOW.sm,
-        }}
-      >
-        <View
-          style={{
-            width: hole,
-            height: hole,
-            borderRadius: hole / 2,
-            backgroundColor: COLORS.white,
-          }}
-        />
-      </View>
+          gap: size * 0.08,
+        },
+        style,
+      ]}
+    >
       <View
         style={{
-          width: 0,
-          height: 0,
-          marginTop: -size * 0.06,
-          borderLeftWidth: size * 0.18,
-          borderRightWidth: size * 0.18,
-          borderTopWidth: size * 0.28,
-          borderLeftColor: 'transparent',
-          borderRightColor: 'transparent',
-          borderTopColor: COLORS.primary,
+          width: dot,
+          height: dot,
+          borderRadius: dot / 2,
+          backgroundColor: COLORS.ink,
+        }}
+      />
+      <View
+        style={{
+          width: size * 0.08,
+          height: size * 0.2,
+          borderRadius: 2,
+          backgroundColor: COLORS.ink,
+        }}
+      />
+      <View
+        style={{
+          width: dot,
+          height: dot,
+          borderRadius: 2,
+          backgroundColor: COLORS.ink,
+          transform: [{ rotate: '45deg' }],
         }}
       />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  fill: {
-    width: '100%',
-    height: '100%',
-  },
-});
+const styles = StyleSheet.create({});
