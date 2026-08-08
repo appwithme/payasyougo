@@ -8,7 +8,7 @@ import {
   decimalToNumber,
   markPaymentFailed,
 } from '../services/wallet';
-import { normalizePhone } from '../utils/helpers';
+import { normalizePhone, normalizeProviderLabel, PAYSTACK_TEST_MTN_NUMBER, toPaystackProvider } from '../utils/helpers';
 
 const initiateSchema = z.object({
   driverCode: z.string().min(3),
@@ -90,6 +90,20 @@ export async function initiatePayment(passengerUserId: string, body: unknown) {
     throw new AppError('Amount does not match route fare');
   }
 
+  const paystackProvider = toPaystackProvider(input.provider);
+  const providerLabel = normalizeProviderLabel(input.provider);
+
+  // Paystack sandbox only documents an MTN test number — don't pretend Telecel works with it
+  if (
+    paystackProvider !== 'mtn' &&
+    momoPhone === PAYSTACK_TEST_MTN_NUMBER
+  ) {
+    throw new AppError(
+      '0551234987 is Paystack’s MTN test number. Select MTN MoMo for test payments, or use a real Telecel number with live keys.',
+      400
+    );
+  }
+
   const reference = `PAY_${Date.now()}_${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
   const txn = await prisma.transaction.create({
@@ -99,7 +113,7 @@ export async function initiatePayment(passengerUserId: string, body: unknown) {
       routeId: route.id,
       amount: fare,
       status: TransactionStatus.PENDING,
-      provider: input.provider.toUpperCase(),
+      provider: providerLabel,
       momoPhone,
       paystackRef: reference,
     },
