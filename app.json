@@ -5,12 +5,12 @@
     "version": "1.0.2",
     "scheme": "payasyougo",
     "orientation": "portrait",
-    "icon": "./assets/app-icon-v4.png",
+    "icon": "./assets/app-icon-v5.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash-v4.png",
+      "image": "./assets/app-icon-v5.png",
       "resizeMode": "contain",
-      "backgroundColor": "#EEF3F9"
+      "backgroundColor": "#FFFFFF"
     },
     "runtimeVersion": {
       "policy": "appVersion"
@@ -28,7 +28,7 @@
       }
     },
     "web": {
-      "favicon": "./assets/app-icon-v4.png"
+      "favicon": "./assets/app-icon-v5.png"
     },
     "plugins": [
       "expo-font",
