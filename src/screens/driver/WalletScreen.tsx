@@ -46,7 +46,7 @@ const WalletScreen = () => {
 
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [provider, setProvider] = useState<MoMoProvider>('MTN');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState('0551234987');
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState('');
   const [error, setError] = useState('');
@@ -189,11 +189,11 @@ const WalletScreen = () => {
                     style={[styles.providerChip, selected && styles.providerChipOn]}
                     onPress={() => setProvider(p.id)}
                     activeOpacity={0.85}
+                    accessibilityLabel={p.name}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
                   >
                     <Image source={p.logo} style={styles.providerLogo} resizeMode="contain" />
-                    <Text style={[styles.providerName, selected && styles.providerNameOn]}>
-                      {p.name}
-                    </Text>
                   </TouchableOpacity>
                 );
               })}
@@ -201,7 +201,7 @@ const WalletScreen = () => {
 
             <Input
               label="MoMo number"
-              placeholder="e.g. 0551234987"
+              placeholder="0551234987"
               value={phone}
               onChangeText={(v) => {
                 setPhone(v);
@@ -367,10 +367,9 @@ const styles = StyleSheet.create({
   },
   providerChip: {
     flex: 1,
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingVertical: 10,
+    justifyContent: 'center',
+    paddingVertical: 14,
     paddingHorizontal: 12,
     borderRadius: RADIUS.md,
     borderWidth: 1,
@@ -382,18 +381,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primaryMuted,
   },
   providerLogo: {
-    width: 22,
-    height: 22,
-  },
-  providerName: {
-    fontFamily: 'DMSans_500Medium',
-    fontSize: 12,
-    color: COLORS.textMuted,
-    flexShrink: 1,
-  },
-  providerNameOn: {
-    color: COLORS.ink,
-    fontFamily: 'DMSans_700Bold',
+    width: 40,
+    height: 40,
   },
   errorText: {
     fontFamily: 'DMSans_500Medium',
