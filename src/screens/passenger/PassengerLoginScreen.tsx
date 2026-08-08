@@ -15,15 +15,22 @@ import Button from '../../components/Button';
 import Input from '../../components/Input';
 import BrandLogo from '../../components/BrandLogo';
 import GoogleSignInButton from '../../components/GoogleSignInButton';
+import { QA_PASSENGER } from '../../data/qaAccounts';
 import { COLORS, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
 
 const PassengerLoginScreen = ({ navigation }: { navigation: any }) => {
   const { loginPassenger } = useApp();
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState(QA_PASSENGER.phone);
+  const [password, setPassword] = useState(QA_PASSENGER.password);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const fillQaAccount = () => {
+    setPhone(QA_PASSENGER.phone);
+    setPassword(QA_PASSENGER.password);
+    setError('');
+  };
 
   const handleLogin = async () => {
     if (!phone.trim()) {
@@ -75,6 +82,9 @@ const PassengerLoginScreen = ({ navigation }: { navigation: any }) => {
             keyboardType="phone-pad"
             iconName="call-outline"
             autoCapitalize="none"
+            autoComplete="tel"
+            textContentType="telephoneNumber"
+            importantForAutofill="yes"
           />
           <Input
             label="Password"
@@ -84,7 +94,21 @@ const PassengerLoginScreen = ({ navigation }: { navigation: any }) => {
             iconName="lock-closed-outline"
             secureTextEntry
             autoCapitalize="none"
+            autoComplete="password"
+            textContentType="password"
+            importantForAutofill="yes"
           />
+
+          <TouchableOpacity
+            style={styles.autofillBtn}
+            onPress={fillQaAccount}
+            accessibilityRole="button"
+            accessibilityLabel="Autofill test passenger account"
+          >
+            <Ionicons name="flash-outline" size={16} color={COLORS.ink} />
+            <Text style={styles.autofillText}>Autofill test account</Text>
+          </TouchableOpacity>
+
           <Button title="Sign in" onPress={handleLogin} loading={loading} variant="ink" />
 
           <View style={styles.dividerRow}>
@@ -136,6 +160,15 @@ const styles = StyleSheet.create({
   },
   errorText: { ...type.caption, color: COLORS.error, flex: 1, fontFamily: 'DMSans_700Bold' },
   form: { gap: 4 },
+  autofillBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: SPACING.xs,
+    marginBottom: SPACING.md,
+    paddingVertical: SPACING.xs,
+  },
+  autofillText: { ...type.caption, color: COLORS.ink, fontFamily: 'DMSans_700Bold' },
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
