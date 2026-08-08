@@ -1,25 +1,23 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  Animated,
   StatusBar,
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 import Button from '../../components/Button';
 import { rateDriverTrip } from '../../services/paymentsService';
-import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import { COLORS, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
 
 const PaymentSuccessScreen = ({ navigation, route }: { navigation: any; route: any }) => {
   const { transaction, driver } = route.params;
-  const scaleAnim = useRef(new Animated.Value(0)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const alreadyRated = transaction?.passengerRating != null;
   const [stars, setStars] = useState<number>(transaction?.passengerRating ?? 0);
@@ -27,21 +25,12 @@ const PaymentSuccessScreen = ({ navigation, route }: { navigation: any; route: a
   const [submitting, setSubmitting] = useState(false);
   const [rateError, setRateError] = useState('');
 
-  useEffect(() => {
-    Animated.sequence([
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        tension: 45,
-        friction: 6,
-        useNativeDriver: true,
-      }),
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
+  const amountLabel = `GH₵${Number(transaction?.amount ?? 0).toFixed(2)}`;
+  const driverName = driver?.name ?? 'the driver';
+  const refShort = String(transaction?.paymentRef || transaction?.id || '')
+    .replace(/^PAY_/, '')
+    .slice(0, 12)
+    .toUpperCase();
 
   const handleSubmitRating = async () => {
     if (!stars || !transaction?.id || submitting) return;
@@ -57,47 +46,66 @@ const PaymentSuccessScreen = ({ navigation, route }: { navigation: any; route: a
     }
   };
 
-  const ReceiptRow = ({
-    label,
-    value,
-    highlight = false,
-  }: {
-    label: string;
-    value: string;
-    highlight?: boolean;
-  }) => (
-    <View style={styles.receiptRow}>
-      <Text style={styles.receiptLabel}>{label}</Text>
-      <Text style={[styles.receiptValue, highlight && styles.receiptHighlight]}>{value}</Text>
-    </View>
-  );
+  const goHome = () => navigation.popToTop();
+  const goHistory = () => {
+    navigation.popToTop();
+    navigation.navigate('TripHistory');
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <StatusBar barStyle="dark-content" />
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.successSection}>
-          <Animated.View style={[styles.checkCircle, { transform: [{ scale: scaleAnim }] }]}>
-            <Ionicons name="checkmark" size={48} color={COLORS.white} />
-          </Animated.View>
 
-          <Animated.View style={{ opacity: fadeAnim, alignItems: 'center' }}>
-            <Text style={styles.successTitle}>Payment sent</Text>
-            <Text style={styles.successSubtitle}>
-              Fare delivered to {driver?.name ?? 'the driver'}
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View entering={FadeInDown.duration(400)} style={styles.hero}>
+          <View style={styles.checkWrap}>
+            <Ionicons name="checkmark" size={22} color={COLORS.white} />
+          </View>
+          <Text style={styles.heroLabel}>Payment sent</Text>
+          <Text style={styles.amount}>{amountLabel}</Text>
+          <Text style={styles.heroHint}>to {driverName}</Text>
+        </Animated.View>
+
+        <Animated.View entering={FadeInUp.delay(60).duration(400)} style={styles.card}>
+          <View style={styles.stopRow}>
+            <View style={styles.iconWell}>
+              <Ionicons name="locate-outline" size={14} color={COLORS.textSecondary} />
+            </View>
+            <View style={styles.stopCopy}>
+              <Text style={styles.stopCaption}>From</Text>
+              <Text style={styles.stopText} numberOfLines={1}>
+                {transaction?.from}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.routeLine} />
+          <View style={styles.stopRow}>
+            <View style={styles.iconWell}>
+              <Ionicons name="flag-outline" size={14} color={COLORS.textSecondary} />
+            </View>
+            <View style={styles.stopCopy}>
+              <Text style={styles.stopCaption}>To</Text>
+              <Text style={styles.stopText} numberOfLines={1}>
+                {transaction?.to}
+              </Text>
+            </View>
+          </View>
+        </Animated.View>
+
+        <Animated.View entering={FadeInUp.delay(100).duration(400)} style={styles.card}>
+          <View style={styles.rateHeader}>
+            <Text style={styles.cardLabel}>
+              {submitted ? 'Thanks for rating' : 'Rate your driver'}
             </Text>
-          </Animated.View>
-        </View>
-
-        <Animated.View style={[styles.rateCard, { opacity: fadeAnim }]}>
-          <Text style={styles.rateTitle}>
-            {submitted ? 'Thanks for rating' : 'Rate your driver'}
-          </Text>
-          <Text style={styles.rateSubtitle}>
-            {submitted
-              ? `You rated ${driver?.name ?? 'this driver'} ${stars} out of 5`
-              : `How was your ride with ${driver?.name ?? 'this driver'}?`}
-          </Text>
+            {submitted ? (
+              <Text style={styles.rateDone}>{stars}.0</Text>
+            ) : (
+              <Text style={styles.rateHint}>{driverName.split(' ')[0]}</Text>
+            )}
+          </View>
 
           <View style={styles.starsPicker}>
             {[1, 2, 3, 4, 5].map((n) => (
@@ -105,13 +113,13 @@ const PaymentSuccessScreen = ({ navigation, route }: { navigation: any; route: a
                 key={n}
                 onPress={() => !submitted && setStars(n)}
                 disabled={submitted || submitting}
-                hitSlop={8}
+                hitSlop={10}
                 accessibilityRole="button"
                 accessibilityLabel={`Rate ${n} stars`}
               >
                 <Ionicons
                   name={n <= stars ? 'star' : 'star-outline'}
-                  size={36}
+                  size={32}
                   color={n <= stars ? COLORS.primaryDark : COLORS.borderStrong}
                 />
               </TouchableOpacity>
@@ -120,96 +128,152 @@ const PaymentSuccessScreen = ({ navigation, route }: { navigation: any; route: a
 
           {!!rateError && <Text style={styles.rateError}>{rateError}</Text>}
 
-          {!submitted ? (
+          {!submitted && stars > 0 ? (
             <TouchableOpacity
-              style={[styles.submitRate, (!stars || submitting) && styles.submitRateDisabled]}
+              style={[styles.submitRate, submitting && styles.submitRateDisabled]}
               onPress={handleSubmitRating}
-              disabled={!stars || submitting}
+              disabled={submitting}
               activeOpacity={0.85}
             >
               {submitting ? (
                 <ActivityIndicator color={COLORS.white} />
               ) : (
-                <Text style={styles.submitRateText}>Submit rating</Text>
+                <Text style={styles.submitRateText}>Submit {stars}-star rating</Text>
               )}
             </TouchableOpacity>
           ) : null}
         </Animated.View>
 
-        <Animated.View style={[styles.receipt, { opacity: fadeAnim }]}>
-          <View style={styles.receiptHeader}>
-            <Ionicons name="receipt-outline" size={22} color={COLORS.ink} />
-            <Text style={styles.receiptTitle}>Receipt</Text>
+        <Animated.View entering={FadeInUp.delay(140).duration(400)} style={styles.card}>
+          <Text style={styles.cardLabel}>Receipt</Text>
+
+          <MetaRow label="Reference" value={refShort || '—'} mono />
+          <MetaRow label="Driver" value={driverName} />
+          <MetaRow label="Driver ID" value={driver?.id || '—'} mono />
+          <MetaRow
+            label="When"
+            value={[transaction?.date, transaction?.time].filter(Boolean).join(' · ') || '—'}
+          />
+          <View style={styles.amountRow}>
+            <Text style={styles.amountRowLabel}>Amount</Text>
+            <Text style={styles.amountRowValue}>{amountLabel}</Text>
           </View>
-
-          <ReceiptRow label="Transaction" value={transaction.id} />
-          <View style={styles.divider} />
-          <ReceiptRow label="Route" value={`${transaction.from} → ${transaction.to}`} />
-          <ReceiptRow label="Driver" value={driver?.name} />
-          <ReceiptRow label="Driver ID" value={driver?.id} />
-          <ReceiptRow label="Date" value={transaction.date} />
-          <ReceiptRow label="Time" value={transaction.time} />
-          <View style={styles.divider} />
-          <ReceiptRow
-            label="Amount paid"
-            value={`GH₵${Number(transaction.amount).toFixed(2)}`}
-            highlight
-          />
-          <ReceiptRow label="Status" value="Completed" />
-        </Animated.View>
-
-        <Animated.View style={[styles.buttons, { opacity: fadeAnim }]}>
-          <Button
-            title="View trip history"
-            variant="secondary"
-            onPress={() => {
-              navigation.popToTop();
-              navigation.navigate('TripHistory');
-            }}
-          />
-          <Button title="Back to home" variant="ink" onPress={() => navigation.popToTop()} />
+          <View style={styles.statusPill}>
+            <View style={styles.statusDot} />
+            <Text style={styles.statusText}>Completed</Text>
+          </View>
         </Animated.View>
       </ScrollView>
+
+      <Animated.View entering={FadeIn.delay(200).duration(350)} style={styles.footer}>
+        <Button title="Back to home" variant="ink" onPress={goHome} />
+        <Button title="View trip history" variant="secondary" onPress={goHistory} />
+      </Animated.View>
     </SafeAreaView>
   );
 };
 
+function MetaRow({
+  label,
+  value,
+  mono = false,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+}) {
+  return (
+    <View style={styles.metaRow}>
+      <Text style={styles.metaLabel}>{label}</Text>
+      <Text style={[styles.metaValue, mono && styles.metaMono]} numberOfLines={1}>
+        {value}
+      </Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  scroll: { padding: SPACING.lg, paddingBottom: 40 },
-  successSection: {
-    alignItems: 'center',
-    marginVertical: SPACING.xl,
-    gap: SPACING.lg,
+  scroll: {
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.lg,
+    gap: SPACING.md,
   },
-  checkCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: 32,
+
+  hero: {
+    alignItems: 'center',
+    paddingTop: SPACING.xl,
+    paddingBottom: SPACING.sm,
+    gap: 6,
+  },
+  checkWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     backgroundColor: COLORS.success,
     alignItems: 'center',
     justifyContent: 'center',
-    ...SHADOW.md,
+    marginBottom: SPACING.sm,
   },
-  successTitle: { ...type.title, textAlign: 'center' },
-  successSubtitle: { ...type.body, textAlign: 'center', marginTop: 6 },
+  heroLabel: { ...type.caption },
+  amount: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 40,
+    color: COLORS.ink,
+    letterSpacing: -1.2,
+  },
+  heroHint: { ...type.body, color: COLORS.textSecondary },
 
-  rateCard: {
+  card: {
     backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.xl,
-    padding: SPACING.lg,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.border,
-    marginBottom: SPACING.lg,
-    alignItems: 'center',
     gap: SPACING.sm,
   },
-  rateTitle: { ...type.subheading, textAlign: 'center' },
-  rateSubtitle: { ...type.caption, textAlign: 'center', marginBottom: SPACING.sm },
+  cardLabel: { ...type.label },
+
+  stopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  iconWell: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: COLORS.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stopCopy: { flex: 1, gap: 1 },
+  stopCaption: { ...type.caption, fontSize: 11 },
+  stopText: { ...type.bodyBold },
+  routeLine: {
+    width: 2,
+    height: 12,
+    backgroundColor: COLORS.border,
+    marginLeft: 15,
+    borderRadius: 1,
+  },
+
+  rateHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  rateHint: { ...type.caption },
+  rateDone: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 16,
+    color: COLORS.ink,
+  },
   starsPicker: {
     flexDirection: 'row',
-    gap: 10,
-    marginVertical: SPACING.sm,
+    justifyContent: 'center',
+    gap: 12,
+    paddingVertical: SPACING.sm,
   },
   rateError: {
     ...type.caption,
@@ -217,61 +281,82 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   submitRate: {
-    marginTop: SPACING.sm,
     backgroundColor: COLORS.ink,
     borderRadius: RADIUS.md,
     paddingVertical: 12,
-    paddingHorizontal: SPACING.xl,
-    minWidth: 160,
     alignItems: 'center',
   },
-  submitRateDisabled: { opacity: 0.45 },
+  submitRateDisabled: { opacity: 0.5 },
   submitRateText: {
     fontFamily: 'DMSans_700Bold',
-    fontSize: 15,
+    fontSize: 14,
     color: COLORS.white,
   },
 
-  receipt: {
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.xl,
-    padding: SPACING.xl,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    marginBottom: SPACING.xl,
-  },
-  receiptHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    marginBottom: SPACING.lg,
-    paddingBottom: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  receiptTitle: { ...type.subheading },
-  receiptRow: {
+  metaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: SPACING.sm,
+    paddingVertical: 6,
+    gap: SPACING.md,
   },
-  receiptLabel: { ...type.caption },
-  receiptValue: {
+  metaLabel: { ...type.caption },
+  metaValue: {
     ...type.label,
-    maxWidth: '60%',
+    flexShrink: 1,
     textAlign: 'right',
   },
-  receiptHighlight: {
+  metaMono: {
+    fontFamily: 'DMSans_700Bold',
+    letterSpacing: 0.3,
+  },
+  amountRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: SPACING.xs,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  amountRowLabel: { ...type.label },
+  amountRowValue: {
     fontFamily: 'Sora_700Bold',
-    fontSize: 18,
+    fontSize: 20,
+    color: COLORS.ink,
   },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginVertical: SPACING.sm,
+  statusPill: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: COLORS.successLight,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: RADIUS.full,
+    marginTop: 4,
   },
-  buttons: { gap: SPACING.md },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.success,
+  },
+  statusText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 12,
+    color: COLORS.success,
+  },
+
+  footer: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.sm,
+    paddingBottom: SPACING.md,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    backgroundColor: COLORS.background,
+    gap: SPACING.sm,
+  },
 });
 
 export default PaymentSuccessScreen;
