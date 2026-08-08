@@ -41,7 +41,9 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
     return driverTransactions.filter((t) => t.status === filter);
   }, [driverTransactions, filter]);
 
-  const completed = driverTransactions.filter((t) => t.status === 'completed');
+  const completed = driverTransactions.filter(
+    (t) => t.status === 'completed' && t.kind !== 'withdrawal'
+  );
   const totalEarned = completed.reduce((sum, t) => sum + Number(t.amount || 0), 0);
 
   return (
@@ -60,10 +62,10 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
           <Text style={styles.heroTitle}>Payments</Text>
           <Text style={styles.heroMeta}>
             {driverTransactions.length === 0
-              ? 'No fares received yet'
-              : `${driverTransactions.length} payment${
+              ? 'No activity yet'
+              : `${driverTransactions.length} item${
                   driverTransactions.length === 1 ? '' : 's'
-                } received`}
+                } · fares & withdrawals`}
           </Text>
 
           <View style={styles.heroMetrics}>
@@ -102,7 +104,7 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>No payments here</Text>
             <Text style={styles.emptyText}>
-              When passengers pay your driver ID, they show up in this list.
+              When passengers pay your driver ID — or you cash out — they show up here.
             </Text>
           </View>
         ) : (
