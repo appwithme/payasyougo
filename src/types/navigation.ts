@@ -41,6 +41,8 @@ export type PassengerHomeStackParamList = {
   };
   TripHistory: undefined;
   PassengerProfile: undefined;
+  EditProfile: undefined;
+  Settings: undefined;
 };
 
 export type PassengerBookStackParamList = {
@@ -75,4 +77,6 @@ export type DriverDashboardStackParamList = {
   DriverDashboard: undefined;
   TransactionHistory: undefined;
   DriverProfile: undefined;
+  EditProfile: undefined;
+  Settings: undefined;
 };
