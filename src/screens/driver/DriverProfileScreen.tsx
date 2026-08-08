@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,8 +6,10 @@ import {
   ScrollView,
   Alert,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
 import InkSheetScreen from '../../components/InkSheetScreen';
@@ -17,11 +19,12 @@ import { type } from '../../theme/typography';
 import { useTabBarPadding } from '../../navigation/FloatingTabBar';
 
 const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
-  const { logout, getDriverData } = useApp();
+  const { logout, getDriverData, updateAvatar } = useApp();
   const tabPad = useTabBarPadding();
   const driver = getDriverData();
   const canGoBack = (navigation.getState()?.index ?? 0) > 0;
-  const avatar = driver && 'avatar' in driver ? (driver as any).avatar : null;
+  const avatar = driver?.avatar ?? null;
+  const [uploading, setUploading] = useState(false);
 
   const handleLogout = () => {
     Alert.alert('Log out', 'Sign out of this driver account?', [
@@ -34,6 +37,60 @@ const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
         },
       },
     ]);
+  };
+
+  const handleChangePhoto = () => {
+    Alert.alert('Profile photo', 'Choose a photo source', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Photo library', onPress: () => pickFromLibrary() },
+      { text: 'Camera', onPress: () => pickFromCamera() },
+    ]);
+  };
+
+  const pickFromLibrary = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permission needed', 'Allow photo access to change your profile picture.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.65,
+      base64: true,
+    });
+    if (!result.canceled) await savePickedAsset(result.assets[0]);
+  };
+
+  const pickFromCamera = async () => {
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permission needed', 'Allow camera access to take a profile picture.');
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.65,
+      base64: true,
+    });
+    if (!result.canceled) await savePickedAsset(result.assets[0]);
+  };
+
+  const savePickedAsset = async (asset: ImagePicker.ImagePickerAsset) => {
+    if (!asset.base64) {
+      Alert.alert('Error', 'Could not read the selected image.');
+      return;
+    }
+    const mime = asset.mimeType || 'image/jpeg';
+    const dataUrl = `data:${mime};base64,${asset.base64}`;
+    setUploading(true);
+    const result = await updateAvatar(dataUrl);
+    setUploading(false);
+    if (!result.success) {
+      Alert.alert('Update failed', result.error || 'Could not update photo');
+    }
   };
 
   const renderStars = (rating: number) => {
@@ -61,9 +118,23 @@ const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
           ) : null}
 
           <View style={styles.heroCenter}>
-            <View style={styles.avatarRing}>
+            <TouchableOpacity
+              onPress={handleChangePhoto}
+              activeOpacity={0.9}
+              disabled={uploading}
+              style={styles.avatarRing}
+              accessibilityRole="button"
+              accessibilityLabel="Change profile photo"
+            >
               <UserAvatar name={driver.name} uri={avatar} size={86} radius={28} />
-            </View>
+              <View style={styles.cameraBadge}>
+                {uploading ? (
+                  <ActivityIndicator size="small" color={COLORS.ink} />
+                ) : (
+                  <Ionicons name="camera" size={13} color={COLORS.ink} />
+                )}
+              </View>
+            </TouchableOpacity>
             <Text style={styles.heroName}>{driver.name}</Text>
             <Text style={styles.heroMeta}>
               {(driver.ratingCount ?? 0) > 0
@@ -209,6 +280,19 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.primary,
     marginBottom: 4,
+  },
+  cameraBadge: {
+    position: 'absolute',
+    right: 2,
+    bottom: 2,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.ink,
   },
   heroName: {
     fontFamily: 'Sora_700Bold',
