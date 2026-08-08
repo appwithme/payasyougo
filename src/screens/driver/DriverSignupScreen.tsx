@@ -677,24 +677,10 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  scroll: { padding: SPACING.lg, flexGrow: 1 },
-  back: { marginBottom: SPACING.md, alignSelf: 'flex-start' },
-  backIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: COLORS.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  header: { marginBottom: SPACING.lg, gap: 8 },
   stepper: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: SPACING.md,
+    marginTop: SPACING.lg,
     paddingHorizontal: 2,
   },
   stepItem: {
@@ -703,63 +689,50 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   stepCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: COLORS.borderStrong,
-    backgroundColor: COLORS.surface,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.28)',
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
   },
   stepCircleActive: {
-    backgroundColor: COLORS.ink,
-    borderColor: COLORS.ink,
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
   stepCircleCurrent: {
-    backgroundColor: COLORS.ink,
-    borderColor: COLORS.primary,
-    borderWidth: 3,
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.white,
+    borderWidth: 2,
   },
   stepNumber: {
     fontFamily: 'Sora_700Bold',
-    fontSize: 13,
-    color: COLORS.textMuted,
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.45)',
   },
   stepNumberActive: {
-    color: COLORS.white,
+    color: COLORS.ink,
   },
   stepLabel: {
     fontFamily: 'DMSans_500Medium',
     fontSize: 11,
-    color: COLORS.textMuted,
+    color: 'rgba(255,255,255,0.4)',
     textAlign: 'center',
   },
   stepLabelActive: {
-    color: COLORS.ink,
+    color: COLORS.white,
     fontFamily: 'DMSans_700Bold',
   },
   stepLine: {
     flex: 1,
     height: 2,
-    backgroundColor: COLORS.border,
-    marginTop: 15,
-    marginHorizontal: -4,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    marginTop: 14,
   },
   stepLineActive: {
-    backgroundColor: COLORS.ink,
-  },
-  title: {
-    fontFamily: 'Sora_700Bold',
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.xxl,
-    letterSpacing: -1,
-  },
-  subtitle: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.base,
-    fontFamily: 'DMSans_400Regular',
-    lineHeight: 22,
+    backgroundColor: COLORS.primary,
   },
   errorBox: {
     flexDirection: 'row',
@@ -768,7 +741,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.errorLight,
     borderRadius: RADIUS.md,
     padding: SPACING.md,
-    marginBottom: SPACING.md,
   },
   errorText: {
     color: COLORS.error,
@@ -776,7 +748,6 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans_700Bold',
     fontSize: FONT_SIZE.sm,
   },
-  form: { gap: SPACING.md },
   autofillBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -862,13 +833,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.ink,
   },
-  footer: {
-    marginTop: SPACING.xl,
-    gap: SPACING.md,
-  },
   loginLink: {
     flexDirection: 'row',
     justifyContent: 'center',
+    paddingVertical: SPACING.sm,
   },
   loginLinkText: {
     color: COLORS.textSecondary,
@@ -876,8 +844,9 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans_500Medium',
   },
   linkAccent: {
-    color: COLORS.textPrimary,
+    color: COLORS.ink,
     fontFamily: 'DMSans_700Bold',
+    fontSize: FONT_SIZE.base,
   },
 });
 
