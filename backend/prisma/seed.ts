@@ -4,17 +4,38 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-const ROUTES = [
-  { fromLocation: 'Science', toLocation: 'Casford', fare: 3.0 },
-  { fromLocation: 'Science', toLocation: 'Ayensu', fare: 3.0 },
-  { fromLocation: 'Ayensu', toLocation: 'Science', fare: 3.0 },
-  { fromLocation: 'Ayensu', toLocation: 'Casford', fare: 5.0 },
-  { fromLocation: 'Casford', toLocation: 'Science', fare: 3.0 },
-  { fromLocation: 'Amissah Arthur', toLocation: 'Science', fare: 4.0 },
-  { fromLocation: 'Amissah Arthur', toLocation: 'Valco', fare: 4.0 },
-  { fromLocation: 'Amissah Arthur', toLocation: 'KNH', fare: 5.0 },
-  { fromLocation: 'Science', toLocation: 'Valco', fare: 3.0 },
+const LOCATIONS = [
+  'Science',
+  'Casford',
+  'Ayensu',
+  'Amissah Arthur',
+  'Valco',
+  'KNH',
+] as const;
+
+/** Undirected campus fares — seed expands each pair both ways */
+const FARE_EDGES: Array<[string, string, number]> = [
+  ['Science', 'Casford', 3],
+  ['Science', 'Ayensu', 3],
+  ['Science', 'Valco', 3],
+  ['Science', 'Amissah Arthur', 4],
+  ['Science', 'KNH', 4],
+  ['Casford', 'Ayensu', 5],
+  ['Casford', 'Valco', 4],
+  ['Casford', 'Amissah Arthur', 5],
+  ['Casford', 'KNH', 5],
+  ['Ayensu', 'Valco', 4],
+  ['Ayensu', 'Amissah Arthur', 4],
+  ['Ayensu', 'KNH', 5],
+  ['Valco', 'Amissah Arthur', 4],
+  ['Valco', 'KNH', 4],
+  ['Amissah Arthur', 'KNH', 5],
 ];
+
+const ROUTES = FARE_EDGES.flatMap(([a, b, fare]) => [
+  { fromLocation: a, toLocation: b, fare },
+  { fromLocation: b, toLocation: a, fare },
+]);
 
 /** Fixed accounts for QA / Paystack test runs */
 const TEST_ACCOUNTS = {
@@ -111,7 +132,9 @@ async function main() {
     });
   }
 
-  console.log('Seeded routes + admin test accounts:');
+  console.log(
+    `Seeded ${ROUTES.length} routes across ${LOCATIONS.length} stops + admin test accounts:`
+  );
   console.log(
     `  Passenger  phone=${TEST_ACCOUNTS.passenger.phone}  password=${TEST_ACCOUNTS.passenger.password}`
   );
