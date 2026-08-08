@@ -37,13 +37,13 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow PayAsYouGo to access your photos to set a profile picture."
+          "photosPermission": "Allow PayAsYouGo to access your photos for profile pictures and Ghana Card uploads."
         }
       ],
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow PayAsYouGo to scan driver QR codes."
+          "cameraPermission": "Allow PayAsYouGo to scan driver QR codes and photograph Ghana Card documents."
         }
       ],
       [
