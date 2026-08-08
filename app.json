@@ -2,12 +2,12 @@
   "expo": {
     "name": "PayAsYouGo",
     "slug": "payasyougo",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/app-icon-v3.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash-v3.png",
       "resizeMode": "contain",
       "backgroundColor": "#EEF3F9"
     },
@@ -22,11 +22,12 @@
       "package": "com.payasyougo.app",
       "adaptiveIcon": {
         "backgroundColor": "#EEF3F9",
-        "foregroundImage": "./assets/icon.png"
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/app-icon-v3.png"
     },
     "plugins": [
       "expo-font"

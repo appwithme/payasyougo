@@ -13,7 +13,7 @@ type Props = {
   variant?: 'pin3d' | 'icon' | 'pin' | 'squircle';
 };
 
-const LOGO_3D = require('../../assets/brand/logo-3d-pin.png');
+const LOGO_3D = require('../../assets/brand/logo-3d-pin-v2.png');
 const LOGO_ICON = require('../../assets/brand/logo-3d-icon.png');
 
 /**

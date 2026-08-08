@@ -12,7 +12,7 @@ import {
 import { COLORS } from '../../theme/colors';
 
 const { width: W, height: H } = Dimensions.get('window');
-const LOGO_3D = require('../../../assets/brand/logo-3d-pin.png');
+const LOGO_3D = require('../../../assets/brand/logo-3d-pin-v2.png');
 
 /**
  * Taxi Rider layout + modern 3D glossy pin:
