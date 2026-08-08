@@ -41,6 +41,12 @@
         }
       ],
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow PayAsYouGo to scan driver QR codes."
+        }
+      ],
+      [
         "expo-notifications",
         {
           "color": "#15233F"
