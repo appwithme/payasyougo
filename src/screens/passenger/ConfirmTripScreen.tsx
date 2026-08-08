@@ -43,7 +43,7 @@ const PROVIDERS: {
 
 const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any }) => {
   const { from, to, fare, driver } = route.params;
-  const { currentUser, refreshTrips } = useApp();
+  const { currentUser, refreshTrips, notifyTripPaid } = useApp();
 
   const [provider, setProvider] = useState<MoMoProvider>('MTN');
   const [momoPhone, setMomoPhone] = useState('0551234987');
@@ -86,6 +86,11 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
 
       setLoadingStep('Confirming payment…');
       await refreshTrips();
+      await notifyTripPaid({
+        from,
+        to,
+        amount: paymentResult.transaction.amount ?? fare,
+      });
       setLoading(false);
       setLoadingStep('');
 
