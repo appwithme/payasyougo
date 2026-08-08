@@ -1,6 +1,7 @@
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
-import Constants from 'expo-constants';
+import { Platform } from 'react-native';
+import { ResponseType } from 'expo-auth-session';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -26,30 +27,37 @@ export function isGoogleConfigured(): boolean {
 }
 
 /**
- * Passenger Google ID-token sign-in.
- * Expo Go uses the Web client ID + Expo auth proxy redirect
- * (native iOS/Android clients are optional for later store builds).
+ * Passenger Google ID-token sign-in for Expo Go.
+ * Uses the Web client ID on all platforms (Expo Go cannot use native Google clients).
+ * Forces response_type=id_token so we don't need a client secret code exchange.
  */
 export function useGoogleIdTokenRequest() {
   const ids = getGoogleClientIds();
   const configured = isGoogleConfigured();
-  const inExpoGo = Constants.appOwnership === 'expo';
+  const webId = ids.webClientId;
 
-  const [request, , promptAsync] = Google.useIdTokenAuthRequest({
-    // Always prefer the real Web client for Expo Go / browser sheet
-    clientId: ids.webClientId,
-    webClientId: ids.webClientId,
-    // Only pass native IDs when they are real (not placeholders)
-    iosClientId: inExpoGo ? undefined : ids.iosClientId,
-    androidClientId: inExpoGo ? undefined : ids.androidClientId,
+  // Expo's Google provider requires platform-specific client IDs.
+  // In Expo Go, reuse the Web client ID for ios/android so the hook can load.
+  const iosId = ids.iosClientId || webId;
+  const androidId = ids.androidClientId || webId;
+
+  const [request, , promptAsync] = Google.useAuthRequest({
+    clientId: webId,
+    webClientId: webId,
+    iosClientId: iosId,
+    androidClientId: androidId,
     redirectUri: GOOGLE_REDIRECT_URI,
+    responseType: ResponseType.IdToken,
     scopes: ['openid', 'profile', 'email'],
+    shouldAutoExchangeCode: false,
+    selectAccount: true,
   });
 
   return {
     configured,
     ready: configured && !!request,
     redirectUri: GOOGLE_REDIRECT_URI,
+    platform: Platform.OS,
     promptAsync,
   };
 }

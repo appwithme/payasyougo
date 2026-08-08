@@ -19,25 +19,35 @@ export default function GoogleSignInButton({ onError }: Props) {
     return (
       <View style={styles.disabledBox}>
         <Text style={styles.disabledText}>
-          Google sign-in ready — add client IDs to `.env` to enable
+          Google sign-in ready — add EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID to `.env`
         </Text>
       </View>
     );
   }
 
   const handlePress = async () => {
+    if (!ready) {
+      onError?.('Google sign-in is still loading. Wait a second and try again.');
+      return;
+    }
     setBusy(true);
     try {
       const result = await promptAsync();
+      if (result.type === 'cancel' || result.type === 'dismiss') {
+        onError?.('Google sign-in was cancelled');
+        return;
+      }
       if (result.type !== 'success') {
-        if (result.type === 'error') {
-          onError?.(result.error?.message || 'Google sign-in failed');
-        }
+        onError?.(
+          result.type === 'error'
+            ? result.error?.message || 'Google sign-in failed'
+            : `Google sign-in did not complete (${result.type})`
+        );
         return;
       }
       const idToken = result.params.id_token;
       if (!idToken) {
-        onError?.('Google did not return an ID token');
+        onError?.('Google did not return an ID token. Check redirect URI in Google Console.');
         return;
       }
       const auth = await loginPassengerWithGoogle(idToken);
@@ -51,9 +61,9 @@ export default function GoogleSignInButton({ onError }: Props) {
 
   return (
     <TouchableOpacity
-      style={[styles.btn, (!ready || busy) && styles.btnDisabled]}
+      style={[styles.btn, busy && styles.btnDisabled]}
       onPress={handlePress}
-      disabled={!ready || busy}
+      disabled={busy}
       activeOpacity={0.85}
     >
       {busy ? (
