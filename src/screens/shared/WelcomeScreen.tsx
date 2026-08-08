@@ -6,17 +6,19 @@ import {
   Pressable,
   StatusBar,
   Dimensions,
+  ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import Animated, {
+  FadeIn,
   FadeInDown,
   FadeInUp,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import CampusRideScene from '../../components/CampusRideScene';
 import { COLORS } from '../../theme/colors';
 
 const { height: H } = Dimensions.get('window');
@@ -30,60 +32,84 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
 
   return (
     <View style={styles.root}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
 
-      <LinearGradient
-        colors={['#E8F1FA', '#D5E4F3', '#B9CEE6']}
-        locations={[0, 0.45, 1]}
-        style={StyleSheet.absoluteFill}
-      />
+      <ImageBackground
+        source={require('../../../assets/brand/onboarding-pay.png')}
+        style={styles.hero}
+        resizeMode="cover"
+      >
+        <LinearGradient
+          colors={[
+            'rgba(18,28,48,0.15)',
+            'rgba(18,28,48,0.05)',
+            'rgba(18,28,48,0.55)',
+            'rgba(18,28,48,0.92)',
+          ]}
+          locations={[0, 0.35, 0.7, 1]}
+          style={StyleSheet.absoluteFill}
+        />
 
-      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-        <View style={styles.top}>
-          <Animated.View entering={FadeInDown.duration(500)}>
+        <SafeAreaView style={styles.heroSafe} edges={['top']}>
+          <Animated.View entering={FadeIn.duration(600)} style={styles.brandRow}>
             <Text style={styles.brand}>
               payasyou
               <Text style={styles.brandGo}>go</Text>
             </Text>
-            <Text style={styles.tagline}>Digital fares for UCC campus rides</Text>
           </Animated.View>
-        </View>
 
-        <Animated.View
-          entering={FadeInUp.delay(120).duration(560)}
-          style={styles.sceneWrap}
-        >
-          <CampusRideScene />
-        </Animated.View>
+          <Animated.View
+            entering={FadeInDown.delay(160).duration(520)}
+            style={styles.heroCopy}
+          >
+            <Text style={styles.headline}>Campus rides,{'\n'}paid in seconds</Text>
+            <Text style={styles.subhead}>
+              Book a UCC route and settle fares with MoMo — no cash hunt.
+            </Text>
+          </Animated.View>
+        </SafeAreaView>
+      </ImageBackground>
 
-        <Animated.View
-          entering={FadeInUp.delay(380).duration(520)}
-          style={styles.ctaBlock}
-        >
-          <RoleButton
-            label="Continue as Passenger"
-            variant="primary"
+      <Animated.View
+        entering={FadeInUp.delay(220).duration(520)}
+        style={styles.sheet}
+      >
+        <SafeAreaView edges={['bottom']} style={styles.sheetInner}>
+          <Text style={styles.sheetLabel}>Get started</Text>
+
+          <RoleOption
+            title="Passenger"
+            subtitle="Find a route and pay your driver"
+            icon="person"
+            accent="amber"
             onPress={() => go('passenger')}
           />
-          <RoleButton
-            label="Continue as Driver"
-            variant="secondary"
+          <RoleOption
+            title="Driver"
+            subtitle="Collect fares and track earnings"
+            icon="car-sport"
+            accent="ink"
             onPress={() => go('driver')}
           />
-          <Text style={styles.footer}>University of Cape Coast · v1.0</Text>
-        </Animated.View>
-      </SafeAreaView>
+
+          <Text style={styles.footer}>University of Cape Coast</Text>
+        </SafeAreaView>
+      </Animated.View>
     </View>
   );
 }
 
-function RoleButton({
-  label,
-  variant,
+function RoleOption({
+  title,
+  subtitle,
+  icon,
+  accent,
   onPress,
 }: {
-  label: string;
-  variant: 'primary' | 'secondary';
+  title: string;
+  subtitle: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  accent: 'amber' | 'ink';
   onPress: () => void;
 }) {
   const scale = useSharedValue(1);
@@ -95,27 +121,32 @@ function RoleButton({
     <Pressable
       onPress={onPress}
       onPressIn={() => {
-        scale.value = withTiming(0.98, { duration: 90 });
+        scale.value = withTiming(0.985, { duration: 90 });
       }}
       onPressOut={() => {
         scale.value = withTiming(1, { duration: 140 });
       }}
     >
-      <Animated.View
-        style={[
-          styles.btn,
-          variant === 'primary' ? styles.btnPrimary : styles.btnSecondary,
-          pressStyle,
-        ]}
-      >
-        <Text
+      <Animated.View style={[styles.option, pressStyle]}>
+        <View
           style={[
-            styles.btnLabel,
-            variant === 'primary' ? styles.btnLabelPrimary : styles.btnLabelSecondary,
+            styles.optionIcon,
+            accent === 'amber' ? styles.optionIconAmber : styles.optionIconInk,
           ]}
         >
-          {label}
-        </Text>
+          <Ionicons
+            name={icon}
+            size={20}
+            color={accent === 'amber' ? COLORS.ink : COLORS.primary}
+          />
+        </View>
+        <View style={styles.optionCopy}>
+          <Text style={styles.optionTitle}>{title}</Text>
+          <Text style={styles.optionSubtitle}>{subtitle}</Text>
+        </View>
+        <View style={styles.optionChevron}>
+          <Ionicons name="arrow-forward" size={16} color={COLORS.ink} />
+        </View>
       </Animated.View>
     </Pressable>
   );
@@ -124,69 +155,121 @@ function RoleButton({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#D5E4F3',
+    backgroundColor: COLORS.ink,
   },
-  safe: {
+  hero: {
+    flex: 1,
+    minHeight: H * 0.52,
+  },
+  heroSafe: {
     flex: 1,
     justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingBottom: 28,
   },
-  top: {
-    paddingHorizontal: 28,
-    paddingTop: H > 700 ? 18 : 8,
+  brandRow: {
+    paddingTop: 8,
   },
   brand: {
     fontFamily: 'Sora_700Bold',
-    fontSize: 38,
-    color: COLORS.ink,
-    letterSpacing: -1.5,
+    fontSize: 28,
+    color: COLORS.white,
+    letterSpacing: -1,
   },
   brandGo: {
-    color: COLORS.primaryDark,
+    color: COLORS.primary,
   },
-  tagline: {
-    marginTop: 8,
-    fontFamily: 'DMSans_500Medium',
+  heroCopy: {
+    gap: 10,
+    paddingBottom: 8,
+  },
+  headline: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 34,
+    lineHeight: 40,
+    color: COLORS.white,
+    letterSpacing: -1.2,
+  },
+  subhead: {
+    fontFamily: 'DMSans_400Regular',
     fontSize: 15,
     lineHeight: 22,
-    color: COLORS.textSecondary,
-    maxWidth: 280,
+    color: 'rgba(255,255,255,0.78)',
+    maxWidth: 300,
   },
-  sceneWrap: {
-    flexGrow: 1,
-    justifyContent: 'center',
+  sheet: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    marginTop: -20,
+    paddingTop: 22,
+    paddingHorizontal: 20,
   },
-  ctaBlock: {
-    paddingHorizontal: 28,
+  sheetInner: {
+    gap: 10,
     paddingBottom: 8,
-    gap: 12,
   },
-  btn: {
-    height: 56,
+  sheetLabel: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 13,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: COLORS.textMuted,
+    marginBottom: 6,
+    marginLeft: 4,
+  },
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    backgroundColor: COLORS.surfaceAlt,
     borderRadius: 18,
+    paddingVertical: 16,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  optionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  btnPrimary: {
+  optionIconAmber: {
+    backgroundColor: COLORS.primary,
+  },
+  optionIconInk: {
     backgroundColor: COLORS.ink,
   },
-  btnSecondary: {
-    backgroundColor: 'rgba(255,255,255,0.55)',
-    borderWidth: 1.5,
-    borderColor: 'rgba(27,43,75,0.18)',
+  optionCopy: {
+    flex: 1,
   },
-  btnLabel: {
-    fontFamily: 'DMSans_700Bold',
-    fontSize: 16,
-    letterSpacing: 0.1,
-  },
-  btnLabelPrimary: {
-    color: COLORS.white,
-  },
-  btnLabelSecondary: {
+  optionTitle: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 17,
     color: COLORS.ink,
+    letterSpacing: -0.3,
+  },
+  optionSubtitle: {
+    marginTop: 2,
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 13,
+    lineHeight: 18,
+    color: COLORS.textSecondary,
+  },
+  optionChevron: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   footer: {
-    marginTop: 8,
+    marginTop: 10,
     textAlign: 'center',
     fontFamily: 'DMSans_500Medium',
     fontSize: 12,
