@@ -47,7 +47,7 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
       <StatusBar barStyle="dark-content" />
       <Header
         title="Where to?"
-        onBack={navigation.canGoBack() ? () => navigation.goBack() : undefined}
+        onBack={(navigation.getState()?.index ?? 0) > 0 ? () => navigation.goBack() : undefined}
         transparent
       />
 

@@ -118,7 +118,7 @@ const PassengerProfileScreen = ({ navigation }: { navigation: any }) => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" />
-      <Header title="Profile" onBack={() => navigation.goBack()} />
+      <Header title="Profile" />
 
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: tabPad }]}

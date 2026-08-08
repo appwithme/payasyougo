@@ -29,7 +29,7 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
       <Header
         title="Transaction History"
         subtitle={`${driverTransactions.length} payments received`}
-        onBack={() => navigation.goBack()}
+        onBack={(navigation.getState()?.index ?? 0) > 0 ? () => navigation.goBack() : undefined}
       />
 
       <View style={styles.summary}>

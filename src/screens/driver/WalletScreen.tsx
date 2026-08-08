@@ -40,7 +40,7 @@ const WalletScreen = ({ navigation }: { navigation: any }) => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" />
-      <Header title="Wallet" onBack={() => navigation.goBack()} />
+      <Header title="Wallet" />
 
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: tabPad }]}

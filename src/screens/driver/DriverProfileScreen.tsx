@@ -69,7 +69,10 @@ const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" />
-      <Header title="Driver Profile" onBack={() => navigation.goBack()} />
+      <Header
+        title="Driver Profile"
+        onBack={(navigation.getState()?.index ?? 0) > 0 ? () => navigation.goBack() : undefined}
+      />
 
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: tabPad }]}

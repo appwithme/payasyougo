@@ -27,7 +27,6 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
       <Header
         title="Trip history"
         subtitle={`${passengerTrips.length} trips`}
-        onBack={() => navigation.goBack()}
       />
 
       <View style={styles.summary}>
