@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, Platform, LayoutChangeEvent } from 'react-native';
+import { View, StyleSheet, Pressable, Platform, LayoutChangeEvent } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,9 +13,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import { COLORS } from '../theme/colors';
 
-const BAR_H = 70;
-const CIRCLE = 54;
-const CUTOUT = 66;
+const BAR_H = 72;
+const CIRCLE = 56;
+const CUTOUT = 70;
 const SPRING = { damping: 16, stiffness: 180, mass: 0.85 };
 
 type IconPair = {
@@ -26,7 +26,7 @@ type IconPair = {
 
 const ROUTE_META: Record<string, IconPair> = {
   HomeTab: { outline: 'home-outline', solid: 'home', label: 'Home' },
-  BookTab: { outline: 'add-outline', solid: 'add', label: 'Book' },
+  BookTab: { outline: 'navigate-outline', solid: 'navigate', label: 'Book' },
   HistoryTab: { outline: 'receipt-outline', solid: 'receipt', label: 'History' },
   ProfileTab: { outline: 'person-outline', solid: 'person', label: 'Profile' },
   DashboardTab: { outline: 'home-outline', solid: 'home', label: 'Home' },
@@ -52,19 +52,23 @@ function TabSlot({
   onLayout: (e: LayoutChangeEvent) => void;
 }) {
   const press = useSharedValue(1);
-  const labelOpacity = useSharedValue(focused ? 1 : 0);
+  const active = useSharedValue(focused ? 1 : 0);
 
   useEffect(() => {
-    labelOpacity.value = withTiming(focused ? 1 : 0, { duration: 220 });
+    active.value = withTiming(focused ? 1 : 0, { duration: 220 });
   }, [focused]);
 
   const pressStyle = useAnimatedStyle(() => ({
     transform: [{ scale: press.value }],
   }));
 
+  const inactiveIconStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(active.value, [0, 1], [1, 0]),
+  }));
+
   const labelStyle = useAnimatedStyle(() => ({
-    opacity: labelOpacity.value,
-    transform: [{ translateY: interpolate(labelOpacity.value, [0, 1], [4, 0]) }],
+    opacity: active.value,
+    transform: [{ translateY: interpolate(active.value, [0, 1], [6, 0]) }],
   }));
 
   return (
@@ -85,12 +89,9 @@ function TabSlot({
       hitSlop={6}
     >
       <Animated.View style={[styles.slotInner, pressStyle]}>
-        {/* Placeholder keeps layout; real active icon lives in the floating circle */}
-        <View style={styles.iconReserve}>
-          {!focused ? (
-            <Ionicons name={meta.outline} size={24} color={COLORS.ink} />
-          ) : null}
-        </View>
+        <Animated.View style={[styles.inactiveIcon, inactiveIconStyle]}>
+          <Ionicons name={meta.outline} size={24} color={COLORS.ink} />
+        </Animated.View>
         <Animated.Text style={[styles.label, labelStyle]} numberOfLines={1}>
           {meta.label}
         </Animated.Text>
@@ -104,7 +105,8 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
   const indicatorX = useSharedValue(0);
   const ready = useSharedValue(0);
   const centers = React.useRef<number[]>([]);
-  const activeMeta = ROUTE_META[state.routes[state.index]?.name] ?? ROUTE_META.HomeTab;
+  const activeRoute = state.routes[state.index]?.name;
+  const activeMeta = ROUTE_META[activeRoute] ?? ROUTE_META.HomeTab;
 
   const moveTo = (index: number, animated: boolean) => {
     const x = centers.current[index];
@@ -130,7 +132,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
     opacity: ready.value,
     transform: [
       { translateX: indicatorX.value - CIRCLE / 2 },
-      { scale: interpolate(ready.value, [0, 1], [0.7, 1]) },
+      { scale: interpolate(ready.value, [0, 1], [0.75, 1]) },
     ],
   }));
 
@@ -143,14 +145,8 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
         entering={FadeInUp.springify().damping(15).stiffness(130)}
         style={styles.shell}
       >
-        {/* Floating active circle (protrudes above the bar) */}
-        <Animated.View style={[styles.activeCircle, circleStyle]}>
-          <Ionicons name={activeMeta.solid} size={24} color="#FFFFFF" />
-        </Animated.View>
-
         <View style={styles.bar}>
-          {/* Concave cutout — matches page background so the bar appears notched */}
-          <Animated.View style={[styles.cutout, cutoutStyle]} />
+          <Animated.View style={[styles.cutout, cutoutStyle]} pointerEvents="none" />
 
           {state.routes.map((route, index) => {
             const focused = state.index === index;
@@ -189,6 +185,10 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
             );
           })}
         </View>
+
+        <Animated.View style={[styles.activeCircle, circleStyle]} pointerEvents="none">
+          <Ionicons name={activeMeta.solid} size={24} color="#FFFFFF" />
+        </Animated.View>
       </Animated.View>
     </View>
   );
@@ -210,16 +210,16 @@ const styles = StyleSheet.create({
   shell: {
     width: '88%',
     maxWidth: 400,
-    paddingTop: CIRCLE / 2 + 4,
+    height: BAR_H + CIRCLE / 2,
+    justifyContent: 'flex-end',
   },
   bar: {
     height: BAR_H,
     backgroundColor: '#FFFFFF',
     borderRadius: 28,
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    paddingBottom: 10,
-    paddingHorizontal: 6,
+    alignItems: 'center',
+    paddingHorizontal: 4,
     ...Platform.select({
       ios: {
         shadowColor: '#1B2B4B',
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
   },
   cutout: {
     position: 'absolute',
-    top: -(CUTOUT / 2),
+    top: -(CUTOUT / 2) + 2,
     left: 0,
     width: CUTOUT,
     height: CUTOUT,
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   },
   activeCircle: {
     position: 'absolute',
-    top: 4,
+    top: 0,
     left: 0,
     width: CIRCLE,
     height: CIRCLE,
@@ -250,36 +250,38 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.ink,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 3,
+    zIndex: 5,
     ...Platform.select({
       ios: {
         shadowColor: '#1B2B4B',
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.25,
+        shadowOpacity: 0.28,
         shadowRadius: 10,
       },
-      android: { elevation: 8 },
+      android: { elevation: 10 },
     }),
   },
   slot: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     height: '100%',
     zIndex: 2,
   },
   slotInner: {
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: 2,
-    paddingBottom: 2,
+    justifyContent: 'center',
+    height: 52,
+    width: '100%',
   },
-  iconReserve: {
-    height: 28,
+  inactiveIcon: {
+    position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
   },
   label: {
+    position: 'absolute',
+    bottom: 0,
     fontFamily: 'DMSans_700Bold',
     fontSize: 11,
     color: COLORS.ink,
