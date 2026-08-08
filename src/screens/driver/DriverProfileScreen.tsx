@@ -1,6 +1,3 @@
-// ============================================================
-// DRIVER PROFILE SCREEN
-// ============================================================
 import React from 'react';
 import {
   View,
@@ -8,49 +5,36 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
-  StatusBar,
+  TouchableOpacity,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
-import Header from '../../components/Header';
-import Button from '../../components/Button';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import InkSheetScreen from '../../components/InkSheetScreen';
+import UserAvatar from '../../components/UserAvatar';
+import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import { type } from '../../theme/typography';
 import { useTabBarPadding } from '../../navigation/FloatingTabBar';
 
 const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
   const { logout, getDriverData } = useApp();
   const tabPad = useTabBarPadding();
   const driver = getDriverData();
+  const canGoBack = (navigation.getState()?.index ?? 0) > 0;
+  const avatar = driver && 'avatar' in driver ? (driver as any).avatar : null;
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await logout();
-          },
+    Alert.alert('Log out', 'Sign out of this driver account?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Log out',
+        style: 'destructive',
+        onPress: async () => {
+          await logout();
         },
-      ]
-    );
+      },
+    ]);
   };
-
-  const InfoRow = ({ icon, label, value }: { icon: any; label: string; value?: string | null }) => (
-    <View style={styles.infoRow}>
-      <View style={styles.infoIcon}>
-        <Ionicons name={icon} size={20} color={COLORS.textPrimary} />
-      </View>
-      <View style={styles.infoText}>
-        <Text style={styles.infoLabel}>{label}</Text>
-        <Text style={styles.infoValue}>{value || '—'}</Text>
-      </View>
-    </View>
-  );
 
   const renderStars = (rating: number) => {
     const full = Math.floor(rating);
@@ -58,8 +42,8 @@ const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
       <Ionicons
         key={i}
         name={i < full ? 'star' : 'star-outline'}
-        size={18}
-        color={COLORS.primaryDark}
+        size={16}
+        color={COLORS.primary}
       />
     ));
   };
@@ -67,217 +51,313 @@ const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
   if (!driver) return null;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="dark-content" />
-      <Header
-        title="Driver Profile"
-        onBack={(navigation.getState()?.index ?? 0) > 0 ? () => navigation.goBack() : undefined}
-      />
+    <InkSheetScreen
+      hero={
+        <Animated.View entering={FadeInDown.delay(60).duration(420)} style={styles.heroBody}>
+          {canGoBack ? (
+            <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={8}>
+              <Text style={styles.backText}>Back</Text>
+            </TouchableOpacity>
+          ) : null}
 
+          <View style={styles.heroCenter}>
+            <View style={styles.avatarRing}>
+              <UserAvatar name={driver.name} uri={avatar} size={86} radius={28} />
+            </View>
+            <Text style={styles.heroName}>{driver.name}</Text>
+            <Text style={styles.heroRole}>Driver</Text>
+            <View style={styles.starsRow}>{renderStars(driver.rating)}</View>
+            <Text style={styles.ratingText}>
+              {(driver.ratingCount ?? 0) > 0
+                ? `${Number(driver.rating).toFixed(1)} · ${driver.ratingCount} passenger ${
+                    driver.ratingCount === 1 ? 'rating' : 'ratings'
+                  }`
+                : 'No passenger ratings yet'}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.idHero}
+            onPress={() => navigation.navigate('DriverQr')}
+            activeOpacity={0.9}
+          >
+            <View style={styles.idHeroTop}>
+              <Text style={styles.idEyebrow}>Your driver ID</Text>
+              <View style={styles.qrChip}>
+                <Ionicons name="qr-code-outline" size={14} color={COLORS.ink} />
+                <Text style={styles.qrChipText}>QR</Text>
+              </View>
+            </View>
+            <Text style={styles.idValue}>{driver.id}</Text>
+            <Text style={styles.idHint}>Tap to show QR for passengers</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      }
+      heroBottom={SPACING.lg}
+    >
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: tabPad }]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.avatarSection}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{driver.name.charAt(0).toUpperCase()}</Text>
-          </View>
-          <Text style={styles.name}>{driver.name}</Text>
-          <View style={styles.roleBadge}>
-            <Ionicons name="car-sport" size={14} color={COLORS.textPrimary} />
-            <Text style={styles.roleBadgeText}>DRIVER</Text>
-          </View>
+        <Animated.View entering={FadeInUp.delay(100).duration(420)} style={styles.panel}>
+          <Text style={styles.panelTitle}>Account</Text>
+          <DetailRow icon="call-outline" label="Phone" value={driver.phone || 'Not set'} />
+          <View style={styles.rule} />
+          <DetailRow icon="mail-outline" label="Email" value={driver.email || 'Not set'} />
+          <View style={styles.rule} />
+          <DetailRow icon="bus-outline" label="Vehicle" value={driver.vehicle || 'Not set'} />
+        </Animated.View>
 
-          <View style={styles.starsRow}>{renderStars(driver.rating)}</View>
-          <Text style={styles.ratingText}>
-            {(driver.ratingCount ?? 0) > 0
-              ? `${Number(driver.rating).toFixed(1)} · ${driver.ratingCount} passenger ${
-                  driver.ratingCount === 1 ? 'rating' : 'ratings'
-                }`
-              : 'No passenger ratings yet'}
-          </Text>
-        </View>
+        <Animated.View entering={FadeInUp.delay(160).duration(420)} style={styles.actions}>
+          <TouchableOpacity
+            style={styles.actionRow}
+            onPress={() => navigation.navigate('EditProfile')}
+            activeOpacity={0.85}
+          >
+            <View style={styles.actionIcon}>
+              <Ionicons name="create-outline" size={18} color={COLORS.ink} />
+            </View>
+            <View style={styles.actionCopy}>
+              <Text style={styles.actionTitle}>Edit profile</Text>
+              <Text style={styles.actionHint}>Name and phone</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+          </TouchableOpacity>
 
-        <View style={styles.driverIdCard}>
-          <View style={styles.driverIdIconWrap}>
-            <Ionicons name="qr-code-outline" size={24} color={COLORS.textPrimary} />
-          </View>
-          <Text style={styles.driverIdLabel}>YOUR UNIQUE DRIVER ID</Text>
-          <Text style={styles.driverIdValue}>{driver.id}</Text>
-          <Text style={styles.driverIdHint}>
-            Passengers need this ID to pay you for trips.
-          </Text>
-        </View>
+          <TouchableOpacity
+            style={styles.actionRow}
+            onPress={() => navigation.navigate('Settings')}
+            activeOpacity={0.85}
+          >
+            <View style={styles.actionIcon}>
+              <Ionicons name="settings-outline" size={18} color={COLORS.ink} />
+            </View>
+            <View style={styles.actionCopy}>
+              <Text style={styles.actionTitle}>Settings</Text>
+              <Text style={styles.actionHint}>Notifications and support</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+          </TouchableOpacity>
 
-        <View style={styles.infoCard}>
-          <InfoRow icon="call-outline" label="Phone Number" value={driver.phone} />
-          <View style={styles.separator} />
-          <InfoRow icon="mail-outline" label="Email" value={driver.email} />
-          <View style={styles.separator} />
-          <InfoRow icon="bus-outline" label="Vehicle" value={driver.vehicle} />
-        </View>
-
-        <Button
-          title="Edit profile"
-          variant="secondary"
-          onPress={() => navigation.navigate('EditProfile')}
-          icon={<Ionicons name="create-outline" size={20} color={COLORS.ink} />}
-        />
-        <Button
-          title="Settings"
-          variant="ghost"
-          onPress={() => navigation.navigate('Settings')}
-          icon={<Ionicons name="settings-outline" size={20} color={COLORS.ink} />}
-        />
-
-        <Button
-          title="Logout"
-          variant="danger"
-          onPress={handleLogout}
-          icon={<Ionicons name="log-out-outline" size={20} color={COLORS.error} />}
-        />
+          <TouchableOpacity
+            style={styles.logoutBtn}
+            onPress={handleLogout}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="log-out-outline" size={18} color={COLORS.error} />
+            <Text style={styles.logoutText}>Log out</Text>
+          </TouchableOpacity>
+        </Animated.View>
       </ScrollView>
-    </SafeAreaView>
+    </InkSheetScreen>
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  scroll: { padding: SPACING.lg, gap: SPACING.xl },
+function DetailRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value: string;
+}) {
+  return (
+    <View style={styles.detailRow}>
+      <View style={styles.detailIcon}>
+        <Ionicons name={icon} size={16} color={COLORS.ink} />
+      </View>
+      <View style={styles.detailCopy}>
+        <Text style={styles.detailLabel}>{label}</Text>
+        <Text style={styles.detailValue} numberOfLines={1}>
+          {value}
+        </Text>
+      </View>
+    </View>
+  );
+}
 
-  avatarSection: {
-    alignItems: 'center',
-    gap: SPACING.sm,
+const styles = StyleSheet.create({
+  heroBody: {
+    marginTop: SPACING.sm,
+    gap: SPACING.md,
   },
-  avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: COLORS.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...SHADOW.md,
-    borderWidth: 4,
-    borderColor: COLORS.primaryLight,
+  backText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 14,
+    color: COLORS.primary,
   },
-  avatarText: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.hero,
-    fontWeight: '900',
-  },
-  name: {
-    color: COLORS.textPrimary,
-    fontSize: 24,
-    fontWeight: '900',
-    marginTop: SPACING.xs,
-  },
-  roleBadge: {
-    flexDirection: 'row',
+  heroCenter: {
     alignItems: 'center',
     gap: 6,
-    backgroundColor: COLORS.primaryLight + '55',
-    borderRadius: RADIUS.full,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
   },
-  roleBadgeText: {
-    color: COLORS.textPrimary,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 1,
+  avatarRing: {
+    padding: 4,
+    borderRadius: 34,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    marginBottom: 4,
+  },
+  heroName: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 24,
+    color: COLORS.white,
+    letterSpacing: -0.5,
+  },
+  heroRole: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.55)',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
   },
   starsRow: {
     flexDirection: 'row',
-    gap: 4,
+    gap: 3,
     marginTop: 4,
   },
   ratingText: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.xs,
-    fontWeight: '600',
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.55)',
   },
-
-  driverIdCard: {
-    backgroundColor: COLORS.primaryLight + '33',
-    borderRadius: RADIUS.xl,
-    padding: SPACING.xl,
+  idHero: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    gap: 6,
+  },
+  idHeroTop: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
-    borderWidth: 2,
-    borderColor: COLORS.primaryLight,
+    justifyContent: 'space-between',
   },
-  driverIdIconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: COLORS.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACING.sm,
-    ...SHADOW.sm,
-  },
-  driverIdLabel: {
-    color: COLORS.textSecondary,
+  idEyebrow: {
+    fontFamily: 'DMSans_700Bold',
     fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 1,
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+    color: COLORS.primary,
   },
-  driverIdValue: {
-    color: COLORS.textPrimary,
-    fontSize: 32,
-    fontWeight: '900',
-    letterSpacing: 6,
+  qrChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
   },
-  driverIdHint: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.xs,
-    textAlign: 'center',
-    fontWeight: '500',
-    marginTop: SPACING.xs,
+  qrChipText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 12,
+    color: COLORS.ink,
   },
-
-  infoCard: {
+  idValue: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 30,
+    color: COLORS.white,
+    letterSpacing: 4,
+  },
+  idHint: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.5)',
+  },
+  scroll: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.lg,
+    gap: SPACING.lg,
+  },
+  panel: {
     backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.xl,
-    padding: SPACING.lg,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.border,
     ...SHADOW.sm,
   },
-  infoRow: {
+  panelTitle: {
+    fontFamily: 'Sora_600SemiBold',
+    fontSize: 15,
+    color: COLORS.ink,
+    marginBottom: 4,
+  },
+  rule: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: COLORS.border,
+    marginLeft: 48,
+  },
+  detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.md,
-    paddingVertical: SPACING.sm,
+    gap: 12,
+    paddingVertical: 10,
   },
-  infoIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  detailIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
     backgroundColor: COLORS.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  detailCopy: { flex: 1, gap: 2, minWidth: 0 },
+  detailLabel: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 12,
+    color: COLORS.textMuted,
+  },
+  detailValue: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 15,
+    color: COLORS.ink,
+  },
+  actions: { gap: 12 },
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    padding: 14,
     borderWidth: 1,
     borderColor: COLORS.border,
+    ...SHADOW.sm,
   },
-  infoText: { flex: 1 },
-  infoLabel: {
-    color: COLORS.textSecondary,
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+  actionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    backgroundColor: COLORS.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  infoValue: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.base,
-    fontWeight: '700',
-    marginTop: 2,
+  actionCopy: { flex: 1, gap: 2 },
+  actionTitle: {
+    fontFamily: 'Sora_600SemiBold',
+    fontSize: 15,
+    color: COLORS.ink,
   },
-  separator: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginVertical: SPACING.sm,
+  actionHint: {
+    ...type.caption,
+    fontSize: 12,
+  },
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.errorLight,
+  },
+  logoutText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 15,
+    color: COLORS.error,
   },
 });
 
