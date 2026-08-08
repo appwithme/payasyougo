@@ -14,7 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../../context/AppContext';
 import TransactionCard from '../../components/TransactionCard';
-import { fetchFare } from '../../services/routesService';
+import { resolveRebookRoute } from '../../services/rebookService';
 import { COLORS, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { useTabBarPadding } from '../../navigation/FloatingTabBar';
@@ -58,7 +58,11 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
     if (rebookingId) return;
     setRebookingId(trip.id);
     try {
-      const route = await fetchFare(trip.from, trip.to);
+      const route = await resolveRebookRoute(trip);
+      if (!route.fare) {
+        Alert.alert('Couldn’t rebook', 'No fare found for this route.');
+        return;
+      }
       navigation.navigate('BookTab', {
         screen: 'EnterDriverId',
         params: {
@@ -72,7 +76,7 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
     } catch (err: any) {
       Alert.alert(
         'Couldn’t rebook',
-        err?.message || 'This route isn’t available right now. Pick it again from Book.'
+        err?.message || 'Something went wrong. Try Book instead.'
       );
     } finally {
       setRebookingId(null);
