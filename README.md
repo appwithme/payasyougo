@@ -86,7 +86,14 @@ Then scan the QR code with Expo Go (same Wi‑Fi as the API).
 
 ## Accounts
 
-Register a passenger or driver from the app. The API seed also creates optional QA users for API testing only (not shown in the UI) — see `backend/prisma/seed.ts`.
+Register from the app, or use these seeded **admin test** accounts:
+
+| Role | Phone | Password | Driver ID |
+|------|-------|----------|-----------|
+| Passenger | `0550000111` | `admin123` | — |
+| Driver | `0240000111` | `admin123` | `DRV100` |
+
+Re-seed anytime with `cd backend && npm run prisma:seed`.
 
 ---
 

@@ -16,6 +16,24 @@ const ROUTES = [
   { fromLocation: 'Science', toLocation: 'Valco', fare: 3.0 },
 ];
 
+/** Fixed accounts for QA / Paystack test runs */
+const TEST_ACCOUNTS = {
+  passenger: {
+    phone: '0550000111',
+    password: 'admin123',
+    fullName: 'Admin Passenger',
+    email: 'admin.passenger@payasyougo.com',
+  },
+  driver: {
+    phone: '0240000111',
+    password: 'admin123',
+    fullName: 'Admin Driver',
+    email: 'admin.driver@payasyougo.com',
+    uniqueCode: 'DRV100',
+    vehicleInfo: 'Toyota Corolla - GR 1000-24',
+  },
+};
+
 async function main() {
   for (const route of ROUTES) {
     await prisma.route.upsert({
@@ -30,62 +48,76 @@ async function main() {
     });
   }
 
-  // Optional QA drivers (DB only — never shown as demo hints in the app UI)
-  const passwordHash = await bcrypt.hash('driver123', 10);
-
-  const kwame = await prisma.user.upsert({
-    where: { phone: '0240000001' },
-    update: {},
-    create: {
-      fullName: 'Kwame Owusu',
-      phone: '0240000001',
-      email: 'kwame@payasyougo.com',
-      passwordHash,
-      role: Role.DRIVER,
-      driver: {
-        create: {
-          uniqueCode: 'DRV001',
-          vehicleInfo: 'Toyota Yaris - ER 1234-21',
-          rating: 4.8,
-        },
-      },
-    },
-  });
-
-  const amaHash = await bcrypt.hash('driver456', 10);
+  const passengerHash = await bcrypt.hash(TEST_ACCOUNTS.passenger.password, 10);
   await prisma.user.upsert({
-    where: { phone: '0200000002' },
-    update: {},
-    create: {
-      fullName: 'Ama Asantewaa',
-      phone: '0200000002',
-      email: 'ama@payasyougo.com',
-      passwordHash: amaHash,
-      role: Role.DRIVER,
-      driver: {
-        create: {
-          uniqueCode: 'DRV002',
-          vehicleInfo: 'Hyundai i10 - GR 5678-22',
-          rating: 4.9,
-        },
-      },
+    where: { phone: TEST_ACCOUNTS.passenger.phone },
+    update: {
+      fullName: TEST_ACCOUNTS.passenger.fullName,
+      email: TEST_ACCOUNTS.passenger.email,
+      passwordHash: passengerHash,
+      role: Role.PASSENGER,
     },
-  });
-
-  const passengerHash = await bcrypt.hash('pass1234', 10);
-  await prisma.user.upsert({
-    where: { phone: '0551002000' },
-    update: {},
     create: {
-      fullName: 'Kofi Mensah',
-      phone: '0551002000',
-      email: 'kofi@example.com',
+      fullName: TEST_ACCOUNTS.passenger.fullName,
+      phone: TEST_ACCOUNTS.passenger.phone,
+      email: TEST_ACCOUNTS.passenger.email,
       passwordHash: passengerHash,
       role: Role.PASSENGER,
     },
   });
 
-  console.log(`Seeded ${ROUTES.length} routes + QA users (Kwame=${kwame.id})`);
+  const driverHash = await bcrypt.hash(TEST_ACCOUNTS.driver.password, 10);
+  const driverUser = await prisma.user.upsert({
+    where: { phone: TEST_ACCOUNTS.driver.phone },
+    update: {
+      fullName: TEST_ACCOUNTS.driver.fullName,
+      email: TEST_ACCOUNTS.driver.email,
+      passwordHash: driverHash,
+      role: Role.DRIVER,
+    },
+    create: {
+      fullName: TEST_ACCOUNTS.driver.fullName,
+      phone: TEST_ACCOUNTS.driver.phone,
+      email: TEST_ACCOUNTS.driver.email,
+      passwordHash: driverHash,
+      role: Role.DRIVER,
+      driver: {
+        create: {
+          uniqueCode: TEST_ACCOUNTS.driver.uniqueCode,
+          vehicleInfo: TEST_ACCOUNTS.driver.vehicleInfo,
+          rating: 5.0,
+        },
+      },
+    },
+    include: { driver: true },
+  });
+
+  if (!driverUser.driver) {
+    await prisma.driver.create({
+      data: {
+        userId: driverUser.id,
+        uniqueCode: TEST_ACCOUNTS.driver.uniqueCode,
+        vehicleInfo: TEST_ACCOUNTS.driver.vehicleInfo,
+        rating: 5.0,
+      },
+    });
+  } else {
+    await prisma.driver.update({
+      where: { userId: driverUser.id },
+      data: {
+        uniqueCode: TEST_ACCOUNTS.driver.uniqueCode,
+        vehicleInfo: TEST_ACCOUNTS.driver.vehicleInfo,
+      },
+    });
+  }
+
+  console.log('Seeded routes + admin test accounts:');
+  console.log(
+    `  Passenger  phone=${TEST_ACCOUNTS.passenger.phone}  password=${TEST_ACCOUNTS.passenger.password}`
+  );
+  console.log(
+    `  Driver     phone=${TEST_ACCOUNTS.driver.phone}  password=${TEST_ACCOUNTS.driver.password}  code=${TEST_ACCOUNTS.driver.uniqueCode}`
+  );
 }
 
 main()
