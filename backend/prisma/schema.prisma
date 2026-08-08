@@ -21,9 +21,10 @@ enum TransactionStatus {
 model User {
   id           String   @id @default(uuid())
   fullName     String
-  phone        String   @unique
+  phone        String?  @unique
   email        String?
-  passwordHash String
+  passwordHash String?
+  googleId     String?  @unique
   role         Role
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

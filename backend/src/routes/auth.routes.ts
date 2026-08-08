@@ -29,6 +29,18 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
+router.post('/google', async (req, res, next) => {
+  try {
+    const result = await auth.loginWithGoogle(req.body);
+    res.json(result);
+  } catch (err) {
+    if (err instanceof Error && err.name === 'ZodError') {
+      return next(new AppError('Invalid Google auth payload'));
+    }
+    next(err);
+  }
+});
+
 router.get('/me', requireAuth, async (req: AuthRequest, res, next) => {
   try {
     const user = await auth.me(req.user!.sub);

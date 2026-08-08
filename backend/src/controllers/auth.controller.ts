@@ -6,6 +6,7 @@ import { signToken } from '../utils/jwt';
 import { nextDriverCode, normalizePhone } from '../utils/helpers';
 import { AppError } from '../middleware/errorHandler';
 import { decimalToNumber } from '../services/wallet';
+import { verifyGoogleIdToken } from '../services/googleAuth';
 
 const registerSchema = z.object({
   role: z.enum(['PASSENGER', 'DRIVER']),
@@ -21,10 +22,14 @@ const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+const googleSchema = z.object({
+  idToken: z.string().min(10),
+});
+
 function mapUser(user: {
   id: string;
   fullName: string;
-  phone: string;
+  phone: string | null;
   email: string | null;
   role: Role;
   driver?: {
@@ -43,7 +48,7 @@ function mapUser(user: {
       userId: user.id,
       driverRecordId: user.driver.id,
       name: user.fullName,
-      phone: user.phone,
+      phone: user.phone || '',
       email: user.email || '',
       vehicle: user.driver.vehicleInfo,
       rating: user.driver.rating,
@@ -58,7 +63,7 @@ function mapUser(user: {
   return {
     id: user.id,
     name: user.fullName,
-    phone: user.phone,
+    phone: user.phone || '',
     email: user.email || '',
     role: 'passenger' as const,
     avatar: null,
@@ -100,7 +105,7 @@ export async function register(body: unknown) {
     include: { driver: true },
   });
 
-  const token = signToken({ sub: user.id, role: user.role, phone: user.phone });
+  const token = signToken({ sub: user.id, role: user.role, phone: user.phone || '' });
   return { token, user: mapUser(user) };
 }
 
@@ -114,10 +119,60 @@ export async function login(body: unknown) {
   });
   if (!user) throw new AppError('No account found with this phone number', 404);
 
+  if (!user.passwordHash) {
+    throw new AppError('This account uses Google sign-in. Continue with Google.', 401);
+  }
+
   const ok = await bcrypt.compare(input.password, user.passwordHash);
   if (!ok) throw new AppError('Incorrect password', 401);
 
-  const token = signToken({ sub: user.id, role: user.role, phone: user.phone });
+  const token = signToken({ sub: user.id, role: user.role, phone: user.phone || '' });
+  return { token, user: mapUser(user) };
+}
+
+/** Passenger-only Google sign-in / sign-up */
+export async function loginWithGoogle(body: unknown) {
+  const input = googleSchema.parse(body);
+  const profile = await verifyGoogleIdToken(input.idToken);
+
+  let user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { googleId: profile.sub },
+        ...(profile.email ? [{ email: profile.email }] : []),
+      ],
+    },
+    include: { driver: true },
+  });
+
+  if (user) {
+    if (user.role !== Role.PASSENGER) {
+      throw new AppError('Google sign-in is only available for passengers', 403);
+    }
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        googleId: profile.sub,
+        email: profile.email || user.email,
+        fullName: profile.name || user.fullName,
+      },
+      include: { driver: true },
+    });
+  } else {
+    user = await prisma.user.create({
+      data: {
+        fullName: profile.name || profile.email || 'Passenger',
+        email: profile.email || null,
+        googleId: profile.sub,
+        phone: null,
+        passwordHash: null,
+        role: Role.PASSENGER,
+      },
+      include: { driver: true },
+    });
+  }
+
+  const token = signToken({ sub: user.id, role: user.role, phone: user.phone || '' });
   return { token, user: mapUser(user) };
 }
 

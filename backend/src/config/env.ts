@@ -12,6 +12,10 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(4000),
   CORS_ORIGIN: z.string().default('*'),
   PUBLIC_API_URL: z.string().optional(),
+  // Optional until you paste Google OAuth client IDs
+  GOOGLE_WEB_CLIENT_ID: z.string().optional(),
+  GOOGLE_IOS_CLIENT_ID: z.string().optional(),
+  GOOGLE_ANDROID_CLIENT_ID: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
