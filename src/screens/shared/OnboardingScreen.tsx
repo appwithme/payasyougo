@@ -30,28 +30,24 @@ const SLIDES: {
   title: string;
   body: string;
   image: ImageSourcePropType;
-  icon: keyof typeof Ionicons.glyphMap;
 }[] = [
   {
     key: 'pay',
     title: 'Pay your fare\nin seconds',
     body: 'Skip hunting for change. Pick a campus route and pay the driver with Mobile Money.',
     image: require('../../../assets/brand/onboarding-pay.png'),
-    icon: 'flash-outline',
   },
   {
     key: 'wallet',
     title: 'Drivers see\nevery cedi',
     body: 'Wallet balance and today’s earnings update the moment a passenger confirms payment.',
     image: require('../../../assets/brand/onboarding-wallet.png'),
-    icon: 'wallet-outline',
   },
   {
     key: 'routes',
     title: 'Built for\nUCC routes',
     body: 'Science, Casford, Ayensu, Valco — fixed fares for the routes you actually ride.',
     image: require('../../../assets/brand/onboarding-routes.png'),
-    icon: 'map-outline',
   },
 ];
 
@@ -112,9 +108,6 @@ export default function OnboardingScreen({ navigation }: Props) {
           <View style={styles.slide}>
             <View style={styles.imageFrame}>
               <Image source={item.image} style={styles.image} resizeMode="cover" />
-              <View style={styles.iconChip}>
-                <Ionicons name={item.icon} size={18} color={COLORS.ink} />
-              </View>
             </View>
 
             <Animated.View entering={FadeInDown.duration(400)} style={styles.copy}>
@@ -184,17 +177,6 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
-  },
-  iconChip: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: COLORS.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   copy: {
     marginTop: SPACING.lg,
