@@ -59,7 +59,7 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
         <SafeAreaView style={styles.heroSafe} edges={['top']}>
           <Animated.View entering={FadeInDown.duration(500)} style={styles.brandBlock}>
             <Animated.View style={bobStyle}>
-              <BrandMark size={104} variant="pin" />
+              <BrandMark size={120} variant="pin3d" />
             </Animated.View>
             <Text style={styles.appName}>
               payasyou<Text style={styles.appNameAccent}>go</Text>

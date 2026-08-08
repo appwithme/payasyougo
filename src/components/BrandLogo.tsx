@@ -21,7 +21,7 @@ export default function BrandLogo({
 
   return (
     <View style={[styles.wrap, style]}>
-      <BrandMark size={dim} variant="pin" />
+      <BrandMark size={dim} variant="pin3d" />
       {showWordmark ? (
         <View style={styles.wordmark}>
           <Text style={styles.name}>

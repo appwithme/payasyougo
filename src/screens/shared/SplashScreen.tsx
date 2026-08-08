@@ -7,22 +7,20 @@ import {
   Dimensions,
   Animated,
   Easing,
+  Image,
 } from 'react-native';
-import BrandMark from '../../components/BrandMark';
 import { COLORS } from '../../theme/colors';
 
 const { width: W, height: H } = Dimensions.get('window');
+const LOGO_3D = require('../../../assets/brand/logo-3d-pin.png');
 
 /**
- * Taxi Rider–style splash:
- * logo (pin) centered upper-middle, app name directly underneath.
- * Moodboard: cool light-blue field, soft white glow, amber brand mark.
- * Duration ~5.8s so it doesn't feel rushed.
+ * Taxi Rider layout + modern 3D glossy pin:
+ * logo on top, app name underneath, ~5.8s dwell.
  */
 const T = {
-  logoIn: 0,
-  nameIn: 900,
-  tagIn: 1600,
+  nameIn: 950,
+  tagIn: 1650,
   progressIn: 1200,
   exitAt: 5400,
   exitDur: 420,
@@ -76,12 +74,12 @@ function SoftBlob({
         height: size,
         borderRadius: size / 2,
         backgroundColor: color,
-        opacity: a.interpolate({ inputRange: [0, 1], outputRange: [0.2, 0.55] }),
+        opacity: a.interpolate({ inputRange: [0, 1], outputRange: [0.18, 0.5] }),
         transform: [
           {
             translateY: a.interpolate({
               inputRange: [0, 1],
-              outputRange: [0, -12],
+              outputRange: [0, -10],
             }),
           },
         ],
@@ -93,37 +91,62 @@ function SoftBlob({
 export default function SplashScreen({ onFinish }: Props) {
   const rootOpacity = useRef(new Animated.Value(1)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
-  const logoScale = useRef(new Animated.Value(0.7)).current;
-  const logoY = useRef(new Animated.Value(28)).current;
+  const logoScale = useRef(new Animated.Value(0.55)).current;
+  const logoY = useRef(new Animated.Value(36)).current;
+  const shadowOpacity = useRef(new Animated.Value(0)).current;
   const nameOpacity = useRef(new Animated.Value(0)).current;
-  const nameY = useRef(new Animated.Value(18)).current;
+  const nameY = useRef(new Animated.Value(20)).current;
   const tagOpacity = useRef(new Animated.Value(0)).current;
   const progress = useRef(new Animated.Value(0)).current;
+  const floatY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // 1) Logo drops in from above-center (Taxi Rider hierarchy)
+    // 1) 3D logo pops in with settle
     Animated.parallel([
       Animated.timing(logoOpacity, {
         toValue: 1,
-        duration: 480,
+        duration: 420,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
       Animated.spring(logoScale, {
         toValue: 1,
-        friction: 6,
-        tension: 70,
+        friction: 5,
+        tension: 65,
         useNativeDriver: true,
       }),
       Animated.spring(logoY, {
         toValue: 0,
-        friction: 7,
-        tension: 65,
+        friction: 6,
+        tension: 60,
         useNativeDriver: true,
       }),
-    ]).start();
+      Animated.timing(shadowOpacity, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      // gentle idle float (premium 3D product feel)
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(floatY, {
+            toValue: -8,
+            duration: 1600,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: true,
+          }),
+          Animated.timing(floatY, {
+            toValue: 0,
+            duration: 1600,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    });
 
-    // 2) App name reads under the logo
+    // 2) Name under logo
     const nameTimer = setTimeout(() => {
       Animated.parallel([
         Animated.timing(nameOpacity, {
@@ -150,7 +173,7 @@ export default function SplashScreen({ onFinish }: Props) {
       }).start();
     }, T.tagIn);
 
-    // 4) Loading bar — makes longer dwell feel intentional
+    // 4) Progress
     Animated.timing(progress, {
       toValue: 1,
       duration: T.exitAt - T.progressIn,
@@ -191,35 +214,39 @@ export default function SplashScreen({ onFinish }: Props) {
       <StatusBar barStyle="dark-content" />
       <View style={styles.bg} />
 
-      {/* moodboard soft shapes */}
-      <SoftBlob top={H * 0.08} left={-40} size={160} color="#FFFFFF" />
+      <SoftBlob top={H * 0.1} left={-36} size={150} color="#FFFFFF" />
       <SoftBlob
-        top={H * 0.18}
-        left={W * 0.62}
-        size={120}
-        color="rgba(245,184,0,0.22)"
-        delay={200}
+        top={H * 0.2}
+        left={W * 0.65}
+        size={110}
+        color="rgba(245,184,0,0.2)"
+        delay={180}
       />
-      <SoftBlob top={H * 0.7} left={W * 0.1} size={100} color="#FFFFFF" delay={400} />
+      <SoftBlob top={H * 0.72} left={W * 0.12} size={90} color="#FFFFFF" delay={360} />
       <View style={styles.centerGlow} />
 
       <View style={styles.column}>
-        {/* LOGO — top */}
+        {/* 3D LOGO — top */}
         <Animated.View
           style={{
             opacity: logoOpacity,
-            transform: [{ translateY: logoY }, { scale: logoScale }],
+            transform: [
+              { translateY: Animated.add(logoY, floatY) },
+              { scale: logoScale },
+            ],
+            alignItems: 'center',
           }}
         >
-          <BrandMark size={112} variant="pin" />
+          <Image source={LOGO_3D} style={styles.logo} resizeMode="contain" />
+          <Animated.View style={[styles.logoShadow, { opacity: shadowOpacity }]} />
         </Animated.View>
 
-        {/* APP NAME — directly under logo */}
+        {/* APP NAME — under logo */}
         <Animated.View
           style={{
             opacity: nameOpacity,
             transform: [{ translateY: nameY }],
-            marginTop: 28,
+            marginTop: 8,
             alignItems: 'center',
           }}
         >
@@ -257,20 +284,30 @@ const styles = StyleSheet.create({
   },
   centerGlow: {
     position: 'absolute',
-    top: H * 0.22,
-    left: W * 0.5 - 140,
-    width: 280,
-    height: 280,
-    borderRadius: 140,
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    top: H * 0.2,
+    left: W * 0.5 - 150,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: 'rgba(255,255,255,0.75)',
   },
   column: {
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
     zIndex: 2,
-    // push block slightly upper-middle like Taxi Rider mockups
-    marginBottom: H * 0.08,
+    marginBottom: H * 0.06,
+    paddingHorizontal: 32,
+  },
+  logo: {
+    width: Math.min(W * 0.42, 180),
+    height: Math.min(W * 0.42, 180),
+  },
+  logoShadow: {
+    marginTop: -6,
+    width: 78,
+    height: 14,
+    borderRadius: 40,
+    backgroundColor: 'rgba(27,43,75,0.14)',
+    transform: [{ scaleX: 1.15 }],
   },
   appName: {
     fontFamily: 'Sora_700Bold',
@@ -287,7 +324,6 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans_500Medium',
     fontSize: 14,
     color: COLORS.textSecondary,
-    letterSpacing: 0.2,
   },
   progressTrack: {
     marginTop: 40,

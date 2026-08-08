@@ -23,7 +23,7 @@ import { type } from '../../theme/typography';
 const { width } = Dimensions.get('window');
 
 /** Bump version so existing Expo Go installs see onboarding again after redesign */
-export const ONBOARDING_KEY = 'payasyougo_onboarding_v5';
+export const ONBOARDING_KEY = 'payasyougo_onboarding_v6';
 
 const SLIDES: {
   key: string;
@@ -87,7 +87,7 @@ export default function OnboardingScreen({ navigation }: Props) {
 
       <View style={styles.topBar}>
         <View style={styles.brandRow}>
-          <BrandMark size={28} />
+          <BrandMark size={32} variant="pin3d" />
           <Text style={styles.brand}>
             payasyou<Text style={styles.brandAccent}>go</Text>
           </Text>
