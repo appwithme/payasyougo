@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -129,8 +128,7 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
     setPassword(sample.password);
     setConfirmPassword(sample.password);
     setGhanaCard(sample.ghanaCard);
-    setGhanaFrontUri(Image.resolveAssetSource(GHANA_CARD_FRONT)?.uri ?? null);
-    setGhanaBackUri(Image.resolveAssetSource(GHANA_CARD_BACK)?.uri ?? null);
+    // Keep live captures empty — examples are reference only
     setGhanaVerified(false);
     setGhanaNormalized('');
     setLicense(sample.license);
@@ -207,7 +205,7 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
     const e: Record<string, string> = {};
     if (!ghanaFrontUri) e.ghanaFront = 'Capture the front of your Ghana Card';
     if (!ghanaBackUri) e.ghanaBack = 'Capture the back of your Ghana Card';
-    if (!ghanaCard.trim()) e.ghanaCard = 'Enter the Personal ID Number from your card';
+    if (!ghanaCard.trim()) e.ghanaCard = 'Enter your Ghana Card number';
     if (Object.keys(e).length > 0) {
       setErrors(e);
       return;
@@ -362,6 +360,21 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
     if (key === 'ghana_card') {
       return (
         <>
+          <Input
+            label="Ghana Card number"
+            placeholder="GHA-123456789-0"
+            value={ghanaCard}
+            onChangeText={(v) => {
+              setGhanaCard(v);
+              setGhanaVerified(false);
+              setGhanaNormalized('');
+              clearFieldError('ghanaCard');
+            }}
+            iconName="id-card-outline"
+            autoCapitalize="characters"
+            error={errors.ghanaCard}
+          />
+
           <View style={styles.infoCard}>
             <Ionicons name="camera-outline" size={20} color={COLORS.ink} />
             <Text style={styles.infoText}>
@@ -397,21 +410,6 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
             }}
           />
 
-          <Input
-            label="Personal ID Number"
-            placeholder="GHA-123456789-0"
-            value={ghanaCard}
-            onChangeText={(v) => {
-              setGhanaCard(v);
-              setGhanaVerified(false);
-              setGhanaNormalized('');
-              clearFieldError('ghanaCard');
-            }}
-            iconName="id-card-outline"
-            autoCapitalize="characters"
-            error={errors.ghanaCard}
-          />
-
           <TouchableOpacity
             style={styles.autofillBtn}
             onPress={fillSignupSample}
@@ -419,7 +417,7 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
             accessibilityLabel="Autofill Ghana Card sample"
           >
             <Ionicons name="flash-outline" size={16} color={COLORS.ink} />
-            <Text style={styles.autofillText}>Autofill sample card + photos</Text>
+            <Text style={styles.autofillText}>Autofill sample details</Text>
           </TouchableOpacity>
 
           {ghanaVerified ? (
