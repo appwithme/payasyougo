@@ -12,6 +12,11 @@ export type PaymentResult = {
 };
 
 class PaymentService {
+  private providerLabel(provider: MoMoProvider): string {
+    if (provider === 'TELECEL') return 'Telecel Cash';
+    return 'MTN MoMo';
+  }
+
   async processMoMoPayment(args: {
     provider: MoMoProvider;
     phone: string;
@@ -22,7 +27,7 @@ class PaymentService {
     onStatus?: (msg: string) => void;
   }): Promise<PaymentResult> {
     try {
-      args.onStatus?.(`Authorizing on ${args.provider}...`);
+      args.onStatus?.(`Authorizing on ${this.providerLabel(args.provider)}…`);
       const initiated = await initiateMoMoPayment({
         driverCode: args.driverCode,
         from: args.from,
