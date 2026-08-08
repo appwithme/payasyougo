@@ -217,7 +217,7 @@ since you are doing a test transaction.
 
 ↑ That error means you’re on test keys with a live number — switch to `0551234987` (MTN tile).
 
-Withdrawals also need funds in your **Paystack balance** (from successful test charges). Disable **Transfer OTP** in the Paystack dashboard so payouts aren’t stuck waiting for approval.
+With **`sk_test_`** keys, driver withdrawals are **simulated** (wallet debited, marked complete) because Paystack Starter accounts cannot send Transfers — even in test. Live payouts need Transfers enabled + Paystack balance + Transfer OTP off.
 
 ### Going live later
 
