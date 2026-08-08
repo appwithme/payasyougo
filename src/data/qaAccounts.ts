@@ -53,7 +53,7 @@ export function makeDriverSignupSample() {
     email: `yaw.boateng.${n}@example.com`,
     password: 'signup123',
     ghanaCard: `GHA-${cardDigits}-${cardDigits.slice(-1)}`,
-    license: `DL${n}`,
+    license: `NAG-${uniqueDigits(8)}-${uniqueDigits(5)}`,
     vehicle: 'Toyota Corolla - GR 4321-25',
   };
 }
