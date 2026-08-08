@@ -163,10 +163,13 @@ In **live / production**, Telecel works the same as MTN: the app sends provider 
 
 ## 👤 Seeded test accounts
 
-| Role | Phone | Password | Driver ID |
-|:-----|:------|:---------|:----------|
-| 🧳 Passenger | `0550000111` | `admin123` | — |
-| 🚕 Driver | `0240000111` | `admin123` | `DRV100` |
+| Role | Name | Phone | Password | Driver ID |
+|:-----|:-----|:------|:---------|:----------|
+| Passenger | Admin Passenger | `0550000111` | `admin123` | — |
+| Driver | Kwame Asiamah | `0240000111` | `admin123` | `DRV100` |
+| Driver | Ama Asantewaa | `0200000002` | `driver456` | `DRV002` |
+
+Drivers can show a **QR code** from the dashboard (`Show QR code`). Passengers scan it on **Link driver** instead of typing the ID.
 
 ```bash
 cd backend && npm run prisma:seed
