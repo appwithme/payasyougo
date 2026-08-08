@@ -100,8 +100,13 @@ const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
               <Text style={styles.emptyText}>Waiting for passenger payments.</Text>
             </View>
           ) : (
-            recentTxns.map((txn) => (
-              <TransactionCard key={txn.id} item={txn} mode="driver" />
+            recentTxns.map((txn, i) => (
+              <TransactionCard
+                key={txn.id}
+                item={txn}
+                mode="driver"
+                last={i === recentTxns.length - 1}
+              />
             ))
           )}
         </View>

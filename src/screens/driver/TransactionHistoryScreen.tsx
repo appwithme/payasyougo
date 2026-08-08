@@ -58,8 +58,12 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
         <FlatList
           data={driverTransactions}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TransactionCard item={item} mode="driver" />
+          renderItem={({ item, index }) => (
+            <TransactionCard
+              item={item}
+              mode="driver"
+              last={index === driverTransactions.length - 1}
+            />
           )}
           contentContainerStyle={[styles.list, { paddingBottom: tabPad }]}
           showsVerticalScrollIndicator={false}

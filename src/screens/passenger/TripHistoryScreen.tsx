@@ -51,8 +51,12 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
         <FlatList
           data={passengerTrips}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TransactionCard item={item} mode="passenger" />
+          renderItem={({ item, index }) => (
+            <TransactionCard
+              item={item}
+              mode="passenger"
+              last={index === passengerTrips.length - 1}
+            />
           )}
           contentContainerStyle={[styles.list, { paddingBottom: tabPad }]}
           showsVerticalScrollIndicator={false}

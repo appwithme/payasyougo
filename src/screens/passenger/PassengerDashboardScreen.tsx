@@ -69,29 +69,44 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
 
         <Animated.View entering={FadeInUp.delay(160).duration(450)} style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent trips</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('HistoryTab' as never)}>
+            <View>
+              <Text style={styles.sectionTitle}>Recent trips</Text>
+              {recentTrips.length > 0 ? (
+                <Text style={styles.sectionHint}>
+                  {passengerTrips.length} total
+                </Text>
+              ) : null}
+            </View>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('HistoryTab' as never)}
+              hitSlop={8}
+            >
               <Text style={styles.seeAll}>See all</Text>
             </TouchableOpacity>
           </View>
 
           {recentTrips.length === 0 ? (
             <View style={styles.empty}>
-              <View style={styles.emptyIcon}>
-                <Ionicons name="receipt-outline" size={22} color={COLORS.textMuted} />
-              </View>
               <Text style={styles.emptyTitle}>No trips yet</Text>
-              <Text style={styles.emptyText}>Your payments will appear here.</Text>
+              <Text style={styles.emptyText}>
+                After you pay a fare, it shows up here.
+              </Text>
             </View>
           ) : (
-            recentTrips.map((trip, i) => (
-              <Animated.View
-                key={trip.id}
-                entering={FadeInUp.delay(200 + i * 60).duration(400)}
-              >
-                <TransactionCard item={trip} mode="passenger" />
-              </Animated.View>
-            ))
+            <View style={styles.tripList}>
+              {recentTrips.map((trip, i) => (
+                <Animated.View
+                  key={trip.id}
+                  entering={FadeInUp.delay(200 + i * 50).duration(380)}
+                >
+                  <TransactionCard
+                    item={trip}
+                    mode="passenger"
+                    last={i === recentTrips.length - 1}
+                  />
+                </Animated.View>
+              ))}
+            </View>
           )}
         </Animated.View>
       </ScrollView>
@@ -140,31 +155,35 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
+    alignItems: 'flex-start',
+    marginBottom: SPACING.sm,
   },
   sectionTitle: { ...type.subheading },
-  seeAll: { ...type.label, color: COLORS.textSecondary },
+  sectionHint: {
+    ...type.caption,
+    marginTop: 2,
+    fontSize: 12,
+  },
+  seeAll: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 13,
+    color: COLORS.ink,
+    marginTop: 4,
+  },
+  tripList: {
+    marginTop: 4,
+  },
   empty: {
-    alignItems: 'center',
-    padding: SPACING.xl,
-    gap: SPACING.sm,
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.sm,
+    gap: 4,
   },
-  emptyIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: COLORS.surfaceAlt,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
+  emptyTitle: {
+    fontFamily: 'Sora_600SemiBold',
+    fontSize: 15,
+    color: COLORS.ink,
   },
-  emptyTitle: { ...type.label },
-  emptyText: { ...type.caption, textAlign: 'center' },
+  emptyText: { ...type.caption },
 });
 
 export default PassengerDashboardScreen;
