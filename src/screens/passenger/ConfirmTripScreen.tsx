@@ -1,6 +1,3 @@
-// ============================================================
-// CONFIRM TRIP SCREEN (MoMo Integration)
-// ============================================================
 import React, { useState } from 'react';
 import {
   View,
@@ -18,18 +15,18 @@ import Header from '../../components/Header';
 import DriverCard from '../../components/DriverCard';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import { COLORS, SPACING, RADIUS } from '../../theme/colors';
+import { type } from '../../theme/typography';
 import { MoMoProvider } from '../../types';
 
 const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any }) => {
   const { from, to, fare, driver } = route.params;
   const { currentUser, refreshTrips } = useApp();
 
-  // MoMo State
   const [provider, setProvider] = useState<MoMoProvider>('MTN');
   const [momoPhone, setMomoPhone] = useState(currentUser?.phone || '');
   const [loading, setLoading] = useState(false);
-  const [loadingStep, setLoadingStep] = useState(''); // E.g., "Waiting for MoMo prompt..."
+  const [loadingStep, setLoadingStep] = useState('');
   const [error, setError] = useState('');
 
   const providers: { id: MoMoProvider; name: string; color: string }[] = [
@@ -52,7 +49,6 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
     setLoadingStep(`Authorizing on ${provider}...`);
 
     try {
-      // Paystack test MoMo via API — persists PENDING → COMPLETED in Neon
       const paymentResult = await paymentService.processMoMoPayment({
         provider,
         phone: momoPhone,
@@ -85,32 +81,34 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" />
-      <Header title="Confirm Payment" onBack={() => navigation.goBack()} transparent />
+      <Header title="Confirm payment" onBack={() => navigation.goBack()} transparent />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>TRIP DETAILS</Text>
+          <Text style={styles.sectionLabel}>Trip</Text>
           <View style={styles.summaryCard}>
-            <Text style={styles.summaryRoute}>{from} → {to}</Text>
+            <Text style={styles.summaryRoute}>
+              {from} → {to}
+            </Text>
             <Text style={styles.summaryFare}>GH₵{fare}</Text>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>DRIVER</Text>
+          <Text style={styles.sectionLabel}>Driver</Text>
           <DriverCard driver={driver} />
         </View>
 
-        {/* MOBILE MONEY SECTION */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>MOBILE MONEY PROVIDER</Text>
+          <Text style={styles.sectionLabel}>Mobile money</Text>
           <View style={styles.providerGrid}>
-            {providers.map(p => (
+            {providers.map((p) => (
               <TouchableOpacity
                 key={p.id}
                 style={[
                   styles.providerBtn,
-                  provider === p.id && { borderColor: p.color, backgroundColor: p.color + '11' }
+                  provider === p.id && styles.providerBtnActive,
+                  provider === p.id && { borderColor: p.color },
                 ]}
                 onPress={() => setProvider(p.id)}
                 activeOpacity={0.8}
@@ -118,10 +116,12 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
                 <View
                   style={[
                     styles.radio,
-                    provider === p.id && { borderColor: p.color }
+                    provider === p.id && { borderColor: p.color },
                   ]}
                 >
-                  {provider === p.id && <View style={[styles.radioFill, { backgroundColor: p.color }]} />}
+                  {provider === p.id && (
+                    <View style={[styles.radioFill, { backgroundColor: p.color }]} />
+                  )}
                 </View>
                 <Text style={styles.providerName}>{p.name}</Text>
               </TouchableOpacity>
@@ -129,7 +129,7 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
           </View>
 
           <Input
-            label="Mobile Money Number"
+            label="Mobile money number"
             placeholder="+233 XX XXX XXXX"
             value={momoPhone}
             onChangeText={setMomoPhone}
@@ -139,9 +139,9 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
           />
 
           <View style={styles.securityNote}>
-            <Ionicons name="lock-closed" size={16} color={COLORS.success} />
+            <Ionicons name="lock-closed-outline" size={16} color={COLORS.textSecondary} />
             <Text style={styles.securityText}>
-              A secure authorization prompt will appear on your phone. We never store your PIN.
+              A prompt will appear on your phone. We never store your PIN.
             </Text>
           </View>
         </View>
@@ -174,13 +174,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,
     gap: SPACING.sm,
   },
-  sectionLabel: {
-    color: COLORS.textMuted,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 1.2,
-    marginLeft: SPACING.xs,
-  },
+  sectionLabel: { ...type.label },
 
   summaryCard: {
     backgroundColor: COLORS.surface,
@@ -191,17 +185,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderWidth: 1,
     borderColor: COLORS.border,
-    ...SHADOW.sm,
   },
-  summaryRoute: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.base,
-    fontWeight: '800',
-  },
+  summaryRoute: { ...type.bodyBold, flex: 1, marginRight: SPACING.md },
   summaryFare: {
-    color: COLORS.primaryDark,
-    fontSize: FONT_SIZE.lg,
-    fontWeight: '900',
+    fontFamily: 'Sora_700Bold',
+    fontSize: 20,
+    color: COLORS.ink,
   },
 
   providerGrid: {
@@ -213,20 +202,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.surface,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: COLORS.border,
     borderRadius: RADIUS.md,
     padding: SPACING.sm,
     paddingHorizontal: SPACING.md,
     gap: SPACING.sm,
-    ...SHADOW.sm,
+  },
+  providerBtnActive: {
+    backgroundColor: COLORS.surfaceAlt,
   },
   radio: {
     width: 18,
     height: 18,
     borderRadius: 9,
     borderWidth: 2,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -235,28 +226,18 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
   },
-  providerName: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: '700',
-  },
+  providerName: { ...type.label, fontSize: 13 },
 
   securityNote: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: COLORS.successLight,
-    padding: SPACING.md,
-    borderRadius: RADIUS.md,
     gap: SPACING.sm,
-    borderWidth: 1,
-    borderColor: COLORS.success + '44',
+    marginTop: SPACING.sm,
   },
   securityText: {
+    ...type.caption,
     flex: 1,
-    color: COLORS.success,
-    fontSize: 11,
-    lineHeight: 16,
-    fontWeight: '700',
+    color: COLORS.textSecondary,
   },
 
   errorBox: {
@@ -271,10 +252,10 @@ const styles = StyleSheet.create({
     borderColor: COLORS.error + '44',
   },
   errorText: {
+    ...type.caption,
     flex: 1,
     color: COLORS.error,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: '700',
+    fontFamily: 'DMSans_700Bold',
   },
 
   footer: {
