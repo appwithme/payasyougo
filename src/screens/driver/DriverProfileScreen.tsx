@@ -81,22 +81,6 @@ const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
               <Text style={styles.editProfileText}>Edit profile</Text>
             </TouchableOpacity>
           </View>
-
-          <TouchableOpacity
-            style={styles.idBlock}
-            onPress={() => navigation.navigate('DriverQr')}
-            activeOpacity={0.9}
-          >
-            <View style={styles.idTop}>
-              <Text style={styles.idLabel}>Driver ID</Text>
-              <View style={styles.qrChip}>
-                <Ionicons name="qr-code-outline" size={14} color={COLORS.ink} />
-                <Text style={styles.qrChipText}>QR</Text>
-              </View>
-            </View>
-            <Text style={styles.idValue}>{driver.id}</Text>
-            <Text style={styles.idMeta}>Tap to show QR for passengers</Text>
-          </TouchableOpacity>
         </Animated.View>
       }
       heroBottom={SPACING.lg}
@@ -107,6 +91,13 @@ const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
       >
         <Animated.View entering={FadeInUp.delay(100).duration(420)} style={styles.panel}>
           <Text style={styles.panelTitle}>Account</Text>
+          <DetailRow
+            icon="id-card-outline"
+            label="Driver ID"
+            value={driver.id}
+            onPress={() => navigation.navigate('DriverQr')}
+          />
+          <View style={styles.rule} />
           <DetailRow icon="call-outline" label="Phone" value={driver.phone || 'Not set'} />
           <View style={styles.rule} />
           <DetailRow icon="mail-outline" label="Email" value={driver.email || 'Not set'} />
@@ -148,13 +139,20 @@ function DetailRow({
   icon,
   label,
   value,
+  onPress,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   value: string;
+  onPress?: () => void;
 }) {
   return (
-    <View style={styles.detailRow}>
+    <TouchableOpacity
+      style={styles.detailRow}
+      onPress={onPress}
+      activeOpacity={0.75}
+      disabled={!onPress}
+    >
       <View style={styles.detailIcon}>
         <Ionicons name={icon} size={16} color={COLORS.ink} />
       </View>
@@ -164,7 +162,10 @@ function DetailRow({
           {value}
         </Text>
       </View>
-    </View>
+      {onPress ? (
+        <Ionicons name="qr-code-outline" size={16} color={COLORS.textMuted} />
+      ) : null}
+    </TouchableOpacity>
   );
 }
 
@@ -219,47 +220,6 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans_700Bold',
     fontSize: 13,
     color: COLORS.ink,
-  },
-  idBlock: {
-    gap: 6,
-  },
-  idTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  idLabel: {
-    fontFamily: 'DMSans_700Bold',
-    fontSize: 11,
-    letterSpacing: 1.4,
-    textTransform: 'uppercase',
-    color: COLORS.primary,
-  },
-  qrChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 999,
-  },
-  qrChipText: {
-    fontFamily: 'DMSans_700Bold',
-    fontSize: 12,
-    color: COLORS.ink,
-  },
-  idValue: {
-    fontFamily: 'Sora_700Bold',
-    fontSize: 42,
-    color: COLORS.white,
-    letterSpacing: 4,
-  },
-  idMeta: {
-    fontFamily: 'DMSans_500Medium',
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.55)',
-    marginTop: 2,
   },
   scroll: {
     paddingHorizontal: SPACING.lg,
