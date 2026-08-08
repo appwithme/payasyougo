@@ -5,17 +5,15 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
-  StatusBar,
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
 import UserAvatar from '../../components/UserAvatar';
+import InkSheetScreen from '../../components/InkSheetScreen';
 import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { Passenger } from '../../types';
@@ -97,124 +95,115 @@ const PassengerProfileScreen = ({ navigation }: { navigation: any }) => {
   };
 
   return (
-    <View style={styles.root}>
-      <StatusBar barStyle="light-content" />
-
-      <LinearGradient
-        colors={['#15233F', COLORS.ink, '#2A3F63']}
-        locations={[0, 0.55, 1]}
-        style={styles.hero}
-      >
-        <SafeAreaView edges={['top']} style={styles.heroSafe}>
-          <Animated.Text entering={FadeIn.duration(400)} style={styles.brand}>
-            payasyou<Text style={styles.brandGo}>go</Text>
-          </Animated.Text>
-
-          <Animated.View entering={FadeInDown.delay(80).duration(450)} style={styles.heroBody}>
-            <TouchableOpacity
-              onPress={handleChangePhoto}
-              activeOpacity={0.9}
-              disabled={uploading}
-              style={styles.avatarRing}
-              accessibilityRole="button"
-              accessibilityLabel="Change profile photo"
-            >
-              <UserAvatar
-                name={passenger?.name}
-                uri={passenger?.avatar}
-                size={86}
-                radius={28}
-              />
-              <View style={styles.cameraBadge}>
-                {uploading ? (
-                  <ActivityIndicator size="small" color={COLORS.ink} />
-                ) : (
-                  <Ionicons name="camera" size={13} color={COLORS.ink} />
-                )}
-              </View>
-            </TouchableOpacity>
-
-            <Text style={styles.heroName} numberOfLines={1}>
-              {passenger?.name || 'Passenger'}
-            </Text>
-            <Text style={styles.heroRole}>Passenger</Text>
-
-            <TouchableOpacity
-              style={styles.editProfileBtn}
-              onPress={() => navigation.navigate('EditProfile')}
-              activeOpacity={0.85}
-            >
-              <Ionicons name="create-outline" size={15} color={COLORS.ink} />
-              <Text style={styles.editProfileText}>Edit profile</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        </SafeAreaView>
-      </LinearGradient>
-
-      <View style={styles.sheet}>
-        <SafeAreaView edges={['bottom']} style={styles.sheetInner}>
-          <ScrollView
-            contentContainerStyle={[styles.scroll, { paddingBottom: tabPad }]}
-            showsVerticalScrollIndicator={false}
-            bounces={false}
+    <InkSheetScreen
+      hero={
+        <Animated.View entering={FadeInDown.delay(60).duration(420)} style={styles.heroBody}>
+          <TouchableOpacity
+            onPress={handleChangePhoto}
+            activeOpacity={0.9}
+            disabled={uploading}
+            style={styles.avatarRing}
+            accessibilityRole="button"
+            accessibilityLabel="Change profile photo"
           >
-            <Animated.View entering={FadeInUp.delay(120).duration(420)} style={styles.stats}>
-              <View style={styles.statTile}>
-                <Text style={styles.statValue}>{completed.length}</Text>
-                <Text style={styles.statLabel}>Paid trips</Text>
-              </View>
-              <View style={[styles.statTile, styles.statTileAccent]}>
-                <Text style={styles.statValue}>GH₵{totalSpent.toFixed(0)}</Text>
-                <Text style={styles.statLabel}>Spent</Text>
-              </View>
-            </Animated.View>
+            <UserAvatar
+              name={passenger?.name}
+              uri={passenger?.avatar}
+              size={86}
+              radius={28}
+            />
+            <View style={styles.cameraBadge}>
+              {uploading ? (
+                <ActivityIndicator size="small" color={COLORS.ink} />
+              ) : (
+                <Ionicons name="camera" size={13} color={COLORS.ink} />
+              )}
+            </View>
+          </TouchableOpacity>
 
-            <Animated.View entering={FadeInUp.delay(180).duration(420)} style={styles.panel}>
-              <Text style={styles.panelTitle}>Account</Text>
-              <DetailRow
-                icon="call-outline"
-                label="Phone"
-                value={passenger?.phone?.trim() ? passenger.phone : 'Not set'}
-                muted={!passenger?.phone?.trim()}
-              />
-              <View style={styles.panelRule} />
-              <DetailRow
-                icon="mail-outline"
-                label="Email"
-                value={passenger?.email || 'Not set'}
-                muted={!passenger?.email}
-              />
-            </Animated.View>
+          <Text style={styles.heroName} numberOfLines={1}>
+            {passenger?.name || 'Passenger'}
+          </Text>
+          <Text style={styles.heroMeta}>Passenger</Text>
 
-            <Animated.View entering={FadeInUp.delay(240).duration(420)} style={styles.actions}>
-              <TouchableOpacity
-                style={styles.primaryAction}
-                onPress={() => navigation.navigate('Settings')}
-                activeOpacity={0.85}
-              >
-                <View style={styles.actionIcon}>
-                  <Ionicons name="settings-outline" size={18} color={COLORS.ink} />
-                </View>
-                <View style={styles.actionCopy}>
-                  <Text style={styles.actionTitle}>Settings</Text>
-                  <Text style={styles.actionHint}>Support and app info</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
-              </TouchableOpacity>
+          <View style={styles.heroMetrics}>
+            <View style={styles.heroMetric}>
+              <Text style={styles.metricLabel}>Paid trips</Text>
+              <Text style={styles.metricValue}>{completed.length}</Text>
+            </View>
+            <View style={styles.heroMetric}>
+              <Text style={styles.metricLabel}>Spent</Text>
+              <Text style={styles.metricValue}>GH₵{totalSpent.toFixed(0)}</Text>
+            </View>
+          </View>
+        </Animated.View>
+      }
+      heroBottom={SPACING.lg}
+    >
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: tabPad }]}
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
+        <Animated.View entering={FadeInUp.delay(120).duration(420)} style={styles.panel}>
+          <Text style={styles.panelTitle}>Account</Text>
+          <DetailRow
+            icon="call-outline"
+            label="Phone"
+            value={passenger?.phone?.trim() ? passenger.phone : 'Not set'}
+            muted={!passenger?.phone?.trim()}
+          />
+          <View style={styles.panelRule} />
+          <DetailRow
+            icon="mail-outline"
+            label="Email"
+            value={passenger?.email || 'Not set'}
+            muted={!passenger?.email}
+          />
+        </Animated.View>
 
-              <TouchableOpacity
-                style={styles.logoutBtn}
-                onPress={handleLogout}
-                activeOpacity={0.8}
-              >
-                <Ionicons name="log-out-outline" size={18} color={COLORS.error} />
-                <Text style={styles.logoutText}>Log out</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          </ScrollView>
-        </SafeAreaView>
-      </View>
-    </View>
+        <Animated.View entering={FadeInUp.delay(180).duration(420)} style={styles.actions}>
+          <TouchableOpacity
+            style={styles.primaryAction}
+            onPress={() => navigation.navigate('EditProfile')}
+            activeOpacity={0.85}
+          >
+            <View style={styles.actionIcon}>
+              <Ionicons name="create-outline" size={18} color={COLORS.ink} />
+            </View>
+            <View style={styles.actionCopy}>
+              <Text style={styles.actionTitle}>Edit profile</Text>
+              <Text style={styles.actionHint}>Name and phone</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.primaryAction}
+            onPress={() => navigation.navigate('Settings')}
+            activeOpacity={0.85}
+          >
+            <View style={styles.actionIcon}>
+              <Ionicons name="settings-outline" size={18} color={COLORS.ink} />
+            </View>
+            <View style={styles.actionCopy}>
+              <Text style={styles.actionTitle}>Settings</Text>
+              <Text style={styles.actionHint}>Support and app info</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.logoutBtn}
+            onPress={handleLogout}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="log-out-outline" size={18} color={COLORS.error} />
+            <Text style={styles.logoutText}>Log out</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </ScrollView>
+    </InkSheetScreen>
   );
 };
 
