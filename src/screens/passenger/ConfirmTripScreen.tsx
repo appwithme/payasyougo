@@ -6,6 +6,8 @@ import {
   ScrollView,
   StatusBar,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +22,12 @@ import { COLORS, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { MoMoProvider } from '../../types';
 
+const PROVIDERS: { id: MoMoProvider; name: string; short: string; tint: string }[] = [
+  { id: 'MTN', name: 'MTN MoMo', short: 'MTN', tint: '#FFCC00' },
+  { id: 'VODAFONE', name: 'Telecel Cash', short: 'Telecel', tint: '#E60000' },
+  { id: 'AIRTELTIGO', name: 'AT Money', short: 'AT', tint: '#003399' },
+];
+
 const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any }) => {
   const { from, to, fare, driver } = route.params;
   const { currentUser, refreshTrips } = useApp();
@@ -30,24 +38,20 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
   const [loadingStep, setLoadingStep] = useState('');
   const [error, setError] = useState('');
 
-  const providers: { id: MoMoProvider; name: string; color: string }[] = [
-    { id: 'MTN', name: 'MTN MoMo', color: '#FFCC00' },
-    { id: 'VODAFONE', name: 'Telecel Cash', color: '#E60000' },
-    { id: 'AIRTELTIGO', name: 'AT Money', color: '#003399' },
-  ];
+  const fareLabel = `GH₵${Number(fare).toFixed(2)}`;
 
   const handlePay = async () => {
     if (!momoPhone.trim() || momoPhone.length < 9) {
-      setError('Please enter a valid Mobile Money number');
+      setError('Enter a valid Mobile Money number');
       return;
     }
     if (!currentUser) {
-      setError('User session expired. Please log in again.');
+      setError('Session expired. Please log in again.');
       return;
     }
     setError('');
     setLoading(true);
-    setLoadingStep(`Authorizing on ${provider}...`);
+    setLoadingStep('Waiting for MoMo approval…');
 
     try {
       const paymentResult = await paymentService.processMoMoPayment({
@@ -75,170 +79,249 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
       });
     } catch (err: any) {
       setLoading(false);
-      setError(err?.message || 'An unexpected error occurred.');
+      setError(err?.message || 'Something went wrong. Try again.');
     }
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <StatusBar barStyle="dark-content" />
       <Header title="Confirm payment" onBack={() => navigation.goBack()} transparent />
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Animated.View entering={FadeInDown.duration(350)} style={styles.section}>
-          <Text style={styles.sectionLabel}>Trip</Text>
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryRoute}>
-              {from} → {to}
-            </Text>
-            <Text style={styles.summaryFare}>GH₵{fare}</Text>
-          </View>
-        </Animated.View>
-
-        <Animated.View entering={FadeInUp.delay(60).duration(400)} style={styles.section}>
-          <Text style={styles.sectionLabel}>Driver</Text>
-          <DriverCard driver={driver} />
-        </Animated.View>
-
-        <Animated.View entering={FadeInUp.delay(120).duration(400)} style={styles.section}>
-          <Text style={styles.sectionLabel}>Mobile money</Text>
-          <View style={styles.providerGrid}>
-            {providers.map((p) => (
-              <TouchableOpacity
-                key={p.id}
-                style={[
-                  styles.providerBtn,
-                  provider === p.id && styles.providerBtnActive,
-                  provider === p.id && { borderColor: p.color },
-                ]}
-                onPress={() => setProvider(p.id)}
-                activeOpacity={0.8}
-              >
-                <View
-                  style={[
-                    styles.radio,
-                    provider === p.id && { borderColor: p.color },
-                  ]}
-                >
-                  {provider === p.id && (
-                    <View style={[styles.radioFill, { backgroundColor: p.color }]} />
-                  )}
-                </View>
-                <Text style={styles.providerName}>{p.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          <Input
-            label="Mobile money number"
-            placeholder="+233 XX XXX XXXX"
-            value={momoPhone}
-            onChangeText={setMomoPhone}
-            keyboardType="phone-pad"
-            iconName="call-outline"
-            style={{ marginTop: SPACING.md }}
-          />
-
-          <View style={styles.securityNote}>
-            <Ionicons name="lock-closed-outline" size={16} color={COLORS.textSecondary} />
-            <Text style={styles.securityText}>
-              A prompt will appear on your phone. We never store your PIN.
-            </Text>
-          </View>
-        </Animated.View>
-
-        {!!error && (
-          <Animated.View entering={FadeInDown.duration(250)} style={styles.errorBox}>
-            <Ionicons name="alert-circle" size={20} color={COLORS.error} />
-            <Text style={styles.errorText}>{error}</Text>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={8}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Animated.View entering={FadeInDown.duration(350)} style={styles.amountHero}>
+            <Text style={styles.amountLabel}>You are paying</Text>
+            <Text style={styles.amountValue}>{fareLabel}</Text>
+            <Text style={styles.amountHint}>to {driver?.name ?? 'driver'}</Text>
           </Animated.View>
-        )}
 
-        <Animated.View entering={FadeInUp.delay(180).duration(400)} style={styles.footer}>
+          <Animated.View entering={FadeInUp.delay(40).duration(400)} style={styles.card}>
+            <Text style={styles.cardLabel}>Route</Text>
+            <View style={styles.stops}>
+              <View style={styles.stopRow}>
+                <View style={styles.iconWell}>
+                  <Ionicons name="locate-outline" size={14} color={COLORS.textSecondary} />
+                </View>
+                <View style={styles.stopCopy}>
+                  <Text style={styles.stopCaption}>From</Text>
+                  <Text style={styles.stopText} numberOfLines={1}>
+                    {from}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.routeLine} />
+              <View style={styles.stopRow}>
+                <View style={styles.iconWell}>
+                  <Ionicons name="flag-outline" size={14} color={COLORS.textSecondary} />
+                </View>
+                <View style={styles.stopCopy}>
+                  <Text style={styles.stopCaption}>To</Text>
+                  <Text style={styles.stopText} numberOfLines={1}>
+                    {to}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </Animated.View>
+
+          <Animated.View entering={FadeInUp.delay(80).duration(400)} style={styles.block}>
+            <Text style={styles.cardLabel}>Paying</Text>
+            <DriverCard driver={driver} />
+          </Animated.View>
+
+          <Animated.View entering={FadeInUp.delay(120).duration(400)} style={styles.block}>
+            <Text style={styles.cardLabel}>Pay with</Text>
+            <View style={styles.providerRow}>
+              {PROVIDERS.map((p) => {
+                const active = provider === p.id;
+                return (
+                  <TouchableOpacity
+                    key={p.id}
+                    style={[styles.providerChip, active && styles.providerChipActive]}
+                    onPress={() => setProvider(p.id)}
+                    activeOpacity={0.85}
+                  >
+                    <View
+                      style={[
+                        styles.providerDot,
+                        { backgroundColor: p.tint },
+                        active && styles.providerDotActive,
+                      ]}
+                    />
+                    <Text style={[styles.providerText, active && styles.providerTextActive]}>
+                      {p.short}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <Input
+              label="Mobile money number"
+              placeholder="+233 XX XXX XXXX"
+              value={momoPhone}
+              onChangeText={(t) => {
+                setMomoPhone(t);
+                if (error) setError('');
+              }}
+              keyboardType="phone-pad"
+              iconName="call-outline"
+              style={{ marginTop: SPACING.md }}
+            />
+
+            <View style={styles.securityNote}>
+              <Ionicons name="lock-closed-outline" size={14} color={COLORS.textMuted} />
+              <Text style={styles.securityText}>
+                Approve the prompt on your phone. We never store your PIN.
+              </Text>
+            </View>
+          </Animated.View>
+
+          {!!error && (
+            <Animated.View entering={FadeInDown.duration(220)} style={styles.errorBox}>
+              <Ionicons name="alert-circle" size={18} color={COLORS.error} />
+              <Text style={styles.errorText}>{error}</Text>
+            </Animated.View>
+          )}
+        </ScrollView>
+
+        <Animated.View entering={FadeInUp.delay(160).duration(400)} style={styles.footer}>
           <Button
-            title={loading ? loadingStep : `Pay GH₵${fare} with MoMo`}
+            title={loading ? loadingStep : `Pay ${fareLabel}`}
+            variant="ink"
             onPress={handlePay}
             loading={loading}
-            style={styles.btn}
+            disabled={loading}
+            icon={
+              !loading ? (
+                <Ionicons name="phone-portrait-outline" size={18} color={COLORS.white} />
+              ) : undefined
+            }
           />
         </Animated.View>
-      </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  scroll: { padding: SPACING.lg, paddingBottom: 40 },
-
-  section: {
-    marginBottom: SPACING.xl,
-    gap: SPACING.sm,
+  flex: { flex: 1 },
+  scroll: {
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.lg,
+    gap: SPACING.lg,
   },
-  sectionLabel: { ...type.label },
 
-  summaryCard: {
+  amountHero: {
+    alignItems: 'center',
+    paddingTop: SPACING.sm,
+    paddingBottom: SPACING.xs,
+    gap: 4,
+  },
+  amountLabel: { ...type.caption },
+  amountValue: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 40,
+    color: COLORS.ink,
+    letterSpacing: -1.2,
+  },
+  amountHint: { ...type.body, color: COLORS.textSecondary },
+
+  card: {
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     borderWidth: 1,
     borderColor: COLORS.border,
+    gap: SPACING.md,
   },
-  summaryRoute: { ...type.bodyBold, flex: 1, marginRight: SPACING.md },
-  summaryFare: {
-    fontFamily: 'Sora_700Bold',
-    fontSize: 20,
-    color: COLORS.ink,
-  },
+  cardLabel: { ...type.label },
+  block: { gap: SPACING.sm },
 
-  providerGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.sm,
-  },
-  providerBtn: {
+  stops: { gap: 0 },
+  stopRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
+  },
+  iconWell: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: COLORS.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stopCopy: { flex: 1, gap: 1 },
+  stopCaption: { ...type.caption, fontSize: 11 },
+  stopText: { ...type.bodyBold },
+  routeLine: {
+    width: 2,
+    height: 14,
+    backgroundColor: COLORS.border,
+    marginLeft: 15,
+    marginVertical: 4,
+    borderRadius: 1,
+  },
+
+  providerRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  providerChip: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
     backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: COLORS.border,
     borderRadius: RADIUS.md,
-    padding: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    gap: SPACING.sm,
+    paddingVertical: 14,
   },
-  providerBtnActive: {
-    backgroundColor: COLORS.surfaceAlt,
+  providerChipActive: {
+    backgroundColor: COLORS.ink,
+    borderColor: COLORS.ink,
   },
-  radio: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 2,
-    borderColor: COLORS.borderStrong,
-    alignItems: 'center',
-    justifyContent: 'center',
+  providerDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    opacity: 0.9,
   },
-  radioFill: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+  providerDotActive: {
+    borderWidth: 1.5,
+    borderColor: COLORS.white,
   },
-  providerName: { ...type.label, fontSize: 13 },
+  providerText: {
+    ...type.label,
+    fontSize: 13,
+    color: COLORS.textSecondary,
+  },
+  providerTextActive: {
+    color: COLORS.white,
+  },
 
   securityNote: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: SPACING.sm,
-    marginTop: SPACING.sm,
+    gap: 8,
+    marginTop: 4,
   },
   securityText: {
     ...type.caption,
     flex: 1,
-    color: COLORS.textSecondary,
   },
 
   errorBox: {
@@ -248,9 +331,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.errorLight,
     borderRadius: RADIUS.md,
     padding: SPACING.md,
-    marginBottom: SPACING.lg,
     borderWidth: 1,
-    borderColor: COLORS.error + '44',
+    borderColor: COLORS.error + '33',
   },
   errorText: {
     ...type.caption,
@@ -260,9 +342,13 @@ const styles = StyleSheet.create({
   },
 
   footer: {
-    marginTop: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.sm,
+    paddingBottom: SPACING.md,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    backgroundColor: COLORS.background,
   },
-  btn: { marginBottom: SPACING.md },
 });
 
 export default ConfirmTripScreen;

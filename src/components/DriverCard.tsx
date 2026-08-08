@@ -20,9 +20,14 @@ const DriverCard = ({ driver }: { driver: Driver | null }) => {
 
   const full = Math.floor(driver.rating ?? 0);
   const hasRatings = (driver.ratingCount ?? 0) > 0;
-  const ratingLabel = hasRatings ? Number(driver.rating).toFixed(1) : 'New';
+  const ratingLabel = hasRatings ? Number(driver.rating).toFixed(1) : null;
   const trips = driver.totalTrips ?? 0;
   const tripLabel = trips === 1 ? '1 trip' : `${trips} trips`;
+  const metaBits = [
+    ratingLabel ? `${ratingLabel}★` : null,
+    tripLabel,
+    driver.id,
+  ].filter(Boolean);
 
   return (
     <>
@@ -40,16 +45,12 @@ const DriverCard = ({ driver }: { driver: Driver | null }) => {
           <Text style={styles.name} numberOfLines={1}>
             {driver.name}
           </Text>
-          <Text style={styles.hint}>Tap for driver details</Text>
-        </View>
-
-        <View style={styles.trailing}>
-          <View style={styles.ratingPill}>
-            {hasRatings ? (
-              <Ionicons name="star" size={11} color={COLORS.primaryDark} />
-            ) : null}
-            <Text style={styles.ratingPillText}>{ratingLabel}</Text>
-          </View>
+          <Text style={styles.meta} numberOfLines={1}>
+            {driver.vehicle || 'Campus driver'}
+          </Text>
+          <Text style={styles.hint} numberOfLines={1}>
+            {metaBits.join(' · ')}
+          </Text>
         </View>
       </Pressable>
 
@@ -78,10 +79,7 @@ const DriverCard = ({ driver }: { driver: Driver | null }) => {
                 </Text>
               </View>
               <Text style={styles.sheetName}>{driver.name}</Text>
-              <View style={styles.idBadge}>
-                <Ionicons name="id-card-outline" size={13} color={COLORS.ink} />
-                <Text style={styles.idBadgeText}>{driver.id}</Text>
-              </View>
+              <Text style={styles.sheetId}>{driver.id}</Text>
             </View>
 
             <View style={styles.starsRow}>
@@ -182,40 +180,22 @@ const styles = StyleSheet.create({
     borderColor: COLORS.borderStrong,
   },
   avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    width: 48,
+    height: 48,
+    borderRadius: 16,
     backgroundColor: COLORS.ink,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
     fontFamily: 'Sora_700Bold',
-    fontSize: 17,
+    fontSize: 18,
     color: COLORS.white,
   },
   info: { flex: 1, gap: 2 },
   name: { ...type.label, fontSize: 16 },
-  hint: { ...type.caption, fontSize: 12 },
-  trailing: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  ratingPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    backgroundColor: COLORS.primaryMuted,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: RADIUS.sm,
-  },
-  ratingPillText: {
-    fontFamily: 'DMSans_700Bold',
-    fontSize: 12,
-    color: COLORS.ink,
-  },
+  meta: { ...type.caption, color: COLORS.textSecondary },
+  hint: { ...type.caption, fontSize: 12, marginTop: 2 },
 
   modalRoot: {
     flex: 1,
@@ -244,7 +224,7 @@ const styles = StyleSheet.create({
   },
   sheetHeader: {
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
     marginBottom: SPACING.md,
   },
   sheetAvatar: {
@@ -264,22 +244,11 @@ const styles = StyleSheet.create({
     ...type.heading,
     textAlign: 'center',
   },
-  idBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: COLORS.surfaceAlt,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: RADIUS.full,
-  },
-  idBadgeText: {
+  sheetId: {
     fontFamily: 'DMSans_700Bold',
     fontSize: 13,
-    color: COLORS.ink,
-    letterSpacing: 0.3,
+    color: COLORS.textSecondary,
+    letterSpacing: 0.4,
   },
   starsRow: {
     flexDirection: 'row',
