@@ -90,6 +90,14 @@ export async function fetchMe(): Promise<AuthUser> {
   return res.user;
 }
 
+export async function updateAvatar(avatarUrl: string): Promise<AuthUser> {
+  const res = await apiRequest<{ user: AuthUser }>('/api/auth/me/avatar', {
+    method: 'PATCH',
+    body: { avatarUrl },
+  });
+  return res.user;
+}
+
 export async function logout(): Promise<void> {
   await setToken(null);
 }
