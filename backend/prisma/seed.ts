@@ -41,8 +41,8 @@ const ROUTES = FARE_EDGES.flatMap(([a, b, fare]) => [
 const TEST_PASSENGER = {
   phone: '0550000111',
   password: 'admin123',
-  fullName: 'Admin Passenger',
-  email: 'admin.passenger@payasyougo.com',
+  fullName: 'Kofi Mensah',
+  email: 'kofi.mensah@payasyougo.com',
 };
 
 const TEST_DRIVERS = [
