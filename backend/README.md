@@ -16,9 +16,10 @@ cp .env.example .env
 
 Fill in:
 
-- `DATABASE_URL` — Neon pooled URL
+- `DATABASE_URL` — Neon pooled URL with `sslmode=require&connect_timeout=15` (avoid `channel_binding=require`)
 - `JWT_SECRET` — long random string
 - `PAYSTACK_SECRET_KEY` / `PAYSTACK_PUBLIC_KEY` — from [Paystack test keys](https://dashboard.paystack.com/#/settings/developers)
+- Optional Google: `GOOGLE_WEB_CLIENT_ID` + `GOOGLE_CLIENT_SECRET`
 
 ## 3. Install, migrate, seed
 
@@ -31,12 +32,12 @@ npm run prisma:seed
 
 Seed creates UCC routes plus QA users:
 
-| Role | Phone | Password | Driver ID |
-|------|-------|----------|-----------|
-| Passenger | `0550000111` | `admin123` | — |
-| Driver | `0240000001` | `driver123` | `DRV001` |
-| Driver | `0200000002` | `driver456` | `DRV002` |
-| Driver | `0240000111` | `admin123` | `DRV100` |
+| Role | Name | Phone | Password | Driver ID |
+|------|------|-------|----------|-----------|
+| Passenger | Kofi Mensah | `0550000111` | `admin123` | — |
+| Driver | Kwame Owusu | `0240000001` | `driver123` | `DRV001` |
+| Driver | Ama Asantewaa | `0200000002` | `driver456` | `DRV002` |
+| Driver | Kwame Asiamah | `0240000111` | `admin123` | `DRV100` |
 
 ## 4. Run API
 
