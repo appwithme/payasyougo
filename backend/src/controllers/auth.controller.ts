@@ -4,6 +4,13 @@ import { z } from 'zod';
 import { prisma } from '../lib/prisma';
 import { signToken } from '../utils/jwt';
 import { nextDriverCode, normalizePhone } from '../utils/helpers';
+import {
+  isValidGhanaCardFormat,
+  isValidLicenseFormat,
+  normalizeGhanaCard,
+  normalizeLicense,
+  verifyIdentityDocument,
+} from '../utils/ghanaId';
 import { AppError } from '../middleware/errorHandler';
 import { decimalToNumber } from '../services/wallet';
 import { verifyGoogleIdToken, GoogleProfile } from '../services/googleAuth';
@@ -15,6 +22,13 @@ const registerSchema = z.object({
   email: z.string().email().optional().or(z.literal('')),
   password: z.string().min(6),
   vehicleInfo: z.string().optional(),
+  ghanaCardNumber: z.string().optional(),
+  licenseNumber: z.string().optional(),
+});
+
+const verifyIdSchema = z.object({
+  type: z.enum(['ghana_card', 'license']),
+  number: z.string().min(4),
 });
 
 const loginSchema = z.object({
@@ -51,6 +65,10 @@ function mapUser(user: {
     id: string;
     uniqueCode: string;
     vehicleInfo: string;
+    ghanaCardNumber?: string | null;
+    ghanaCardVerified?: boolean;
+    licenseNumber?: string | null;
+    licenseVerified?: boolean;
     rating: number;
     ratingCount: number;
     walletBalance: any;
@@ -67,6 +85,10 @@ function mapUser(user: {
       phone: user.phone || '',
       email: user.email || '',
       vehicle: user.driver.vehicleInfo,
+      ghanaCardNumber: user.driver.ghanaCardNumber || undefined,
+      ghanaCardVerified: Boolean(user.driver.ghanaCardVerified),
+      licenseNumber: user.driver.licenseNumber || undefined,
+      licenseVerified: Boolean(user.driver.licenseVerified),
       rating: user.driver.rating,
       ratingCount: user.driver.ratingCount,
       walletBalance: decimalToNumber(user.driver.walletBalance),
@@ -87,6 +109,40 @@ function mapUser(user: {
   };
 }
 
+export async function verifyDriverId(body: unknown) {
+  const input = verifyIdSchema.parse(body);
+  // Small delay so the app can show a verifying state
+  await new Promise((r) => setTimeout(r, 700));
+
+  const result = verifyIdentityDocument(input.type, input.number);
+  if (!result.verified) {
+    throw new AppError(result.message, 400);
+  }
+
+  if (input.type === 'ghana_card') {
+    const taken = await prisma.driver.findFirst({
+      where: { ghanaCardNumber: result.normalized },
+    });
+    if (taken) {
+      throw new AppError('This Ghana Card is already registered to another driver', 409);
+    }
+  } else {
+    const taken = await prisma.driver.findFirst({
+      where: { licenseNumber: result.normalized },
+    });
+    if (taken) {
+      throw new AppError('This driver licence is already registered to another driver', 409);
+    }
+  }
+
+  return {
+    verified: true,
+    type: input.type,
+    normalized: result.normalized,
+    message: result.message,
+  };
+}
+
 export async function register(body: unknown) {
   const input = registerSchema.parse(body);
   const phone = normalizePhone(input.phone);
@@ -96,6 +152,37 @@ export async function register(body: unknown) {
 
   if (input.role === 'DRIVER' && !input.vehicleInfo?.trim()) {
     throw new AppError('Vehicle info is required for drivers');
+  }
+
+  let ghanaCardNumber: string | undefined;
+  let licenseNumber: string | undefined;
+
+  if (input.role === 'DRIVER') {
+    if (!input.ghanaCardNumber?.trim()) {
+      throw new AppError('Ghana Card number is required for drivers');
+    }
+    if (!input.licenseNumber?.trim()) {
+      throw new AppError('Driver licence number is required for drivers');
+    }
+
+    ghanaCardNumber = normalizeGhanaCard(input.ghanaCardNumber);
+    licenseNumber = normalizeLicense(input.licenseNumber);
+
+    if (!isValidGhanaCardFormat(ghanaCardNumber)) {
+      throw new AppError('Invalid Ghana Card number. Use format GHA-123456789-0');
+    }
+    if (!isValidLicenseFormat(licenseNumber)) {
+      throw new AppError('Invalid driver licence number');
+    }
+
+    const cardTaken = await prisma.driver.findFirst({ where: { ghanaCardNumber } });
+    if (cardTaken) {
+      throw new AppError('This Ghana Card is already registered to another driver', 409);
+    }
+    const licenseTaken = await prisma.driver.findFirst({ where: { licenseNumber } });
+    if (licenseTaken) {
+      throw new AppError('This driver licence is already registered to another driver', 409);
+    }
   }
 
   const passwordHash = await bcrypt.hash(input.password, 10);
@@ -114,6 +201,10 @@ export async function register(body: unknown) {
               create: {
                 uniqueCode: uniqueCode!,
                 vehicleInfo: input.vehicleInfo!.trim(),
+                ghanaCardNumber,
+                ghanaCardVerified: true,
+                licenseNumber,
+                licenseVerified: true,
               },
             },
           }
