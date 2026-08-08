@@ -19,9 +19,11 @@ import UserAvatar from '../../components/UserAvatar';
 import { COLORS, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { Passenger } from '../../types';
+import { useTabBarPadding } from '../../navigation/FloatingTabBar';
 
 const PassengerProfileScreen = ({ navigation }: { navigation: any }) => {
   const { currentUser, logout, passengerTrips, updateAvatar } = useApp();
+  const tabPad = useTabBarPadding();
   const passenger = currentUser as Passenger | null;
   const totalSpent = passengerTrips.reduce((sum, t) => sum + t.amount, 0);
   const [uploading, setUploading] = useState(false);
@@ -118,7 +120,10 @@ const PassengerProfileScreen = ({ navigation }: { navigation: any }) => {
       <StatusBar barStyle="dark-content" />
       <Header title="Profile" onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: tabPad }]}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.avatarSection}>
           <TouchableOpacity
             onPress={handleChangePhoto}
@@ -182,7 +187,7 @@ const PassengerProfileScreen = ({ navigation }: { navigation: any }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  scroll: { padding: SPACING.lg, paddingBottom: 100, gap: SPACING.xl },
+  scroll: { padding: SPACING.lg, gap: SPACING.xl },
 
   avatarSection: {
     alignItems: 'center',
