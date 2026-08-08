@@ -13,7 +13,6 @@ import { COLORS } from '../theme/colors';
 
 const { width: W } = Dimensions.get('window');
 const SCENE_H = Math.min(W * 0.92, 340);
-const ROAD_Y = SCENE_H * 0.72;
 
 const BUILDINGS_BACK = [
   { left: 8, w: 36, h: 70, color: '#C5D6EA' },
@@ -42,9 +41,14 @@ const BUILDINGS_FRONT = [
 
 type Props = {
   style?: object;
+  /** Smaller scene for splash */
+  compact?: boolean;
 };
 
-export default function CampusRideScene({ style }: Props) {
+export default function CampusRideScene({ style, compact }: Props) {
+  const sceneH = compact ? Math.min(W * 0.7, 260) : SCENE_H;
+  const roadY = sceneH * 0.72;
+
   const clouds = useSharedValue(0);
   const skyline = useSharedValue(0);
   const carX = useSharedValue(-90);
@@ -111,7 +115,7 @@ export default function CampusRideScene({ style }: Props) {
   }));
 
   return (
-    <View style={[styles.scene, style]}>
+    <View style={[styles.scene, { height: sceneH }, style]}>
       {/* Sky wash */}
       <View style={styles.skyFade} />
 
@@ -131,7 +135,13 @@ export default function CampusRideScene({ style }: Props) {
       </Animated.View>
 
       {/* Distant skyline — medium parallax */}
-      <Animated.View style={[styles.skyline, skylineStyle]}>
+      <Animated.View
+        style={[
+          styles.skyline,
+          { bottom: sceneH - roadY + 8, height: compact ? 100 : 140 },
+          skylineStyle,
+        ]}
+      >
         {[0, W * 0.85].map((offset) => (
           <View key={offset} style={[styles.skylineStrip, { left: offset }]}>
             {BUILDINGS_BACK.map((b, i) => (
@@ -142,7 +152,7 @@ export default function CampusRideScene({ style }: Props) {
                   {
                     left: b.left,
                     width: b.w,
-                    height: b.h,
+                    height: compact ? b.h * 0.75 : b.h,
                     backgroundColor: b.color,
                     bottom: 0,
                   },
@@ -162,7 +172,7 @@ export default function CampusRideScene({ style }: Props) {
                   {
                     left: b.left,
                     width: b.w,
-                    height: b.h,
+                    height: compact ? b.h * 0.75 : b.h,
                     backgroundColor: b.color,
                     bottom: 0,
                     opacity: 0.92,
@@ -175,19 +185,31 @@ export default function CampusRideScene({ style }: Props) {
       </Animated.View>
 
       {/* Ground / road plane */}
-      <View style={styles.ground}>
+      <View style={[styles.ground, { height: sceneH - roadY + 28 }]}>
         <View style={styles.roadLine} />
       </View>
 
       {/* Foliage accent */}
-      <Animated.View style={[styles.foliage, foliageStyle]}>
+      <Animated.View
+        style={[
+          styles.foliage,
+          { bottom: sceneH - roadY - 10 },
+          foliageStyle,
+        ]}
+      >
         <View style={[styles.leaf, styles.leafA]} />
         <View style={[styles.leaf, styles.leafB]} />
         <View style={[styles.leaf, styles.leafC]} />
       </Animated.View>
 
       {/* Taxi driving across */}
-      <Animated.View style={[styles.carWrap, carStyle]}>
+      <Animated.View
+        style={[
+          styles.carWrap,
+          { bottom: sceneH - roadY - 6 },
+          carStyle,
+        ]}
+      >
         <CampusTaxi />
       </Animated.View>
     </View>
@@ -240,7 +262,6 @@ function CampusTaxi() {
 const styles = StyleSheet.create({
   scene: {
     width: '100%',
-    height: SCENE_H,
     overflow: 'hidden',
   },
   skyFade: {
@@ -268,15 +289,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: SCENE_H - ROAD_Y + 8,
-    height: 140,
     width: W * 2,
   },
   skylineStrip: {
     position: 'absolute',
     bottom: 0,
     width: W,
-    height: 140,
+    height: '100%',
   },
   building: {
     position: 'absolute',
@@ -300,7 +319,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: SCENE_H - ROAD_Y + 28,
     backgroundColor: '#7FA0C4',
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
@@ -317,7 +335,6 @@ const styles = StyleSheet.create({
   foliage: {
     position: 'absolute',
     left: -6,
-    bottom: SCENE_H - ROAD_Y - 10,
     width: 70,
     height: 90,
     zIndex: 2,
@@ -354,7 +371,6 @@ const styles = StyleSheet.create({
   },
   carWrap: {
     position: 'absolute',
-    bottom: SCENE_H - ROAD_Y - 6,
     left: 0,
     zIndex: 3,
   },

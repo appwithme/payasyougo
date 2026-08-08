@@ -1,234 +1,133 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   StatusBar,
   Dimensions,
-  Animated,
-  Easing,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated, {
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import CustomBrandMark from '../../components/CustomBrandMark';
 import { COLORS } from '../../theme/colors';
 
 const { width: W, height: H } = Dimensions.get('window');
 
-/**
- * Custom modern splash — hand-crafted mark, editorial layout.
- * Logo top → name under logo (Taxi Rider hierarchy).
- * ~6s brand dwell — no progress bar.
- */
-const T = {
-  nameAt: 1100,
-  tagAt: 1800,
-  exitAt: 5600,
-  exitDur: 480,
-  safety: 6500,
-};
+/** Short identity beat — welcome owns the campus scene + role pick */
+const EXIT_AT = 2800;
+const EXIT_DUR = 380;
+const SAFETY = 3600;
 
 type Props = { onFinish: () => void };
 
 export default function SplashScreen({ onFinish }: Props) {
-  const root = useRef(new Animated.Value(1)).current;
-  const markOp = useRef(new Animated.Value(0)).current;
-  const markScale = useRef(new Animated.Value(0.72)).current;
-  const markY = useRef(new Animated.Value(40)).current;
-  const ring = useRef(new Animated.Value(0)).current;
-  const nameOp = useRef(new Animated.Value(0)).current;
-  const nameY = useRef(new Animated.Value(22)).current;
-  const tagOp = useRef(new Animated.Value(0)).current;
-  const floatY = useRef(new Animated.Value(0)).current;
-  const line = useRef(new Animated.Value(0)).current;
+  const rootOp = useSharedValue(1);
+  const markScale = useSharedValue(0.78);
+  const markOp = useSharedValue(0);
+  const nameOp = useSharedValue(0);
+  const nameY = useSharedValue(16);
+  const ring = useSharedValue(0);
+  const floatY = useSharedValue(0);
 
   useEffect(() => {
-    // Mark entrance
-    Animated.parallel([
-      Animated.timing(markOp, {
-        toValue: 1,
-        duration: 520,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-      Animated.spring(markScale, {
-        toValue: 1,
-        friction: 6,
-        tension: 58,
-        useNativeDriver: true,
-      }),
-      Animated.spring(markY, {
-        toValue: 0,
-        friction: 7,
-        tension: 55,
-        useNativeDriver: true,
-      }),
-      Animated.timing(ring, {
-        toValue: 1,
-        duration: 900,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(floatY, {
-            toValue: -7,
-            duration: 1700,
-            easing: Easing.inOut(Easing.sin),
-            useNativeDriver: true,
-          }),
-          Animated.timing(floatY, {
-            toValue: 0,
-            duration: 1700,
-            easing: Easing.inOut(Easing.sin),
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-    });
+    markOp.value = withTiming(1, { duration: 480, easing: Easing.out(Easing.cubic) });
+    markScale.value = withTiming(1, { duration: 640, easing: Easing.out(Easing.back(1.2)) });
 
-    // Decorative route line draws under mark
-    Animated.timing(line, {
-      toValue: 1,
-      duration: 1400,
-      delay: 400,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: false,
-    }).start();
+    ring.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 1100, easing: Easing.out(Easing.cubic) }),
+        withTiming(0, { duration: 0 })
+      ),
+      2,
+      false
+    );
 
-    // Name under logo
-    const nameT = setTimeout(() => {
-      Animated.parallel([
-        Animated.timing(nameOp, {
-          toValue: 1,
-          duration: 560,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.spring(nameY, {
-          toValue: 0,
-          friction: 8,
-          tension: 65,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }, T.nameAt);
+    nameOp.value = withDelay(420, withTiming(1, { duration: 420 }));
+    nameY.value = withDelay(
+      420,
+      withTiming(0, { duration: 480, easing: Easing.out(Easing.cubic) })
+    );
 
-    const tagT = setTimeout(() => {
-      Animated.timing(tagOp, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }).start();
-    }, T.tagAt);
+    floatY.value = withDelay(
+      700,
+      withRepeat(
+        withSequence(
+          withTiming(-6, { duration: 1400, easing: Easing.inOut(Easing.sin) }),
+          withTiming(0, { duration: 1400, easing: Easing.inOut(Easing.sin) })
+        ),
+        -1,
+        false
+      )
+    );
 
-    const exitT = setTimeout(() => {
-      Animated.timing(root, {
-        toValue: 0,
-        duration: T.exitDur,
-        easing: Easing.in(Easing.cubic),
-        useNativeDriver: true,
-      }).start(({ finished }) => {
-        if (finished) onFinish();
-      });
-    }, T.exitAt);
+    rootOp.value = withDelay(
+      EXIT_AT,
+      withTiming(0, { duration: EXIT_DUR, easing: Easing.in(Easing.cubic) })
+    );
 
-    const safety = setTimeout(() => onFinish(), T.safety);
-
+    const exitT = setTimeout(() => onFinish(), EXIT_AT + EXIT_DUR);
+    const safety = setTimeout(() => onFinish(), SAFETY);
     return () => {
-      clearTimeout(nameT);
-      clearTimeout(tagT);
       clearTimeout(exitT);
       clearTimeout(safety);
     };
   }, []);
 
-  const lineW = line.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, Math.min(W * 0.28, 120)],
-  });
+  const rootStyle = useAnimatedStyle(() => ({ opacity: rootOp.value }));
 
-  const ringScale = ring.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.55, 1.15],
-  });
-  const ringOp = ring.interpolate({
-    inputRange: [0, 0.3, 1],
-    outputRange: [0, 0.35, 0],
-  });
+  const markStyle = useAnimatedStyle(() => ({
+    opacity: markOp.value,
+    transform: [{ translateY: floatY.value }, { scale: markScale.value }],
+  }));
+
+  const ringStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(ring.value, [0, 0.25, 1], [0, 0.45, 0]),
+    transform: [{ scale: interpolate(ring.value, [0, 1], [0.7, 1.35]) }],
+  }));
+
+  const nameStyle = useAnimatedStyle(() => ({
+    opacity: nameOp.value,
+    transform: [{ translateY: nameY.value }],
+  }));
 
   return (
-    <Animated.View style={[styles.root, { opacity: root }]}>
-      <StatusBar barStyle="dark-content" />
+    <Animated.View style={[styles.root, rootStyle]}>
+      <StatusBar barStyle="light-content" />
 
       <LinearGradient
-        colors={['#F7FAFD', '#EEF3F9', '#E8F0F8']}
-        locations={[0, 0.55, 1]}
+        colors={['#243552', '#1B2B4B', '#121C30']}
+        locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
 
-      {/* soft mesh accents */}
-      <View style={[styles.blob, styles.blobTL]} />
-      <View style={[styles.blob, styles.blobBR]} />
-      <View style={styles.halo} />
+      <View style={styles.amberWash} />
+      <View style={styles.cornerGlow} />
 
       <View style={styles.stage}>
         <View style={styles.markWrap}>
-          {/* expanding ring behind mark */}
-          <Animated.View
-            pointerEvents="none"
-            style={[
-              styles.pulseRing,
-              {
-                opacity: ringOp,
-                transform: [{ scale: ringScale }],
-              },
-            ]}
-          />
-
-          {/* LOGO TOP */}
-          <Animated.View
-            style={{
-              opacity: markOp,
-              transform: [
-                { translateY: Animated.add(markY, floatY) },
-                { scale: markScale },
-              ],
-            }}
-          >
-            <CustomBrandMark size={128} />
+          <Animated.View pointerEvents="none" style={[styles.ring, ringStyle]} />
+          <Animated.View style={markStyle}>
+            <CustomBrandMark size={132} />
           </Animated.View>
         </View>
 
-        {/* drawn route accent */}
-        <View style={styles.routeRow}>
-          <View style={styles.routeDot} />
-          <Animated.View style={[styles.routeLine, { width: lineW }]} />
-          <View style={[styles.routeDot, styles.routeDotEnd]} />
-        </View>
-
-        {/* NAME UNDER LOGO */}
-        <Animated.View
-          style={{
-            opacity: nameOp,
-            transform: [{ translateY: nameY }],
-            alignItems: 'center',
-            marginTop: 18,
-          }}
-        >
+        <Animated.View style={[styles.copy, nameStyle]}>
           <Text style={styles.brand}>
             payasyou
-            <Text style={styles.brandAccent}>go</Text>
+            <Text style={styles.brandGo}>go</Text>
           </Text>
-          <Animated.Text style={[styles.tag, { opacity: tagOp }]}>
-            campus rides · digital fares
-          </Animated.Text>
+          <Text style={styles.tag}>UCC campus rides</Text>
         </Animated.View>
       </View>
-
-      <Animated.Text style={[styles.footer, { opacity: tagOp }]}>
-        University of Cape Coast
-      </Animated.Text>
     </Animated.View>
   );
 }
@@ -236,42 +135,32 @@ export default function SplashScreen({ onFinish }: Props) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#EEF3F9',
+    backgroundColor: COLORS.ink,
   },
-  blob: {
+  amberWash: {
     position: 'absolute',
-    borderRadius: 999,
-  },
-  blobTL: {
-    top: -H * 0.08,
-    left: -W * 0.2,
-    width: W * 0.7,
-    height: W * 0.7,
-    backgroundColor: 'rgba(255,255,255,0.7)',
-  },
-  blobBR: {
-    bottom: H * 0.05,
-    right: -W * 0.25,
-    width: W * 0.65,
-    height: W * 0.65,
-    backgroundColor: 'rgba(245,184,0,0.12)',
-  },
-  halo: {
-    position: 'absolute',
-    top: H * 0.22,
-    alignSelf: 'center',
+    top: H * 0.2,
     left: W * 0.5 - 130,
     width: 260,
     height: 260,
     borderRadius: 130,
-    backgroundColor: 'rgba(255,255,255,0.55)',
+    backgroundColor: 'rgba(245,184,0,0.12)',
+  },
+  cornerGlow: {
+    position: 'absolute',
+    bottom: -80,
+    right: -60,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(245,184,0,0.08)',
   },
   stage: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 32,
-    marginBottom: H * 0.06,
+    marginBottom: H * 0.04,
   },
   markWrap: {
     width: 220,
@@ -279,58 +168,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  pulseRing: {
+  ring: {
     position: 'absolute',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    borderWidth: 1.5,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    borderWidth: 2,
     borderColor: COLORS.primary,
   },
-  routeRow: {
-    flexDirection: 'row',
+  copy: {
     alignItems: 'center',
-    marginTop: 10,
-    height: 14,
-  },
-  routeDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.primary,
-  },
-  routeDotEnd: {
-    backgroundColor: COLORS.ink,
-  },
-  routeLine: {
-    height: 2,
-    backgroundColor: 'rgba(27,43,75,0.18)',
-    marginHorizontal: 4,
-    borderRadius: 2,
+    marginTop: 8,
   },
   brand: {
     fontFamily: 'Sora_700Bold',
-    fontSize: 36,
-    color: COLORS.ink,
-    letterSpacing: -1.4,
-    textTransform: 'lowercase',
+    fontSize: 34,
+    color: COLORS.white,
+    letterSpacing: -1.3,
   },
-  brandAccent: {
-    color: COLORS.primaryDark,
+  brandGo: {
+    color: COLORS.primary,
   },
   tag: {
-    marginTop: 10,
+    marginTop: 8,
     fontFamily: 'DMSans_500Medium',
     fontSize: 14,
-    color: COLORS.textSecondary,
-    letterSpacing: 0.3,
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 48,
-    alignSelf: 'center',
-    fontFamily: 'DMSans_500Medium',
-    fontSize: 12,
-    color: COLORS.textMuted,
+    color: 'rgba(255,255,255,0.55)',
+    letterSpacing: 0.4,
   },
 });
