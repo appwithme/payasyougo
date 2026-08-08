@@ -165,13 +165,41 @@ export async function initiateWithdrawal(userId: string, body: unknown) {
       wallet,
     };
   } catch (err: any) {
-    await failAndRefundWithdrawal({
-      withdrawalId: withdrawal.id,
-      reason: err?.message || 'Transfer failed',
-      paystackRef: reference,
-    });
-    throw new AppError(err?.message || 'Failed to send MoMo withdrawal', 502);
+    const raw = err?.message || 'Transfer failed';
+    const reason = friendlyPayoutError(raw);
+    try {
+      await failAndRefundWithdrawal({
+        withdrawalId: withdrawal.id,
+        reason,
+        paystackRef: reference,
+      });
+    } catch (refundErr: any) {
+      console.error('[withdraw] refund failed', refundErr?.message || refundErr);
+    }
+    throw new AppError(reason, 502);
   }
+}
+
+function friendlyPayoutError(message: string): string {
+  const lower = message.toLowerCase();
+  if (lower.includes('expired transaction') || lower.includes('transaction already closed')) {
+    return 'Withdrawal timed out. Your balance was not taken — try again.';
+  }
+  if (
+    lower.includes('third party payout') ||
+    lower.includes('starter business') ||
+    lower.includes('you cannot initiate')
+  ) {
+    return 'Paystack test account cannot send MoMo payouts yet. Upgrade transfers in the Paystack dashboard, or use live keys with a funded balance.';
+  }
+  if (lower.includes('insufficient') && lower.includes('balance')) {
+    return 'Paystack payout balance is too low. Fund your Paystack balance first.';
+  }
+  // Don't leak raw Prisma internals to the app UI
+  if (lower.includes('prisma') || lower.includes('transaction api')) {
+    return 'Could not complete withdrawal. Please try again.';
+  }
+  return message;
 }
 
 export async function withdrawalStatus(userId: string, withdrawalId: string) {
