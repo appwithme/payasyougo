@@ -17,6 +17,18 @@ router.post('/register', async (req, res, next) => {
   }
 });
 
+router.post('/verify-id', async (req, res, next) => {
+  try {
+    const result = await auth.verifyDriverId(req.body);
+    res.json(result);
+  } catch (err) {
+    if (err instanceof Error && err.name === 'ZodError') {
+      return next(new AppError('Invalid verification payload'));
+    }
+    next(err);
+  }
+});
+
 router.post('/login', async (req, res, next) => {
   try {
     const result = await auth.login(req.body);
