@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -87,7 +87,7 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
           <RoleOption
             title="Driver"
             subtitle="Collect fares and track earnings"
-            icon="car-sport"
+            icon="directions-car"
             accent="ink"
             onPress={() => go('driver')}
           />
@@ -108,7 +108,7 @@ function RoleOption({
 }: {
   title: string;
   subtitle: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: keyof typeof MaterialIcons.glyphMap;
   accent: 'amber' | 'ink';
   onPress: () => void;
 }) {
@@ -134,9 +134,9 @@ function RoleOption({
             accent === 'amber' ? styles.optionIconAmber : styles.optionIconInk,
           ]}
         >
-          <Ionicons
+          <MaterialIcons
             name={icon}
-            size={20}
+            size={22}
             color={accent === 'amber' ? COLORS.ink : COLORS.primary}
           />
         </View>
@@ -145,7 +145,7 @@ function RoleOption({
           <Text style={styles.optionSubtitle}>{subtitle}</Text>
         </View>
         <View style={styles.optionChevron}>
-          <Ionicons name="arrow-forward" size={16} color={COLORS.ink} />
+          <MaterialIcons name="arrow-forward" size={18} color={COLORS.ink} />
         </View>
       </Animated.View>
     </Pressable>
