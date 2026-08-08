@@ -57,7 +57,7 @@ const TransactionCard = ({
               accessibilityLabel={`Reload trip ${item.from} to ${item.to}`}
             >
               {rebooking ? (
-                <ActivityIndicator size="small" color={COLORS.ink} />
+                <ActivityIndicator size="small" color={COLORS.textMuted} />
               ) : (
                 <Ionicons name="reload" size={16} color={COLORS.textMuted} />
               )}
