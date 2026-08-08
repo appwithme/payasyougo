@@ -238,6 +238,55 @@ export async function me(userId: string) {
   return mapUser(user);
 }
 
+const profileSchema = z.object({
+  fullName: z.string().min(2).optional(),
+  phone: z.string().min(9).optional().or(z.literal('')),
+  email: z.string().email().optional().or(z.literal('')),
+});
+
+export async function updateProfile(userId: string, body: unknown) {
+  const input = profileSchema.parse(body);
+
+  const data: {
+    fullName?: string;
+    phone?: string | null;
+    email?: string | null;
+  } = {};
+
+  if (typeof input.fullName === 'string' && input.fullName.trim()) {
+    data.fullName = input.fullName.trim();
+  }
+
+  if (typeof input.email === 'string') {
+    data.email = input.email.trim() || null;
+  }
+
+  if (typeof input.phone === 'string') {
+    if (!input.phone.trim()) {
+      data.phone = null;
+    } else {
+      const phone = normalizePhone(input.phone);
+      const taken = await prisma.user.findFirst({
+        where: { phone, NOT: { id: userId } },
+      });
+      if (taken) throw new AppError('That phone number is already in use', 409);
+      data.phone = phone;
+    }
+  }
+
+  if (Object.keys(data).length === 0) {
+    throw new AppError('No profile fields to update');
+  }
+
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data,
+    include: { driver: true },
+  });
+
+  return mapUser(user);
+}
+
 export async function updateAvatar(userId: string, body: unknown) {
   const input = avatarSchema.parse(body);
   const url = input.avatarUrl.trim();
