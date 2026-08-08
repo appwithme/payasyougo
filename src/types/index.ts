@@ -22,6 +22,10 @@ export interface Driver extends User {
   walletBalance: number;
   todayEarnings: number;
   totalTrips: number;
+  ghanaCardNumber?: string;
+  ghanaCardVerified?: boolean;
+  licenseNumber?: string;
+  licenseVerified?: boolean;
 }
 
 export interface Transaction {
