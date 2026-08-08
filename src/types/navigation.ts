@@ -29,6 +29,12 @@ export type PassengerHomeStackParamList = {
     routeId: string;
     prefillDriverId?: string;
   };
+  ScanDriverQr: {
+    from: string;
+    to: string;
+    fare: number;
+    routeId: string;
+  };
   ConfirmTrip: {
     from: string;
     to: string;
@@ -55,6 +61,12 @@ export type PassengerBookStackParamList = {
     routeId: string;
     prefillDriverId?: string;
   };
+  ScanDriverQr: {
+    from: string;
+    to: string;
+    fare: number;
+    routeId: string;
+  };
   ConfirmTrip: {
     from: string;
     to: string;
@@ -78,6 +90,7 @@ export type DriverDashboardStackParamList = {
   DriverDashboard: undefined;
   TransactionHistory: undefined;
   DriverProfile: undefined;
+  DriverQr: undefined;
   EditProfile: undefined;
   Settings: undefined;
   NotificationsSettings: undefined;
