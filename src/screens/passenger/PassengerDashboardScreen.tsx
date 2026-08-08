@@ -12,7 +12,6 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
 import TransactionCard from '../../components/TransactionCard';
-import Button from '../../components/Button';
 import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
 
@@ -57,14 +56,8 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
           >
             <Ionicons name="search-outline" size={18} color={COLORS.textMuted} />
             <Text style={styles.searchPlaceholder}>Where are you going?</Text>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
           </TouchableOpacity>
-
-          <Button
-            title="Select route"
-            variant="ink"
-            onPress={() => navigation.navigate('BookTrip')}
-            icon={<Ionicons name="arrow-forward" size={18} color={COLORS.white} />}
-          />
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(160).duration(450)} style={styles.section}>

@@ -43,7 +43,11 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" />
-      <Header title="Select route" onBack={() => navigation.goBack()} transparent />
+      <Header
+        title="Where to?"
+        onBack={navigation.canGoBack() ? () => navigation.goBack() : undefined}
+        transparent
+      />
 
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -51,8 +55,8 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
         showsVerticalScrollIndicator={false}
       >
         <Animated.View entering={FadeInDown.duration(400)}>
-          <Text style={styles.label}>Where to?</Text>
-          <Text style={styles.sublabel}>Pick your campus pickup and drop-off</Text>
+          <Text style={styles.label}>Choose your route</Text>
+          <Text style={styles.sublabel}>Pick campus pickup and drop-off</Text>
         </Animated.View>
 
         <Animated.View
