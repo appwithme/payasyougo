@@ -1,32 +1,28 @@
 import React from 'react';
 import { View, Image, StyleSheet, ViewStyle, ImageStyle } from 'react-native';
+import CustomBrandMark from './CustomBrandMark';
 import { COLORS, SHADOW } from '../theme/colors';
 
 type Props = {
   size?: number;
   style?: ViewStyle;
   /**
-   * `pin3d` — glossy 3D splash/hero mark (default)
-   * `icon` — App Store tile with pin
+   * `pin3d` — hand-crafted gradient pin (splash/hero)
+   * `icon` — App Store tile
    * `pin` — lightweight flat pin for small UI chrome
    */
   variant?: 'pin3d' | 'icon' | 'pin' | 'squircle';
 };
 
-const LOGO_3D = require('../../assets/brand/logo-3d-pin-v2.png');
 const LOGO_ICON = require('../../assets/brand/logo-3d-icon.png');
 
 /**
- * Brand mark — modern glossy 3D pin for splash/hero,
+ * Brand mark — custom gradient pin for splash/hero,
  * flat geometric pin for small UI.
  */
 export default function BrandMark({ size = 72, style, variant = 'pin3d' }: Props) {
   if (variant === 'pin3d') {
-    return (
-      <View style={[{ width: size, height: size }, style]}>
-        <Image source={LOGO_3D} style={styles.fill as ImageStyle} resizeMode="contain" />
-      </View>
-    );
+    return <CustomBrandMark size={size} style={style} />;
   }
 
   if (variant === 'icon' || variant === 'squircle') {
