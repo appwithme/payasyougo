@@ -33,7 +33,13 @@
     "plugins": [
       "expo-font",
       "expo-secure-store",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow PayAsYouGo to access your photos to set a profile picture."
+        }
+      ]
     ],
     "extra": {
       "eas": {
