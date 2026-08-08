@@ -126,6 +126,15 @@ const PassengerProfileScreen = ({ navigation }: { navigation: any }) => {
           </Text>
           <Text style={styles.heroMeta}>Passenger</Text>
 
+          <TouchableOpacity
+            style={styles.editProfileBtn}
+            onPress={() => navigation.navigate('EditProfile')}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="create-outline" size={15} color={COLORS.ink} />
+            <Text style={styles.editProfileText}>Edit profile</Text>
+          </TouchableOpacity>
+
           <View style={styles.heroMetrics}>
             <View style={styles.heroMetric}>
               <Text style={styles.metricLabel}>Paid trips</Text>
@@ -163,21 +172,6 @@ const PassengerProfileScreen = ({ navigation }: { navigation: any }) => {
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(180).duration(420)} style={styles.actions}>
-          <TouchableOpacity
-            style={styles.primaryAction}
-            onPress={() => navigation.navigate('EditProfile')}
-            activeOpacity={0.85}
-          >
-            <View style={styles.actionIcon}>
-              <Ionicons name="create-outline" size={18} color={COLORS.ink} />
-            </View>
-            <View style={styles.actionCopy}>
-              <Text style={styles.actionTitle}>Edit profile</Text>
-              <Text style={styles.actionHint}>Name and phone</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
-          </TouchableOpacity>
-
           <TouchableOpacity
             style={styles.primaryAction}
             onPress={() => navigation.navigate('Settings')}
@@ -283,6 +277,21 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans_500Medium',
     fontSize: 14,
     color: 'rgba(255,255,255,0.55)',
+  },
+  editProfileBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: COLORS.primary,
+  },
+  editProfileText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 13,
+    color: COLORS.ink,
   },
   heroMetrics: {
     flexDirection: 'row',
