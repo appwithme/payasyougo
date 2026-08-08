@@ -47,8 +47,8 @@ A mobile transport payment app for **University of Cape Coast (UCC)** — passen
 <td width="50%" valign="top">
 
 ### 🚕 Drivers
-- Unique **Driver ID** for passengers
-- Live wallet & today’s earnings
+- Unique **Driver ID** + QR code for passengers
+- Live wallet, today’s earnings & MoMo withdrawals
 - Trip / payment history
 - Profile with vehicle + rating
 - Ratings update from passenger feedback
@@ -166,10 +166,13 @@ In **live / production**, Telecel works the same as MTN: the app sends provider 
 | Role | Name | Phone | Password | Driver ID |
 |:-----|:-----|:------|:---------|:----------|
 | Passenger | Admin Passenger | `0550000111` | `admin123` | — |
-| Driver | Kwame Asiamah | `0240000111` | `admin123` | `DRV100` |
+| Driver | Kwame Owusu | `0240000001` | `driver123` | `DRV001` |
 | Driver | Ama Asantewaa | `0200000002` | `driver456` | `DRV002` |
+| Driver | Kwame Asiamah | `0240000111` | `admin123` | `DRV100` |
 
-Drivers can show a **QR code** from the dashboard (`Show QR code`). Passengers scan it on **Link driver** instead of typing the ID.
+All three drivers are created by `prisma/seed.ts` (re-run after a fresh Neon DB).
+
+Drivers can show a **QR code** from the dashboard. Passengers scan it on **Link driver** instead of typing the ID.
 
 ```bash
 cd backend && npm run prisma:seed
