@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { env } from '../config/env';
-import { toPaystackProvider } from '../utils/helpers';
+import { toPaystackProvider, toPaystackPhone } from '../utils/helpers';
 
 const PAYSTACK_BASE = 'https://api.paystack.co';
 
@@ -13,6 +13,13 @@ type ChargeArgs = {
   metadata?: Record<string, unknown>;
 };
 
+export type ChargeResult = {
+  reference: string;
+  status: string;
+  display_text?: string;
+  gateway_response?: string;
+};
+
 async function paystackFetch(path: string, init?: RequestInit) {
   const res = await fetch(`${PAYSTACK_BASE}${path}`, {
     ...init,
@@ -22,12 +29,42 @@ async function paystackFetch(path: string, init?: RequestInit) {
       ...(init?.headers || {}),
     },
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   return { ok: res.ok, status: res.status, data };
 }
 
-export async function chargeMobileMoney(args: ChargeArgs) {
+const PENDING_STATUSES = new Set([
+  'pay_offline',
+  'pending',
+  'send_otp',
+  'open_url',
+  'ongoing',
+]);
+
+function friendlyChargeError(message: string | undefined, httpStatus: number): string {
+  const msg = (message || '').trim();
+  const lower = msg.toLowerCase();
+
+  if (!msg || lower === 'charge attempted') {
+    return 'Could not start the MoMo charge. Check the number matches your selected network and try again.';
+  }
+  if (lower.includes('invalid') && lower.includes('phone')) {
+    return 'That Mobile Money number looks invalid. Use a Ghana number like 05XXXXXXXX.';
+  }
+  if (lower.includes('currency') || lower.includes('ghs')) {
+    return 'This Paystack account may not be set up for Ghana MoMo (GHS).';
+  }
+  if (httpStatus === 401 || lower.includes('invalid key')) {
+    return 'Paystack keys look invalid. Check PAYSTACK_SECRET_KEY on the server.';
+  }
+  return msg;
+}
+
+export async function chargeMobileMoney(args: ChargeArgs): Promise<ChargeResult> {
   const amountPesewas = Math.round(args.amountGhs * 100);
+  const phone = toPaystackPhone(args.phone);
+  const provider = toPaystackProvider(args.provider);
+
   const body = {
     email: args.email,
     amount: amountPesewas,
@@ -35,27 +72,52 @@ export async function chargeMobileMoney(args: ChargeArgs) {
     reference: args.reference,
     metadata: args.metadata,
     mobile_money: {
-      phone: args.phone,
-      provider: toPaystackProvider(args.provider),
+      phone,
+      provider,
     },
   };
 
-  const { ok, data } = await paystackFetch('/charge', {
+  const { ok, status: httpStatus, data } = await paystackFetch('/charge', {
     method: 'POST',
     body: JSON.stringify(body),
   });
 
-  if (!ok || !data.status) {
-    const message = data?.message || 'Paystack charge failed';
-    throw new Error(message);
+  const payload = data?.data;
+  const txnStatus = typeof payload?.status === 'string' ? payload.status.toLowerCase() : '';
+
+  // Success path: API ok + boolean status true (message is often "Charge attempted")
+  if (ok && data?.status === true && payload) {
+    return {
+      reference: payload.reference || args.reference,
+      status: txnStatus || 'pending',
+      display_text:
+        payload.display_text ||
+        'Approve the MoMo prompt on your phone to complete payment.',
+      gateway_response: payload.gateway_response,
+    };
   }
 
-  return data.data as {
-    reference: string;
-    status: string;
-    display_text?: string;
-    gateway_response?: string;
-  };
+  // Some gateways return useful payload even when HTTP is awkward — treat offline pending as success
+  if (payload?.reference && PENDING_STATUSES.has(txnStatus)) {
+    return {
+      reference: payload.reference,
+      status: txnStatus,
+      display_text:
+        payload.display_text ||
+        'Approve the MoMo prompt on your phone to complete payment.',
+      gateway_response: payload.gateway_response,
+    };
+  }
+
+  console.error('[paystack] charge failed', {
+    httpStatus,
+    message: data?.message,
+    payload,
+    phone,
+    provider,
+  });
+
+  throw new Error(friendlyChargeError(data?.message, httpStatus));
 }
 
 export async function verifyTransaction(reference: string) {
