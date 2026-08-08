@@ -14,7 +14,6 @@ import { useApp } from '../../context/AppContext';
 import TransactionCard from '../../components/TransactionCard';
 import UserAvatar from '../../components/UserAvatar';
 import InkSheetScreen from '../../components/InkSheetScreen';
-import Button from '../../components/Button';
 import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { useTabBarPadding } from '../../navigation/FloatingTabBar';
@@ -166,25 +165,6 @@ const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
             <Text style={styles.statLabel}>All trips</Text>
           </View>
         </Animated.View>
-
-        <Animated.View entering={FadeInUp.delay(180).duration(420)} style={styles.tipCard}>
-          <View style={styles.tipIcon}>
-            <Ionicons name="qr-code-outline" size={18} color={COLORS.ink} />
-          </View>
-              <View style={styles.tipCopy}>
-                <Text style={styles.tipTitle}>Show your QR at pickup</Text>
-                <Text style={styles.tipBody}>
-                  Passengers scan your code or type {driver.id} to pay with MoMo.
-                </Text>
-              </View>
-              <Button
-                title="QR"
-                variant="secondary"
-                onPress={() => navigation.navigate('DriverQr')}
-                style={styles.tipBtn}
-                textStyle={styles.tipBtnText}
-              />
-            </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(220).duration(420)} style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -413,47 +393,6 @@ const styles = StyleSheet.create({
     ...type.caption,
     marginTop: 4,
     fontSize: 11,
-  },
-  tipCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    ...SHADOW.sm,
-  },
-  tipIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 14,
-    backgroundColor: COLORS.surfaceAlt,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tipCopy: {
-    flex: 1,
-    gap: 2,
-    minWidth: 0,
-  },
-  tipTitle: {
-    fontFamily: 'Sora_600SemiBold',
-    fontSize: 14,
-    color: COLORS.ink,
-  },
-  tipBody: {
-    ...type.caption,
-    fontSize: 12,
-  },
-  tipBtn: {
-    minHeight: 40,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-  },
-  tipBtnText: {
-    fontSize: 13,
   },
   section: {
     gap: 10,
