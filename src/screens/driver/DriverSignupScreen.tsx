@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,9 +14,13 @@ import { useApp } from '../../context/AppContext';
 import * as authService from '../../services/authService';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
+import IdCaptureSlot from '../../components/IdCaptureSlot';
 import { makeDriverSignupSample } from '../../data/qaAccounts';
 import { COLORS, FONT_SIZE, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
+
+const GHANA_CARD_FRONT = require('../../../assets/id/ghana-card-front.png');
+const GHANA_CARD_BACK = require('../../../assets/id/ghana-card-back.png');
 
 const STEPS = [
   {
@@ -28,7 +33,7 @@ const STEPS = [
     key: 'ghana_card',
     label: 'ID',
     title: 'Verify Ghana Card',
-    subtitle: 'Confirm your national ID before you can drive.',
+    subtitle: 'Photograph the front and back of your national ID.',
   },
   {
     key: 'license',
