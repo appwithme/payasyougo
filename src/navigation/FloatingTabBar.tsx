@@ -45,7 +45,7 @@ const ROUTE_META: Record<string, IconPair> = {
   HistoryTab: { outline: 'receipt-outline', solid: 'receipt', label: 'History' },
   ProfileTab: { outline: 'person-outline', solid: 'person', label: 'Profile' },
   DashboardTab: { outline: 'home-outline', solid: 'home', label: 'Home' },
-  TxnTab: { outline: 'cash-outline', solid: 'cash', label: 'Pay' },
+  TxnTab: { outline: 'cash-outline', solid: 'cash', label: 'Payments' },
   WalletTab: { outline: 'wallet-outline', solid: 'wallet', label: 'Wallet' },
 };
 
