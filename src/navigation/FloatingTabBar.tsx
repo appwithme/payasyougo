@@ -18,6 +18,21 @@ const CIRCLE = 56;
 const CUTOUT = 70;
 const SPRING = { damping: 16, stiffness: 180, mass: 0.85 };
 
+/** Visible height of the floating pill + bump (excludes safe-area inset). */
+export const FLOATING_TAB_BAR_CONTENT_HEIGHT = BAR_H + CIRCLE / 2;
+
+/** Bottom padding so scroll/content clears the absolute floating tab bar. */
+export function useTabBarPadding(extra = 24) {
+  const insets = useSafeAreaInsets();
+  return FLOATING_TAB_BAR_CONTENT_HEIGHT + Math.max(insets.bottom, 14) + extra;
+}
+
+function isNestedPastRoot(state: BottomTabBarProps['state']) {
+  const tab = state.routes[state.index];
+  const nested = tab?.state as { index?: number } | undefined;
+  return typeof nested?.index === 'number' && nested.index > 0;
+}
+
 type IconPair = {
   outline: keyof typeof Ionicons.glyphMap;
   solid: keyof typeof Ionicons.glyphMap;
@@ -107,6 +122,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
   const centers = React.useRef<number[]>([]);
   const activeRoute = state.routes[state.index]?.name;
   const activeMeta = ROUTE_META[activeRoute] ?? ROUTE_META.HomeTab;
+  const hideBar = isNestedPastRoot(state);
 
   const moveTo = (index: number, animated: boolean) => {
     const x = centers.current[index];
@@ -135,6 +151,10 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
       { scale: interpolate(ready.value, [0, 1], [0.75, 1]) },
     ],
   }));
+
+  if (hideBar) {
+    return null;
+  }
 
   return (
     <View
