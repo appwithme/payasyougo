@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
 import TransactionCard from '../../components/TransactionCard';
+import Button from '../../components/Button';
 import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
 
@@ -49,15 +50,12 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
             </View>
           </View>
 
-          <TouchableOpacity
-            style={styles.searchRow}
-            activeOpacity={0.85}
+          <Button
+            title="Select route"
+            variant="ink"
             onPress={() => navigation.navigate('BookTrip')}
-          >
-            <Ionicons name="search-outline" size={18} color={COLORS.textMuted} />
-            <Text style={styles.searchPlaceholder}>Where are you going?</Text>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
-          </TouchableOpacity>
+            icon={<Ionicons name="arrow-forward" size={18} color={COLORS.white} />}
+          />
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(160).duration(450)} style={styles.section}>
@@ -145,22 +143,6 @@ const styles = StyleSheet.create({
   payCopy: { flex: 1 },
   payTitle: { ...type.subheading },
   paySubtitle: { ...type.caption, marginTop: 2 },
-  searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surfaceAlt,
-    borderRadius: RADIUS.md,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: 14,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    gap: SPACING.sm,
-  },
-  searchPlaceholder: {
-    ...type.body,
-    color: COLORS.textMuted,
-    flex: 1,
-  },
   section: { marginBottom: SPACING.xl },
   sectionHeader: {
     flexDirection: 'row',
