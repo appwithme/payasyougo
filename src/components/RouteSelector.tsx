@@ -55,7 +55,11 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
     if (openPicker === 'from') {
       newFrom = location;
       setFrom(location);
-      if (location === to) {
+      // Clear destination if it isn't valid for the new origin
+      const stillValid =
+        newTo != null &&
+        routes.some((r) => r.from === newFrom && r.to === newTo);
+      if (!stillValid) {
         newTo = null;
         setTo(null);
       }
@@ -70,7 +74,13 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
   };
 
   const currentRoute = getRoute(from, to);
-  const toOptions = locations.filter((l) => l !== from);
+  const fromOptions = Array.from(
+    new Set(routes.map((r) => r.from))
+  ).sort((a, b) => a.localeCompare(b));
+  const toOptions = routes
+    .filter((r) => r.from === from)
+    .map((r) => r.to)
+    .sort((a, b) => a.localeCompare(b));
 
   if (loading) {
     return (
@@ -130,12 +140,12 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
         <Ionicons name="chevron-down" size={18} color={COLORS.textMuted} />
       </TouchableOpacity>
 
-      {from && to && !currentRoute && (
+      {from && toOptions.length === 0 ? (
         <View style={styles.noRoute}>
           <Ionicons name="alert-circle-outline" size={16} color={COLORS.error} />
-          <Text style={styles.noRouteText}>No route for this combination</Text>
+          <Text style={styles.noRouteText}>No destinations from this pickup</Text>
         </View>
-      )}
+      ) : null}
 
       <Modal
         visible={!!openPicker}
@@ -154,8 +164,11 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
               {openPicker === 'from' ? 'Pickup' : 'Destination'}
             </Text>
             <FlatList
-              data={openPicker === 'to' ? toOptions : locations}
+              data={openPicker === 'to' ? toOptions : fromOptions}
               keyExtractor={(item) => item}
+              ListEmptyComponent={
+                <Text style={styles.emptyList}>No options available</Text>
+              }
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.optionRow}
@@ -240,6 +253,11 @@ const styles = StyleSheet.create({
   noRouteText: {
     ...type.caption,
     color: COLORS.error,
+  },
+  emptyList: {
+    ...type.caption,
+    textAlign: 'center',
+    paddingVertical: SPACING.lg,
   },
   modalOverlay: {
     flex: 1,
