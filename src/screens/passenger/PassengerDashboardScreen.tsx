@@ -16,7 +16,7 @@ import { useApp } from '../../context/AppContext';
 import TransactionCard from '../../components/TransactionCard';
 import Button from '../../components/Button';
 import UserAvatar from '../../components/UserAvatar';
-import { fetchFare } from '../../services/routesService';
+import { resolveRebookRoute } from '../../services/rebookService';
 import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { useTabBarPadding } from '../../navigation/FloatingTabBar';
@@ -37,7 +37,11 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
     if (rebookingId) return;
     setRebookingId(trip.id);
     try {
-      const route = await fetchFare(trip.from, trip.to);
+      const route = await resolveRebookRoute(trip);
+      if (!route.fare) {
+        Alert.alert('Couldn’t rebook', 'No fare found for this route.');
+        return;
+      }
       navigation.navigate('BookTab', {
         screen: 'EnterDriverId',
         params: {
