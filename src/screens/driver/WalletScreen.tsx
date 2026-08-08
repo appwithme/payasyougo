@@ -20,7 +20,7 @@ import Button from '../../components/Button';
 import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 
 const WalletScreen = ({ navigation }: { navigation: any }) => {
-  const { getDriverData } = useApp();
+  const { getDriverData, withdrawDriverFunds } = useApp();
   const driver = getDriverData();
 
   const [withdrawAmount, setWithdrawAmount] = useState('');
@@ -29,30 +29,8 @@ const WalletScreen = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading]               = useState(false);
 
   const handleWithdraw = () => {
-    if (!driver) return;
-    const amount = parseFloat(withdrawAmount);
-    if (!withdrawAmount || isNaN(amount) || amount <= 0) {
-      Alert.alert('Invalid Amount', 'Please enter a valid withdrawal amount');
-      return;
-    }
-    if (amount > driver.walletBalance) {
-      Alert.alert('Insufficient Balance', 'Amount exceeds your current wallet balance');
-      return;
-    }
-    if (!network.trim() || !phone.trim()) {
-      Alert.alert('Missing Info', 'Please enter your mobile money network and number');
-      return;
-    }
-
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      Alert.alert(
-        'Request Submitted',
-        `Withdrawal of GH₵${amount} to ${network} (${phone}) has been submitted.\n\nFunds arrive within 24 hours in demo mode.`,
-        [{ text: 'OK', onPress: () => { setWithdrawAmount(''); setNetwork(''); setPhone(''); } }]
-      );
-    }, 1500);
+    const result = withdrawDriverFunds(parseFloat(withdrawAmount) || 0);
+    Alert.alert('Withdrawals', result.error || 'Coming soon');
   };
 
   if (!driver) return null;

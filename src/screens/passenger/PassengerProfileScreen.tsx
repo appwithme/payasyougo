@@ -31,8 +31,8 @@ const PassengerProfileScreen = ({ navigation }: { navigation: any }) => {
         {
           text: 'Logout',
           style: 'destructive',
-          onPress: () => {
-            logout();
+          onPress: async () => {
+            await logout();
             navigation.reset({ index: 0, routes: [{ name: 'Welcome' as any }] });
           },
         },
