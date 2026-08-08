@@ -222,14 +222,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     password: string;
   }) => {
     try {
-      const { user } = await authService.registerPassenger({
+      await authService.registerPassenger({
         fullName: input.name,
         phone: input.phone,
         email: input.email,
         password: input.password,
       });
-      applyUser(user);
-      return { success: true, passenger: user as Passenger };
+      return { success: true };
     } catch (err: any) {
       return { success: false, error: err?.message || 'Registration failed' };
     }
@@ -259,7 +258,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     licenseNumber: string;
   }) => {
     try {
-      const { user } = await authService.registerDriver({
+      await authService.registerDriver({
         fullName: input.name,
         phone: input.phone,
         email: input.email,
@@ -268,8 +267,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ghanaCardNumber: input.ghanaCardNumber,
         licenseNumber: input.licenseNumber,
       });
-      applyUser(user);
-      return { success: true, driver: user as Driver };
+      return { success: true };
     } catch (err: any) {
       return { success: false, error: err?.message || 'Registration failed' };
     }
