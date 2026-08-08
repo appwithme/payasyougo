@@ -58,7 +58,7 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
             </TouchableOpacity>
           ) : null}
           <Text style={styles.heroTitle}>Payments</Text>
-          <Text style={styles.heroSub}>
+          <Text style={styles.heroMeta}>
             {driverTransactions.length === 0
               ? 'No fares received yet'
               : `${driverTransactions.length} payment${
@@ -66,15 +66,14 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
                 } received`}
           </Text>
 
-          <View style={styles.heroStats}>
-            <View style={styles.heroStat}>
-              <Text style={styles.heroStatValue}>{completed.length}</Text>
-              <Text style={styles.heroStatLabel}>Completed</Text>
+          <View style={styles.heroMetrics}>
+            <View style={styles.heroMetric}>
+              <Text style={styles.metricLabel}>Completed</Text>
+              <Text style={styles.metricValue}>{completed.length}</Text>
             </View>
-            <View style={styles.heroStatRule} />
-            <View style={styles.heroStat}>
-              <Text style={styles.heroStatValue}>GH₵{totalEarned.toFixed(0)}</Text>
-              <Text style={styles.heroStatLabel}>Earned</Text>
+            <View style={styles.heroMetric}>
+              <Text style={styles.metricLabel}>Earned</Text>
+              <Text style={styles.metricValue}>GH₵{totalEarned.toFixed(0)}</Text>
             </View>
           </View>
         </Animated.View>
@@ -130,11 +129,11 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
 const styles = StyleSheet.create({
   heroBody: {
     marginTop: SPACING.md,
-    gap: 8,
+    gap: SPACING.lg,
   },
   backBtn: {
     alignSelf: 'flex-start',
-    marginBottom: 4,
+    marginBottom: -8,
   },
   backText: {
     fontFamily: 'DMSans_700Bold',
@@ -147,42 +146,31 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     letterSpacing: -0.8,
   },
-  heroSub: {
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 15,
-    color: 'rgba(255,255,255,0.55)',
-  },
-  heroStats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: SPACING.sm,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: RADIUS.lg,
-    paddingVertical: 14,
-    paddingHorizontal: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
-  },
-  heroStat: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 2,
-  },
-  heroStatValue: {
-    fontFamily: 'Sora_700Bold',
-    fontSize: 22,
-    color: COLORS.white,
-    letterSpacing: -0.5,
-  },
-  heroStatLabel: {
+  heroMeta: {
     fontFamily: 'DMSans_500Medium',
-    fontSize: 12,
+    fontSize: 14,
     color: 'rgba(255,255,255,0.55)',
+    marginTop: -10,
   },
-  heroStatRule: {
-    width: 1,
-    height: 32,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+  heroMetrics: {
+    flexDirection: 'row',
+    gap: SPACING.xl,
+  },
+  heroMetric: {
+    gap: 4,
+  },
+  metricLabel: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 11,
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+    color: COLORS.primary,
+  },
+  metricValue: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 28,
+    color: COLORS.white,
+    letterSpacing: -0.8,
   },
   body: {
     flex: 1,
