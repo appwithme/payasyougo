@@ -43,7 +43,7 @@ export interface Transaction {
   passengerRating?: number;
 }
 
-export type MoMoProvider = 'MTN' | 'VODAFONE' | 'AIRTELTIGO';
+export type MoMoProvider = 'MTN' | 'VODAFONE';
 
 export interface RouteInfo {
   id: string;
