@@ -98,6 +98,17 @@ export async function updateAvatar(avatarUrl: string): Promise<AuthUser> {
   return res.user;
 }
 
+export async function updateProfile(input: {
+  fullName?: string;
+  phone?: string;
+}): Promise<AuthUser> {
+  const res = await apiRequest<{ user: AuthUser }>('/api/auth/me', {
+    method: 'PATCH',
+    body: input,
+  });
+  return res.user;
+}
+
 export async function logout(): Promise<void> {
   await setToken(null);
 }
