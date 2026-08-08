@@ -62,6 +62,18 @@ router.get('/me', requireAuth, async (req: AuthRequest, res, next) => {
   }
 });
 
+router.patch('/me', requireAuth, async (req: AuthRequest, res, next) => {
+  try {
+    const user = await auth.updateProfile(req.user!.sub, req.body);
+    res.json({ user });
+  } catch (err) {
+    if (err instanceof Error && err.name === 'ZodError') {
+      return next(new AppError('Invalid profile payload'));
+    }
+    next(err);
+  }
+});
+
 router.patch('/me/avatar', requireAuth, async (req: AuthRequest, res, next) => {
   try {
     const user = await auth.updateAvatar(req.user!.sub, req.body);
