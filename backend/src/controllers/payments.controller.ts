@@ -9,6 +9,7 @@ import {
   markPaymentFailed,
 } from '../services/wallet';
 import { normalizePhone, normalizeProviderLabel, PAYSTACK_TEST_MTN_NUMBER, toPaystackProvider } from '../utils/helpers';
+import { handleTransferWebhook } from './withdrawals.controller';
 
 const initiateSchema = z.object({
   driverCode: z.string().min(3),
@@ -218,10 +219,19 @@ export async function handleWebhookEvent(event: any) {
   const data = event?.data;
   if (!data?.reference) return { handled: false };
 
+  if (typeof eventName === 'string' && eventName.startsWith('transfer.')) {
+    return handleTransferWebhook(event);
+  }
+
   const txn = await prisma.transaction.findFirst({
     where: { paystackRef: data.reference },
   });
-  if (!txn) return { handled: false, reason: 'unknown_reference' };
+  if (!txn) {
+    // Fallback: some accounts emit transfer updates without a transfer.* event name
+    const transferResult = await handleTransferWebhook(event);
+    if (transferResult.handled) return transferResult;
+    return { handled: false, reason: 'unknown_reference' };
+  }
 
   if (eventName === 'charge.success' || data.status === 'success') {
     await completePaymentAndCreditWallet({
