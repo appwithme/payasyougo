@@ -12,6 +12,7 @@ import { fetchTransactions } from '../services/transactionsService';
 import {
   initiateWithdrawal,
   waitForWithdrawal,
+  type WithdrawalRecord,
 } from '../services/withdrawalsService';
 import { getToken } from '../services/apiClient';
 import notificationService, {
@@ -66,7 +67,13 @@ interface AppContextType {
     provider: MoMoProvider;
     momoPhone: string;
     onStatus?: (msg: string) => void;
-  }) => Promise<{ success: boolean; error?: string }>;
+  }) => Promise<{
+    success: boolean;
+    error?: string;
+    withdrawal?: WithdrawalRecord;
+    demo?: boolean;
+    walletBalance?: number;
+  }>;
   logout: () => Promise<void>;
   updateAvatar: (avatarUrl: string) => Promise<{ success: boolean; error?: string }>;
   updateProfile: (input: {
@@ -293,8 +300,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       if (started.status === 'completed') {
         input.onStatus?.('Withdrawal sent');
-        await refreshDriverWallet();
-        return { success: true };
+        await Promise.all([refreshDriverWallet(), refreshTrips()]);
+        return {
+          success: true,
+          withdrawal: started.withdrawal,
+          demo: started.demo,
+          walletBalance: Number(started.wallet?.walletBalance ?? 0),
+        };
       }
 
       if (started.status === 'failed') {
@@ -318,7 +330,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
 
       setCurrentUser(finished.wallet);
-      return { success: true };
+      await refreshTrips();
+      return {
+        success: true,
+        withdrawal: finished.withdrawal,
+        demo: started.demo,
+        walletBalance: Number(finished.wallet?.walletBalance ?? 0),
+      };
     } catch (err: any) {
       await refreshDriverWallet();
       return {
