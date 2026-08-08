@@ -45,6 +45,9 @@ function friendlyChargeError(message: string | undefined, httpStatus: number): s
   const msg = (message || '').trim();
   const lower = msg.toLowerCase();
 
+  if (lower.includes('test mobile money') || lower.includes('test transaction')) {
+    return 'Test mode: use Paystack’s test MTN number 0551234987';
+  }
   if (!msg || lower === 'charge attempted') {
     return 'Could not start the MoMo charge. Check the number matches your selected network and try again.';
   }
@@ -117,7 +120,9 @@ export async function chargeMobileMoney(args: ChargeArgs): Promise<ChargeResult>
     provider,
   });
 
-  throw new Error(friendlyChargeError(data?.message, httpStatus));
+  throw new Error(
+    friendlyChargeError(payload?.message || data?.message, httpStatus)
+  );
 }
 
 export async function verifyTransaction(reference: string) {
