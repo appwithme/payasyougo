@@ -33,6 +33,15 @@ export function toPaystackProvider(provider: string): 'mtn' | 'vod' | 'atl' {
   throw new Error(`Unsupported MoMo provider: ${provider}`);
 }
 
+/** Bank/telco codes for Paystack Ghana MoMo transfer recipients */
+export function toPaystackMomoBankCode(provider: string): 'MTN' | 'VOD' | 'ATL' {
+  const key = provider.toUpperCase();
+  if (key === 'MTN') return 'MTN';
+  if (key === 'TELECEL' || key === 'VODAFONE' || key === 'VOD') return 'VOD';
+  if (key === 'AIRTELTIGO' || key === 'AT' || key === 'ATL') return 'ATL';
+  throw new Error(`Unsupported MoMo provider: ${provider}`);
+}
+
 /** Canonical label stored on transactions */
 export function normalizeProviderLabel(provider: string): string {
   const key = provider.toUpperCase();
