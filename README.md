@@ -174,6 +174,8 @@ In **live / production**, Telecel works the same as MTN: the app sends provider 
 
 All three drivers are created by `prisma/seed.ts` (re-run after a fresh Neon DB).
 
+**New driver registration** is a 4-step flow: Account → Ghana Card verify → Licence verify → Vehicle. Ghana Card must look like `GHA-XXXXXXXXX-X`. Licence numbers are checked for format uniqueness (campus pilot — not live NIA/DVLA).
+
 Drivers can show a **QR code** from the dashboard. Passengers scan it on **Link driver** instead of typing the ID.
 
 ```bash
