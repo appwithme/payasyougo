@@ -24,6 +24,9 @@ interface AppContextType {
     phone: string,
     password: string
   ) => Promise<{ success: boolean; passenger?: Passenger; error?: string }>;
+  loginPassengerWithGoogle: (
+    idToken: string
+  ) => Promise<{ success: boolean; passenger?: Passenger; error?: string }>;
   registerPassenger: (input: {
     name: string;
     phone: string;
@@ -121,6 +124,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const loginPassengerWithGoogle = async (idToken: string) => {
+    try {
+      const { user } = await authService.loginWithGoogle(idToken);
+      if (user.role !== 'passenger') {
+        await authService.logout();
+        return { success: false, error: 'Google sign-in is only for passengers.' };
+      }
+      applyUser(user);
+      return { success: true, passenger: user as Passenger };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Google sign-in failed' };
+    }
+  };
+
   const registerPassenger = async (input: {
     name: string;
     phone: string;
@@ -206,6 +223,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currentUser,
         userRole,
         loginPassenger,
+        loginPassengerWithGoogle,
         registerPassenger,
         loginDriver,
         signupDriver,
