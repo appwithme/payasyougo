@@ -146,6 +146,15 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
     setErrors({});
   };
 
+  const fillVehicleSample = () => {
+    setVehicleName('Toyota Corolla');
+    setVehicleNumber('GR 4321-25');
+    setVehicleColor('Silver');
+    clearFieldError('vehicleName');
+    clearFieldError('vehicleNumber');
+    clearFieldError('vehicleColor');
+  };
+
   const clearFieldError = (key: string) => {
     if (errors[key] || errors.form) {
       setErrors((prev) => ({ ...prev, [key]: undefined, form: undefined }));
@@ -599,12 +608,12 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
         />
         <TouchableOpacity
           style={styles.autofillBtn}
-          onPress={fillSignupSample}
+          onPress={fillVehicleSample}
           accessibilityRole="button"
           accessibilityLabel="Autofill vehicle sample"
         >
           <Ionicons name="flash-outline" size={16} color={COLORS.ink} />
-          <Text style={styles.autofillText}>Autofill sample details</Text>
+          <Text style={styles.autofillText}>Autofill car details</Text>
         </TouchableOpacity>
       </>
     );
