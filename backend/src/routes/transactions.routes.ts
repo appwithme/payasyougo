@@ -13,4 +13,12 @@ router.get('/', requireAuth, async (req: AuthRequest, res, next) => {
   }
 });
 
+router.post('/:id/rate', requireAuth, async (req: AuthRequest, res, next) => {
+  try {
+    res.json(await payments.rateTransaction(req.user!.sub, req.params.id, req.body));
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;
