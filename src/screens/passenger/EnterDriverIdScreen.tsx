@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -22,13 +22,37 @@ import { type } from '../../theme/typography';
 import { Driver } from '../../types';
 
 const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: any }) => {
-  const { from, to, fare } = route.params;
+  const { from, to, fare, prefillDriverId } = route.params;
 
   const [driverId, setDriverId] = useState('');
   const [foundDriver, setFoundDriver] = useState<Driver | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [looking, setLooking] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didPrefill = useRef(false);
+
+  const lookup = async (val: string) => {
+    if (val.length < 5) return;
+    setLooking(true);
+    try {
+      const driver = await lookupDriver(val);
+      setFoundDriver(driver);
+      setNotFound(false);
+    } catch {
+      setFoundDriver(null);
+      setNotFound(true);
+    } finally {
+      setLooking(false);
+    }
+  };
+
+  useEffect(() => {
+    if (didPrefill.current || !prefillDriverId) return;
+    didPrefill.current = true;
+    const val = String(prefillDriverId).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    setDriverId(val);
+    lookup(val);
+  }, [prefillDriverId]);
 
   const handleSearch = (text: string) => {
     const val = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -39,18 +63,8 @@ const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: an
     if (timer.current) clearTimeout(timer.current);
     if (val.length < 5) return;
 
-    timer.current = setTimeout(async () => {
-      setLooking(true);
-      try {
-        const driver = await lookupDriver(val);
-        setFoundDriver(driver);
-        setNotFound(false);
-      } catch {
-        setFoundDriver(null);
-        setNotFound(true);
-      } finally {
-        setLooking(false);
-      }
+    timer.current = setTimeout(() => {
+      lookup(val);
     }, 400);
   };
 
