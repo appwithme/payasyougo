@@ -30,7 +30,8 @@
       "favicon": "./assets/app-icon-v4.png"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-secure-store"
     ],
     "extra": {
       "eas": {
