@@ -17,6 +17,7 @@ import TripHistoryScreen from '../screens/passenger/TripHistoryScreen';
 import PassengerProfileScreen from '../screens/passenger/PassengerProfileScreen';
 import EditProfileScreen from '../screens/shared/EditProfileScreen';
 import SettingsScreen from '../screens/shared/SettingsScreen';
+import NotificationsSettingsScreen from '../screens/shared/NotificationsSettingsScreen';
 
 const Tab = createBottomTabNavigator<PassengerTabParamList>();
 const HomeStackNav = createNativeStackNavigator<PassengerHomeStackParamList>();
@@ -34,6 +35,10 @@ const HomeStack = () => (
     <HomeStackNav.Screen name="PassengerProfile" component={PassengerProfileScreen} />
     <HomeStackNav.Screen name="EditProfile" component={EditProfileScreen} />
     <HomeStackNav.Screen name="Settings" component={SettingsScreen} />
+    <HomeStackNav.Screen
+      name="NotificationsSettings"
+      component={NotificationsSettingsScreen}
+    />
   </HomeStackNav.Navigator>
 );
 
@@ -57,6 +62,10 @@ const ProfileStack = () => (
     <SimpleStack.Screen name="PassengerProfile" component={PassengerProfileScreen} />
     <SimpleStack.Screen name="EditProfile" component={EditProfileScreen} />
     <SimpleStack.Screen name="Settings" component={SettingsScreen} />
+    <SimpleStack.Screen
+      name="NotificationsSettings"
+      component={NotificationsSettingsScreen}
+    />
   </SimpleStack.Navigator>
 );
 
