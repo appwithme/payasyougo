@@ -14,7 +14,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../../context/AppContext';
 import TransactionCard from '../../components/TransactionCard';
-import Header from '../../components/Header';
 import { fetchFare } from '../../services/routesService';
 import { COLORS, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
@@ -80,37 +79,33 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
     }
   };
 
-  return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="dark-content" />
-      <Header
-        title="Trip history"
-        subtitle={
-          passengerTrips.length === 0
-            ? 'No trips yet'
-            : `${completed.length} paid · ${failedCount} failed`
-        }
-      />
-
-      <View style={styles.summary}>
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryValue}>{completed.length}</Text>
-          <Text style={styles.summaryLabel}>Paid trips</Text>
-        </View>
-        <View style={styles.divider} />
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryValue}>GH₵{totalSpent.toFixed(0)}</Text>
-          <Text style={styles.summaryLabel}>Spent</Text>
-        </View>
+  const listHeader = (
+    <View style={styles.top}>
+      <View style={styles.titleRow}>
+        <Text style={styles.title}>Trips</Text>
+        {completed.length > 0 ? (
+          <Text style={styles.spent}>
+            GH₵{totalSpent.toFixed(0)}
+            <Text style={styles.spentUnit}> spent</Text>
+          </Text>
+        ) : null}
       </View>
 
+      <Text style={styles.meta}>
+        {passengerTrips.length === 0
+          ? 'Fares you pay show up here'
+          : `${passengerTrips.length} total · ${completed.length} paid${
+              failedCount ? ` · ${failedCount} failed` : ''
+            }`}
+      </Text>
+
       {passengerTrips.length > 0 ? (
-        <View style={styles.tools}>
+        <>
           <View style={styles.search}>
             <Ionicons name="search-outline" size={18} color={COLORS.textMuted} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search route or driver"
+              placeholder="Route or driver"
               placeholderTextColor={COLORS.textMuted}
               value={query}
               onChangeText={setQuery}
@@ -137,36 +132,56 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
               );
             })}
           </View>
-        </View>
+
+          <Text style={styles.resultCount}>
+            Showing {filtered.length}
+            {filtered.length !== passengerTrips.length
+              ? ` of ${passengerTrips.length}`
+              : ''}
+          </Text>
+        </>
       ) : null}
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" />
 
       {passengerTrips.length === 0 ? (
-        <View style={styles.empty}>
-          <Text style={styles.emptyTitle}>No trips yet</Text>
-          <Text style={styles.emptySubtitle}>
-            Completed fares will show up here so you can rebook faster.
-          </Text>
+        <View style={styles.page}>
+          {listHeader}
+          <View style={styles.empty}>
+            <Text style={styles.emptyTitle}>No trips yet</Text>
+            <Text style={styles.emptySubtitle}>
+              After you pay a fare, rebook it from here in one tap.
+            </Text>
+          </View>
         </View>
       ) : filtered.length === 0 ? (
-        <View style={styles.empty}>
-          <Text style={styles.emptyTitle}>No matches</Text>
-          <Text style={styles.emptySubtitle}>
-            Try another search or clear the status filter.
-          </Text>
-          <TouchableOpacity
-            onPress={() => {
-              setQuery('');
-              setStatusFilter('all');
-            }}
-            style={styles.clearBtn}
-          >
-            <Text style={styles.clearText}>Clear filters</Text>
-          </TouchableOpacity>
+        <View style={styles.page}>
+          {listHeader}
+          <View style={styles.empty}>
+            <Text style={styles.emptyTitle}>No matches</Text>
+            <Text style={styles.emptySubtitle}>
+              Try another search or clear the status filter.
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                setQuery('');
+                setStatusFilter('all');
+              }}
+              style={styles.clearBtn}
+            >
+              <Text style={styles.clearText}>Clear filters</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       ) : (
         <FlatList
           data={filtered}
           keyExtractor={(item) => item.id}
+          ListHeaderComponent={listHeader}
           renderItem={({ item, index }) => (
             <View>
               <TransactionCard
@@ -183,14 +198,9 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
               ) : null}
             </View>
           )}
-          contentContainerStyle={[styles.list, { paddingBottom: tabPad }]}
+          contentContainerStyle={[styles.page, { paddingBottom: tabPad }]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          ListHeaderComponent={
-            <Text style={styles.resultCount}>
-              {filtered.length} of {passengerTrips.length}
-            </Text>
-          }
         />
       )}
     </SafeAreaView>
@@ -199,31 +209,40 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  summary: {
+  page: {
+    paddingHorizontal: SPACING.lg,
+  },
+  top: {
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.sm,
+    gap: 10,
+  },
+  titleRow: {
     flexDirection: 'row',
-    marginHorizontal: SPACING.lg,
-    marginBottom: SPACING.md,
-    paddingVertical: SPACING.sm,
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: SPACING.md,
   },
-  summaryItem: {
-    flex: 1,
-  },
-  summaryValue: {
+  title: {
     fontFamily: 'Sora_700Bold',
     fontSize: 28,
     color: COLORS.ink,
     letterSpacing: -0.8,
   },
-  summaryLabel: { ...type.caption, marginTop: 2 },
-  divider: {
-    width: StyleSheet.hairlineWidth,
-    backgroundColor: COLORS.borderStrong,
-    marginHorizontal: SPACING.lg,
+  spent: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 18,
+    color: COLORS.ink,
+    letterSpacing: -0.3,
   },
-  tools: {
-    paddingHorizontal: SPACING.lg,
-    gap: SPACING.sm,
-    marginBottom: SPACING.sm,
+  spentUnit: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 13,
+    color: COLORS.textMuted,
+  },
+  meta: {
+    ...type.caption,
+    marginTop: -4,
   },
   search: {
     flexDirection: 'row',
@@ -234,7 +253,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     paddingHorizontal: 14,
-    paddingVertical: 11,
+    paddingVertical: 10,
+    marginTop: 4,
   },
   searchInput: {
     flex: 1,
@@ -249,12 +269,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     borderRadius: RADIUS.full,
-    backgroundColor: COLORS.surface,
+    backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderStrong,
   },
   chipActive: {
     backgroundColor: COLORS.ink,
@@ -268,12 +288,10 @@ const styles = StyleSheet.create({
   chipTextActive: {
     color: COLORS.white,
   },
-  list: {
-    paddingHorizontal: SPACING.lg,
-  },
   resultCount: {
     ...type.caption,
-    marginBottom: 4,
+    fontSize: 12,
+    marginTop: 2,
   },
   rebookBusy: {
     flexDirection: 'row',
@@ -287,9 +305,7 @@ const styles = StyleSheet.create({
     color: COLORS.ink,
   },
   empty: {
-    flex: 1,
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.xl,
+    paddingTop: SPACING.lg,
     gap: 6,
   },
   emptyTitle: {
