@@ -36,7 +36,10 @@ export default function Button({
 }: Props) {
   const isDisabled = disabled || loading;
   const spinnerColor =
-    variant === 'primary' || variant === 'ink' ? COLORS.ink : COLORS.primaryDark;
+    variant === 'ink' || variant === 'primary' ? COLORS.white : COLORS.ink;
+  // primary button is yellow — use ink spinner there
+  const resolvedSpinner =
+    variant === 'primary' ? COLORS.ink : spinnerColor;
 
   return (
     <TouchableOpacity
@@ -46,7 +49,22 @@ export default function Button({
       style={[styles.base, styles[variant], isDisabled && styles.disabled, style]}
     >
       {loading ? (
-        <ActivityIndicator color={spinnerColor} size="small" />
+        <View style={styles.row}>
+          <ActivityIndicator color={resolvedSpinner} size="small" />
+          {!!title && (
+            <Text
+              style={[
+                styles.baseText,
+                styles[`${variant}Text` as const],
+                styles.loadingText,
+                textStyle,
+              ]}
+              numberOfLines={1}
+            >
+              {title}
+            </Text>
+          )}
+        </View>
       ) : (
         <View style={styles.row}>
           {icon ? <View style={styles.iconWrap}>{icon}</View> : null}
@@ -70,6 +88,7 @@ const styles = StyleSheet.create({
   },
   row: { flexDirection: 'row', alignItems: 'center' },
   iconWrap: { marginRight: SPACING.sm },
+  loadingText: { marginLeft: SPACING.sm, maxWidth: '85%' },
 
   primary: {
     backgroundColor: COLORS.primary,
