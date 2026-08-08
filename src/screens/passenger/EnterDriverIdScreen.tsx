@@ -14,7 +14,8 @@ import Input from '../../components/Input';
 import DriverCard from '../../components/DriverCard';
 import Button from '../../components/Button';
 import { lookupDriver } from '../../services/driversService';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import { COLORS, SPACING } from '../../theme/colors';
+import { type } from '../../theme/typography';
 import { Driver } from '../../types';
 
 const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: any }) => {
@@ -53,22 +54,19 @@ const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: an
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" />
-      <Header title="Driver Details" onBack={() => navigation.goBack()} transparent />
+      <Header title="Driver" onBack={() => navigation.goBack()} transparent />
 
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.tripSummary}>
-          <Ionicons name="map" size={20} color={COLORS.primaryDark} />
-          <Text style={styles.tripSummaryText}>
+          <Text style={styles.tripRoute}>
             {from} → {to}
           </Text>
-          <View style={styles.fareBadge}>
-            <Text style={styles.fareText}>GH₵{fare}</Text>
-          </View>
+          <Text style={styles.tripFare}>GH₵{fare}</Text>
         </View>
 
-        <Text style={styles.title}>Enter Driver ID</Text>
+        <Text style={styles.title}>Enter driver ID</Text>
         <Text style={styles.subtitle}>
-          Ask your driver for their unique ID (shown on their profile) to link the payment.
+          Ask your driver for the ID on their profile to link this payment.
         </Text>
 
         <View style={styles.inputWrap}>
@@ -91,15 +89,16 @@ const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: an
 
         {foundDriver && (
           <View style={styles.driverSection}>
-            <Text style={styles.foundLabel}>
-              <Ionicons name="checkmark-circle" size={16} color={COLORS.success} /> Driver Found
-            </Text>
+            <View style={styles.foundRow}>
+              <Ionicons name="checkmark-circle" size={16} color={COLORS.success} />
+              <Text style={styles.foundLabel}>Driver found</Text>
+            </View>
             <DriverCard driver={foundDriver} />
           </View>
         )}
 
         <Button
-          title="Continue to Payment"
+          title="Continue to payment"
           onPress={() =>
             navigation.navigate('ConfirmTrip', {
               from,
@@ -121,40 +120,23 @@ const styles = StyleSheet.create({
   tripSummary: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
+    justifyContent: 'space-between',
     marginBottom: SPACING.xl,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    gap: SPACING.sm,
-    ...SHADOW.sm,
+    paddingBottom: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
-  tripSummaryText: {
-    flex: 1,
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.base,
-    fontWeight: '700',
+  tripRoute: { ...type.bodyBold, flex: 1, marginRight: SPACING.md },
+  tripFare: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 18,
+    color: COLORS.ink,
   },
-  fareBadge: {
-    backgroundColor: COLORS.primaryMuted,
-    borderRadius: RADIUS.sm,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  fareText: { color: COLORS.ink, fontWeight: '800', fontSize: FONT_SIZE.sm },
-  title: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.xl,
-    fontWeight: '900',
-    letterSpacing: -0.5,
-  },
+  title: { ...type.heading },
   subtitle: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.base,
+    ...type.body,
     marginTop: SPACING.sm,
     marginBottom: SPACING.lg,
-    lineHeight: 22,
   },
   inputWrap: { marginBottom: SPACING.lg },
   looking: {
@@ -163,12 +145,16 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 8,
   },
-  lookingText: { color: COLORS.textMuted, fontSize: FONT_SIZE.sm },
+  lookingText: { ...type.caption },
   driverSection: { marginBottom: SPACING.lg, gap: SPACING.sm },
+  foundRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   foundLabel: {
+    ...type.label,
     color: COLORS.success,
-    fontWeight: '700',
-    fontSize: FONT_SIZE.sm,
   },
 });
 
