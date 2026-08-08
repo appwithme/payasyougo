@@ -23,7 +23,7 @@ app.get('/health', (_req, res) => {
 // Paystack webhook needs raw body — mount before json parser
 app.use('/api/payments/webhook', webhookRouter);
 
-app.use(express.json());
+app.use(express.json({ limit: '3mb' }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/routes', routesRoutes);
