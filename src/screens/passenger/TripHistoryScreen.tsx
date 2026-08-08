@@ -1,6 +1,3 @@
-// ============================================================
-// TRIP HISTORY SCREEN
-// ============================================================
 import React from 'react';
 import {
   View,
@@ -14,7 +11,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../../context/AppContext';
 import TransactionCard from '../../components/TransactionCard';
 import Header from '../../components/Header';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import { COLORS, SPACING, RADIUS } from '../../theme/colors';
+import { type } from '../../theme/typography';
 
 const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
   const { passengerTrips } = useApp();
@@ -25,7 +23,7 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" />
       <Header
-        title="Trip History"
+        title="Trip history"
         subtitle={`${passengerTrips.length} trips`}
         onBack={() => navigation.goBack()}
       />
@@ -33,22 +31,20 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
       <View style={styles.summary}>
         <View style={styles.summaryItem}>
           <Text style={styles.summaryValue}>{passengerTrips.length}</Text>
-          <Text style={styles.summaryLabel}>Total Trips</Text>
+          <Text style={styles.summaryLabel}>Trips</Text>
         </View>
         <View style={styles.divider} />
         <View style={styles.summaryItem}>
           <Text style={styles.summaryValue}>GH₵{totalSpent}</Text>
-          <Text style={styles.summaryLabel}>Total Spent</Text>
+          <Text style={styles.summaryLabel}>Spent</Text>
         </View>
       </View>
 
       {passengerTrips.length === 0 ? (
         <View style={styles.empty}>
-          <Ionicons name="car-outline" size={64} color={COLORS.textMuted} />
-          <Text style={styles.emptyTitle}>No Trips Yet</Text>
-          <Text style={styles.emptySubtitle}>
-            Your completed trips will appear here.
-          </Text>
+          <Ionicons name="bus-outline" size={40} color={COLORS.textMuted} />
+          <Text style={styles.emptyTitle}>No trips yet</Text>
+          <Text style={styles.emptySubtitle}>Completed trips will show up here.</Text>
         </View>
       ) : (
         <FlatList
@@ -69,33 +65,28 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   summary: {
     flexDirection: 'row',
-    backgroundColor: COLORS.primaryLight + '33',
-    margin: SPACING.lg,
-    borderRadius: RADIUS.xl,
+    backgroundColor: COLORS.surface,
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
+    borderRadius: RADIUS.lg,
     padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: COLORS.primaryLight,
+    borderColor: COLORS.border,
   },
   summaryItem: {
     flex: 1,
     alignItems: 'center',
   },
   summaryValue: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.xxl,
-    fontWeight: '900',
+    fontFamily: 'Sora_700Bold',
+    fontSize: 22,
+    color: COLORS.ink,
   },
-  summaryLabel: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.sm,
-    marginTop: 4,
-    fontWeight: '600',
-  },
+  summaryLabel: { ...type.caption, marginTop: 4 },
   divider: {
-    width: 2,
-    backgroundColor: COLORS.primaryLight,
+    width: 1,
+    backgroundColor: COLORS.border,
     marginHorizontal: SPACING.md,
-    borderRadius: 1,
   },
   list: {
     paddingHorizontal: SPACING.lg,
@@ -105,20 +96,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: SPACING.md,
+    gap: SPACING.sm,
     padding: SPACING.xl,
+    marginHorizontal: SPACING.lg,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    maxHeight: 200,
   },
-  emptyTitle: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.xl,
-    fontWeight: '800',
-  },
-  emptySubtitle: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.base,
-    textAlign: 'center',
-    fontWeight: '500',
-  },
+  emptyTitle: { ...type.subheading },
+  emptySubtitle: { ...type.caption, textAlign: 'center' },
 });
 
 export default TripHistoryScreen;
