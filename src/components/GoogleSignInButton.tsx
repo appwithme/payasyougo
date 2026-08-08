@@ -10,7 +10,8 @@ import {
   Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { WebView, ShouldStartLoadRequest } from 'react-native-webview';
+import { WebView } from 'react-native-webview';
+import type { ShouldStartLoadRequest } from 'react-native-webview/lib/WebViewTypes';
 import {
   buildGoogleAuthUrl,
   extractGoogleResult,
