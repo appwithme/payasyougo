@@ -12,10 +12,37 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../../components/Header';
+import { useApp } from '../../context/AppContext';
 import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
 
+type DocStatus = 'verified' | 'pending' | 'missing';
+
+function docStatus(number?: string | null, verified?: boolean): DocStatus {
+  if (!number?.trim()) return 'missing';
+  return verified ? 'verified' : 'pending';
+}
+
+function statusLabel(status: DocStatus) {
+  if (status === 'verified') return 'Verified';
+  if (status === 'pending') return 'Pending';
+  return 'Not on file';
+}
+
+function maskId(value?: string | null) {
+  const raw = (value || '').trim();
+  if (!raw) return '—';
+  if (raw.length <= 6) return raw;
+  return `${raw.slice(0, 4)}····${raw.slice(-3)}`;
+}
+
 export default function SettingsScreen({ navigation }: { navigation: any }) {
+  const { userRole, getDriverData } = useApp();
+  const driver = userRole === 'driver' ? getDriverData() : null;
+
+  const ghanaStatus = docStatus(driver?.ghanaCardNumber, driver?.ghanaCardVerified);
+  const licenseStatus = docStatus(driver?.licenseNumber, driver?.licenseVerified);
+
   const openSupport = async () => {
     const url = 'mailto:support@payasyougo.app?subject=PayAsYouGo%20support';
     const can = await Linking.canOpenURL(url);
@@ -24,6 +51,23 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
       return;
     }
     await Linking.openURL(url);
+  };
+
+  const showDocDetails = (
+    title: string,
+    number: string | undefined,
+    status: DocStatus
+  ) => {
+    const lines = [
+      `Status: ${statusLabel(status)}`,
+      number?.trim() ? `Number: ${number.trim()}` : 'No number on file yet.',
+    ];
+    if (status === 'pending') {
+      lines.push('Verification is still pending review.');
+    } else if (status === 'verified') {
+      lines.push('This document has been verified.');
+    }
+    Alert.alert(title, lines.join('\n'));
   };
 
   return (
@@ -44,6 +88,39 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
               onPress={() => navigation.navigate('NotificationsSettings')}
             />
           </View>
+
+          {driver ? (
+            <View style={styles.panel}>
+              <Text style={styles.panelTitle}>Identity documents</Text>
+              <Text style={styles.panelHint}>
+                Ghana Card and licence status for your driver account.
+              </Text>
+
+              <DocumentRow
+                icon="card-outline"
+                title="Ghana Card"
+                preview={maskId(driver.ghanaCardNumber)}
+                status={ghanaStatus}
+                onPress={() =>
+                  showDocDetails('Ghana Card', driver.ghanaCardNumber, ghanaStatus)
+                }
+              />
+              <View style={styles.rule} />
+              <DocumentRow
+                icon="document-text-outline"
+                title="Driver licence"
+                preview={maskId(driver.licenseNumber)}
+                status={licenseStatus}
+                onPress={() =>
+                  showDocDetails(
+                    'Driver licence',
+                    driver.licenseNumber,
+                    licenseStatus
+                  )
+                }
+              />
+            </View>
+          ) : null}
 
           <View style={styles.panel}>
             <Text style={styles.panelTitle}>Support</Text>
@@ -68,6 +145,55 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
           </View>
         </ScrollView>
       </SafeAreaView>
+    </View>
+  );
+}
+
+function DocumentRow({
+  icon,
+  title,
+  preview,
+  status,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  preview: string;
+  status: DocStatus;
+  onPress: () => void;
+}) {
+  return (
+    <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.75}>
+      <View style={styles.iconWrap}>
+        <Ionicons name={icon} size={18} color={COLORS.ink} />
+      </View>
+      <View style={styles.copy}>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.hint}>{preview}</Text>
+      </View>
+      <StatusPill status={status} />
+      <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+    </TouchableOpacity>
+  );
+}
+
+function StatusPill({ status }: { status: DocStatus }) {
+  const tone =
+    status === 'verified'
+      ? styles.pillVerified
+      : status === 'pending'
+        ? styles.pillPending
+        : styles.pillMissing;
+  const textTone =
+    status === 'verified'
+      ? styles.pillTextVerified
+      : status === 'pending'
+        ? styles.pillTextPending
+        : styles.pillTextMissing;
+
+  return (
+    <View style={[styles.pill, tone]}>
+      <Text style={[styles.pillText, textTone]}>{statusLabel(status)}</Text>
     </View>
   );
 }
@@ -128,6 +254,11 @@ const styles = StyleSheet.create({
     color: COLORS.ink,
     marginBottom: 4,
   },
+  panelHint: {
+    ...type.caption,
+    fontSize: 12,
+    marginBottom: 6,
+  },
   rule: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: COLORS.border,
@@ -159,5 +290,33 @@ const styles = StyleSheet.create({
   hint: {
     ...type.caption,
     fontSize: 12,
+  },
+  pill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  pillVerified: {
+    backgroundColor: COLORS.successLight,
+  },
+  pillPending: {
+    backgroundColor: COLORS.primaryMuted,
+  },
+  pillMissing: {
+    backgroundColor: COLORS.surfaceAlt,
+  },
+  pillText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 11,
+    letterSpacing: 0.2,
+  },
+  pillTextVerified: {
+    color: COLORS.success,
+  },
+  pillTextPending: {
+    color: COLORS.warning,
+  },
+  pillTextMissing: {
+    color: COLORS.textMuted,
   },
 });
