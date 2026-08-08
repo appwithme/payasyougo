@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -17,13 +17,75 @@ import { COLORS, FONT_SIZE, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
 
 const STEPS = [
-  { key: 'account', title: 'Account', subtitle: 'Your contact details' },
-  { key: 'ghana_card', title: 'Ghana Card', subtitle: 'Verify your national ID' },
-  { key: 'license', title: 'Licence', subtitle: 'Verify your driver licence' },
-  { key: 'vehicle', title: 'Vehicle', subtitle: 'Finish and create account' },
+  {
+    key: 'account',
+    label: 'Account',
+    title: 'Create driver account',
+    subtitle: 'Enter your contact details to get started.',
+  },
+  {
+    key: 'ghana_card',
+    label: 'ID',
+    title: 'Verify Ghana Card',
+    subtitle: 'Confirm your national ID before you can drive.',
+  },
+  {
+    key: 'license',
+    label: 'Licence',
+    title: 'Verify licence',
+    subtitle: 'Enter your DVLA driver licence number.',
+  },
+  {
+    key: 'vehicle',
+    label: 'Vehicle',
+    title: 'Vehicle details',
+    subtitle: 'Add your car info and finish registration.',
+  },
 ] as const;
 
 type StepKey = (typeof STEPS)[number]['key'];
+
+function SignupStepper({ activeIndex }: { activeIndex: number }) {
+  return (
+    <View style={styles.stepper}>
+      {STEPS.map((s, i) => {
+        const done = i < activeIndex;
+        const current = i === activeIndex;
+        const reached = done || current;
+        return (
+          <React.Fragment key={s.key}>
+            {i > 0 ? (
+              <View style={[styles.stepLine, reached && styles.stepLineActive]} />
+            ) : null}
+            <View style={styles.stepItem}>
+              <View
+                style={[
+                  styles.stepCircle,
+                  reached && styles.stepCircleActive,
+                  current && styles.stepCircleCurrent,
+                ]}
+              >
+                {done ? (
+                  <Ionicons name="checkmark" size={14} color={COLORS.white} />
+                ) : (
+                  <Text style={[styles.stepNumber, reached && styles.stepNumberActive]}>
+                    {i + 1}
+                  </Text>
+                )}
+              </View>
+              <Text
+                style={[styles.stepLabel, reached && styles.stepLabelActive]}
+                numberOfLines={1}
+              >
+                {s.label}
+              </Text>
+            </View>
+          </React.Fragment>
+        );
+      })}
+    </View>
+  );
+}
 
 const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
   const { signupDriver } = useApp();
@@ -50,7 +112,6 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
 
   const current = STEPS[step];
-  const progress = useMemo(() => ((step + 1) / STEPS.length) * 100, [step]);
 
   const clearFieldError = (key: string) => {
     if (errors[key] || errors.form) {
@@ -363,26 +424,9 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
         </TouchableOpacity>
 
         <View style={styles.header}>
-          <Text style={styles.stepEyebrow}>
-            Step {step + 1} of {STEPS.length}
-          </Text>
+          <SignupStepper activeIndex={step} />
           <Text style={styles.title}>{current.title}</Text>
           <Text style={styles.subtitle}>{current.subtitle}</Text>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${progress}%` }]} />
-          </View>
-          <View style={styles.stepDots}>
-            {STEPS.map((s, i) => (
-              <View
-                key={s.key}
-                style={[
-                  styles.dot,
-                  i <= step && styles.dotActive,
-                  i === step && styles.dotCurrent,
-                ]}
-              />
-            ))}
-          </View>
         </View>
 
         {!!errors.form && (
@@ -435,13 +479,64 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
   },
-  header: { marginBottom: SPACING.lg, gap: 6 },
-  stepEyebrow: {
-    fontFamily: 'DMSans_700Bold',
+  header: { marginBottom: SPACING.lg, gap: 8 },
+  stepper: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.md,
+    paddingHorizontal: 2,
+  },
+  stepItem: {
+    alignItems: 'center',
+    width: 56,
+    gap: 6,
+  },
+  stepCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: COLORS.borderStrong,
+    backgroundColor: COLORS.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepCircleActive: {
+    backgroundColor: COLORS.ink,
+    borderColor: COLORS.ink,
+  },
+  stepCircleCurrent: {
+    backgroundColor: COLORS.ink,
+    borderColor: COLORS.primary,
+    borderWidth: 3,
+  },
+  stepNumber: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 13,
+    color: COLORS.textMuted,
+  },
+  stepNumberActive: {
+    color: COLORS.white,
+  },
+  stepLabel: {
+    fontFamily: 'DMSans_500Medium',
     fontSize: 11,
-    letterSpacing: 1.3,
-    textTransform: 'uppercase',
-    color: COLORS.primary,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+  },
+  stepLabelActive: {
+    color: COLORS.ink,
+    fontFamily: 'DMSans_700Bold',
+  },
+  stepLine: {
+    flex: 1,
+    height: 2,
+    backgroundColor: COLORS.border,
+    marginTop: 15,
+    marginHorizontal: -4,
+  },
+  stepLineActive: {
+    backgroundColor: COLORS.ink,
   },
   title: {
     fontFamily: 'Sora_700Bold',
@@ -453,37 +548,7 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontSize: FONT_SIZE.base,
     fontFamily: 'DMSans_400Regular',
-  },
-  progressTrack: {
-    height: 6,
-    borderRadius: 999,
-    backgroundColor: COLORS.border,
-    overflow: 'hidden',
-    marginTop: 10,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: COLORS.ink,
-    borderRadius: 999,
-  },
-  stepDots: {
-    flexDirection: 'row',
-    gap: 6,
-    marginTop: 10,
-  },
-  dot: {
-    flex: 1,
-    height: 4,
-    borderRadius: 999,
-    backgroundColor: COLORS.border,
-  },
-  dotActive: {
-    backgroundColor: COLORS.ink,
-    opacity: 0.35,
-  },
-  dotCurrent: {
-    backgroundColor: COLORS.ink,
-    opacity: 1,
+    lineHeight: 22,
   },
   errorBox: {
     flexDirection: 'row',
