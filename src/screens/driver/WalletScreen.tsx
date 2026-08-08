@@ -1,34 +1,38 @@
-// ============================================================
-// WALLET SCREEN (Driver)
-// ============================================================
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  StatusBar,
+  TouchableOpacity,
   Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
-import Header from '../../components/Header';
-import WalletCard from '../../components/WalletCard';
+import InkSheetScreen from '../../components/InkSheetScreen';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import { type } from '../../theme/typography';
 import { useTabBarPadding } from '../../navigation/FloatingTabBar';
 
-const WalletScreen = ({ navigation }: { navigation: any }) => {
-  const { getDriverData, withdrawDriverFunds } = useApp();
+const WalletScreen = () => {
+  const { getDriverData, withdrawDriverFunds, refreshDriverWallet } = useApp();
   const tabPad = useTabBarPadding();
   const driver = getDriverData();
 
   const [withdrawAmount, setWithdrawAmount] = useState('');
-  const [network, setNetwork]               = useState('');
-  const [phone, setPhone]                   = useState('');
-  const [loading, setLoading]               = useState(false);
+  const [network, setNetwork] = useState('');
+  const [phone, setPhone] = useState('');
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshDriverWallet();
+    }, [refreshDriverWallet])
+  );
 
   const handleWithdraw = () => {
     const result = withdrawDriverFunds(parseFloat(withdrawAmount) || 0);
@@ -37,50 +41,70 @@ const WalletScreen = ({ navigation }: { navigation: any }) => {
 
   if (!driver) return null;
 
-  return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="dark-content" />
-      <Header title="Wallet" />
+  const balance = Number(driver.walletBalance || 0);
+  const today = Number(driver.todayEarnings || 0);
 
+  return (
+    <InkSheetScreen
+      hero={
+        <Animated.View entering={FadeInDown.delay(60).duration(420)} style={styles.heroBody}>
+          <Text style={styles.heroTitle}>Wallet</Text>
+          <Text style={styles.heroSub}>Campus MoMo earnings</Text>
+
+          <LinearGradient
+            colors={['rgba(255,255,255,0.12)', 'rgba(255,255,255,0.04)']}
+            style={styles.balanceHero}
+          >
+            <Text style={styles.balanceLabel}>Available balance</Text>
+            <Text style={styles.balanceValue}>GH₵{balance.toFixed(2)}</Text>
+            <View style={styles.balanceMeta}>
+              <Ionicons name="sunny-outline" size={14} color={COLORS.primary} />
+              <Text style={styles.balanceMetaText}>
+                GH₵{today.toFixed(2)} earned today
+              </Text>
+            </View>
+          </LinearGradient>
+        </Animated.View>
+      }
+      heroBottom={SPACING.lg}
+    >
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: tabPad }]}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <WalletCard
-          balance={driver.walletBalance}
-          todayEarnings={driver.todayEarnings}
-          totalTrips={driver.totalTrips}
-        />
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Earnings Summary</Text>
-          <View style={styles.earningsGrid}>
-            {[
-              { label: 'Today', value: driver.todayEarnings, color: COLORS.textPrimary },
-              { label: 'This Week', value: driver.todayEarnings * 5.5, color: COLORS.textPrimary },
-              { label: 'This Month', value: driver.walletBalance, color: COLORS.success },
-            ].map((item, idx) => (
-              <View key={item.label} style={styles.earningCard}>
-                <Text style={[styles.earningValue, { color: item.color }]}>
-                  GH₵{item.value.toFixed(2)}
-                </Text>
-                <Text style={styles.earningLabel}>{item.label}</Text>
-              </View>
-            ))}
+        <Animated.View entering={FadeInUp.delay(80).duration(420)} style={styles.stats}>
+          <View style={[styles.statTile, styles.statAccent]}>
+            <Text style={styles.statValue}>GH₵{today.toFixed(0)}</Text>
+            <Text style={styles.statLabel}>Today</Text>
           </View>
-        </View>
+          <View style={styles.statTile}>
+            <Text style={styles.statValue}>{driver.totalTrips ?? 0}</Text>
+            <Text style={styles.statLabel}>Paid trips</Text>
+          </View>
+          <View style={styles.statTile}>
+            <Text style={styles.statValue}>GH₵{balance.toFixed(0)}</Text>
+            <Text style={styles.statLabel}>All time</Text>
+          </View>
+        </Animated.View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Withdraw Funds</Text>
-          <View style={styles.withdrawCard}>
-            <View style={styles.withdrawHeader}>
-              <Ionicons name="phone-portrait" size={20} color={COLORS.primaryDark} />
-              <Text style={styles.withdrawHeaderText}>Mobile Money Transfer</Text>
+        <Animated.View entering={FadeInUp.delay(140).duration(420)} style={styles.section}>
+          <Text style={styles.sectionTitle}>Withdraw</Text>
+          <Text style={styles.sectionHint}>
+            Cash out to Mobile Money. Withdrawals are coming soon.
+          </Text>
+
+          <View style={styles.panel}>
+            <View style={styles.panelHeader}>
+              <View style={styles.panelIcon}>
+                <Ionicons name="phone-portrait-outline" size={16} color={COLORS.ink} />
+              </View>
+              <Text style={styles.panelHeaderText}>Mobile Money</Text>
             </View>
 
             <Input
               label="Amount (GH₵)"
-              placeholder={`Max: GH₵${driver.walletBalance.toFixed(2)}`}
+              placeholder={`Max GH₵${balance.toFixed(2)}`}
               value={withdrawAmount}
               onChangeText={setWithdrawAmount}
               keyboardType="numeric"
@@ -88,14 +112,14 @@ const WalletScreen = ({ navigation }: { navigation: any }) => {
             />
             <Input
               label="Network"
-              placeholder="e.g. MTN, Telecel"
+              placeholder="MTN or Telecel"
               value={network}
               onChangeText={setNetwork}
               iconName="wifi-outline"
             />
             <Input
-              label="Mobile Money Number"
-              placeholder="+233 XX XXX XXXX"
+              label="MoMo number"
+              placeholder="e.g. 0550000111"
               value={phone}
               onChangeText={setPhone}
               keyboardType="phone-pad"
@@ -104,77 +128,136 @@ const WalletScreen = ({ navigation }: { navigation: any }) => {
             />
 
             <Button
-              title="Request Withdrawal"
+              title="Request withdrawal"
+              variant="ink"
               onPress={handleWithdraw}
-              loading={loading}
-              icon={<Ionicons name="arrow-up-circle" size={20} color={COLORS.textPrimary} />}
+              icon={<Ionicons name="arrow-up-outline" size={18} color={COLORS.white} />}
             />
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
-    </SafeAreaView>
+    </InkSheetScreen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  scroll: { padding: SPACING.lg, gap: SPACING.xl },
-
-  section: { gap: SPACING.md },
-  sectionTitle: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.md,
-    fontWeight: '800',
+  heroBody: {
+    marginTop: SPACING.md,
+    gap: SPACING.md,
   },
-
-  earningsGrid: {
+  heroTitle: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 28,
+    color: COLORS.white,
+    letterSpacing: -0.8,
+  },
+  heroSub: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 15,
+    color: 'rgba(255,255,255,0.55)',
+    marginTop: -8,
+  },
+  balanceHero: {
+    borderRadius: RADIUS.lg,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    gap: 6,
+  },
+  balanceLabel: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 11,
+    letterSpacing: 1.3,
+    textTransform: 'uppercase',
+    color: COLORS.primary,
+  },
+  balanceValue: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 36,
+    color: COLORS.white,
+    letterSpacing: -1,
+  },
+  balanceMeta: {
     flexDirection: 'row',
-    gap: SPACING.sm,
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 4,
   },
-  earningCard: {
+  balanceMetaText: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.65)',
+  },
+  scroll: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.lg,
+    gap: SPACING.lg,
+  },
+  stats: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  statTile: {
     flex: 1,
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
-    padding: SPACING.md,
-    alignItems: 'center',
-    gap: 4,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
     ...SHADOW.sm,
   },
-  earningValue: {
-    fontSize: FONT_SIZE.base,
-    fontWeight: '900',
+  statAccent: {
+    backgroundColor: COLORS.primaryMuted,
+    borderColor: 'rgba(245,184,0,0.35)',
   },
-  earningLabel: {
-    color: COLORS.textSecondary,
+  statValue: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 18,
+    color: COLORS.ink,
+    letterSpacing: -0.4,
+  },
+  statLabel: {
+    ...type.caption,
+    marginTop: 4,
     fontSize: 11,
-    fontWeight: '600',
-    textTransform: 'uppercase',
   },
-
-  withdrawCard: {
+  section: { gap: 8 },
+  sectionTitle: {
+    fontFamily: 'Sora_600SemiBold',
+    fontSize: 17,
+    color: COLORS.ink,
+  },
+  sectionHint: {
+    ...type.caption,
+    marginBottom: 4,
+  },
+  panel: {
     backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.xl,
-    padding: SPACING.lg,
-    gap: SPACING.sm,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    gap: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.border,
-    ...SHADOW.md,
+    ...SHADOW.sm,
   },
-  withdrawHeader: {
+  panelHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
-    marginBottom: SPACING.md,
-    paddingBottom: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    gap: 10,
   },
-  withdrawHeaderText: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.base,
-    fontWeight: '800',
+  panelIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: COLORS.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  panelHeaderText: {
+    fontFamily: 'Sora_600SemiBold',
+    fontSize: 15,
+    color: COLORS.ink,
   },
 });
 
