@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { fetchRoutes } from '../services/routesService';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../theme/colors';
+import { COLORS, SPACING, RADIUS } from '../theme/colors';
+import { type } from '../theme/typography';
 import { RouteInfo } from '../types';
 
 interface RouteSelection {
@@ -98,12 +99,12 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
       >
         <View style={styles.dotFrom} />
         <View style={styles.selectorContent}>
-          <Text style={styles.selectorLabel}>FROM</Text>
+          <Text style={styles.selectorLabel}>From</Text>
           <Text style={[styles.selectorValue, !from && styles.placeholder]}>
-            {from || 'Select pickup location'}
+            {from || 'Select pickup'}
           </Text>
         </View>
-        <Ionicons name="chevron-down" size={20} color={COLORS.textMuted} />
+        <Ionicons name="chevron-down" size={18} color={COLORS.textMuted} />
       </TouchableOpacity>
 
       <View style={styles.connectorLine} />
@@ -117,18 +118,18 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
       >
         <View style={styles.dotTo} />
         <View style={styles.selectorContent}>
-          <Text style={styles.selectorLabel}>TO</Text>
+          <Text style={styles.selectorLabel}>To</Text>
           <Text style={[styles.selectorValue, !to && styles.placeholder]}>
             {to || (from ? 'Select destination' : 'Pick origin first')}
           </Text>
         </View>
-        <Ionicons name="chevron-down" size={20} color={COLORS.textMuted} />
+        <Ionicons name="chevron-down" size={18} color={COLORS.textMuted} />
       </TouchableOpacity>
 
       {from && to && !currentRoute && (
         <View style={styles.noRoute}>
-          <Ionicons name="alert-circle-outline" size={18} color={COLORS.error} />
-          <Text style={styles.noRouteText}>No available route for this combination</Text>
+          <Ionicons name="alert-circle-outline" size={16} color={COLORS.error} />
+          <Text style={styles.noRouteText}>No route for this combination</Text>
         </View>
       )}
 
@@ -146,7 +147,7 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
           <View style={styles.modalSheet}>
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>
-              {openPicker === 'from' ? 'Select Pickup Location' : 'Select Destination'}
+              {openPicker === 'from' ? 'Pickup' : 'Destination'}
             </Text>
             <FlatList
               data={openPicker === 'to' ? toOptions : locations}
@@ -157,8 +158,8 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
                   onPress={() => handleSelect(item)}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="location-outline" size={24} color={COLORS.textPrimary} />
                   <Text style={styles.optionText}>{item}</Text>
+                  <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
                 </TouchableOpacity>
               )}
             />
@@ -176,7 +177,6 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     borderWidth: 1,
     borderColor: COLORS.border,
-    ...SHADOW.sm,
   },
   centered: {
     alignItems: 'center',
@@ -184,13 +184,10 @@ const styles = StyleSheet.create({
     gap: 8,
     minHeight: 120,
   },
-  loadingText: {
-    color: COLORS.textMuted,
-    fontSize: FONT_SIZE.sm,
-  },
+  loadingText: { ...type.caption },
   errorText: {
+    ...type.caption,
     color: COLORS.error,
-    fontSize: FONT_SIZE.sm,
     textAlign: 'center',
     marginTop: 6,
   },
@@ -200,64 +197,53 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.xs,
   },
   dotFrom: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: COLORS.textPrimary,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.ink,
     marginRight: SPACING.md,
   },
   dotTo: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: COLORS.primary,
     marginRight: SPACING.md,
   },
   connectorLine: {
-    width: 2,
-    height: 24,
+    width: 1,
+    height: 20,
     backgroundColor: COLORS.border,
-    marginLeft: 6,
-    marginVertical: 4,
+    marginLeft: 4.5,
+    marginVertical: 2,
   },
   selectorContent: { flex: 1 },
-  selectorLabel: {
-    color: COLORS.textMuted,
-    fontSize: FONT_SIZE.xs,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
+  selectorLabel: { ...type.caption, fontSize: 12 },
   selectorValue: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.md,
-    fontWeight: '700',
+    ...type.bodyBold,
     marginTop: 2,
   },
   placeholder: {
     color: COLORS.textMuted,
-    fontWeight: '500',
+    fontFamily: 'DMSans_400Regular',
   },
   noRoute: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: SPACING.md,
-    backgroundColor: COLORS.errorLight,
-    borderRadius: RADIUS.sm,
-    padding: SPACING.sm,
+    gap: 6,
   },
   noRouteText: {
+    ...type.caption,
     color: COLORS.error,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: '600',
-    marginLeft: SPACING.xs,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(27, 43, 75, 0.4)',
     justifyContent: 'flex-end',
   },
   modalSheet: {
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.surface,
     borderTopLeftRadius: RADIUS.xl,
     borderTopRightRadius: RADIUS.xl,
     padding: SPACING.xl,
@@ -265,32 +251,26 @@ const styles = StyleSheet.create({
     maxHeight: '60%',
   },
   modalHandle: {
-    width: 48,
-    height: 5,
+    width: 36,
+    height: 4,
     backgroundColor: COLORS.border,
-    borderRadius: 3,
+    borderRadius: 2,
     alignSelf: 'center',
-    marginBottom: SPACING.xl,
+    marginBottom: SPACING.lg,
   },
   modalTitle: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.lg,
-    fontWeight: '800',
+    ...type.subheading,
     marginBottom: SPACING.md,
   },
   optionRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingVertical: SPACING.md,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  optionText: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.md,
-    marginLeft: SPACING.md,
-    fontWeight: '700',
-  },
+  optionText: { ...type.bodyBold },
 });
 
 export default RouteSelector;
