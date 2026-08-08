@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
 import TransactionCard from '../../components/TransactionCard';
 import Button from '../../components/Button';
@@ -39,7 +39,7 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
       </Animated.View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.payCard}>
+        <Animated.View entering={FadeInUp.delay(80).duration(450)} style={styles.payCard}>
           <View style={styles.payCardHeader}>
             <View style={styles.payIcon}>
               <Ionicons name="navigate-outline" size={22} color={COLORS.ink} />
@@ -65,9 +65,9 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
             onPress={() => navigation.navigate('BookTrip')}
             icon={<Ionicons name="arrow-forward" size={18} color={COLORS.white} />}
           />
-        </View>
+        </Animated.View>
 
-        <View style={styles.section}>
+        <Animated.View entering={FadeInUp.delay(160).duration(450)} style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent trips</Text>
             <TouchableOpacity onPress={() => navigation.navigate('TripHistory')}>
@@ -84,11 +84,16 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
               <Text style={styles.emptyText}>Your payments will appear here.</Text>
             </View>
           ) : (
-            recentTrips.map((trip) => (
-              <TransactionCard key={trip.id} item={trip} mode="passenger" />
+            recentTrips.map((trip, i) => (
+              <Animated.View
+                key={trip.id}
+                entering={FadeInUp.delay(200 + i * 60).duration(400)}
+              >
+                <TransactionCard item={trip} mode="passenger" />
+              </Animated.View>
             ))
           )}
-        </View>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
