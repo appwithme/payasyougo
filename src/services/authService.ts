@@ -1,0 +1,72 @@
+import { apiRequest, setToken } from './apiClient';
+import { Driver, Passenger } from '../types';
+
+export type AuthUser = (Passenger | Driver) & { role: 'passenger' | 'driver' };
+
+type AuthResponse = {
+  token: string;
+  user: AuthUser;
+};
+
+export async function registerPassenger(input: {
+  fullName: string;
+  phone: string;
+  email?: string;
+  password: string;
+}): Promise<AuthResponse> {
+  const res = await apiRequest<AuthResponse>('/api/auth/register', {
+    method: 'POST',
+    auth: false,
+    body: {
+      role: 'PASSENGER',
+      fullName: input.fullName,
+      phone: input.phone,
+      email: input.email || '',
+      password: input.password,
+    },
+  });
+  await setToken(res.token);
+  return res;
+}
+
+export async function registerDriver(input: {
+  fullName: string;
+  phone: string;
+  email?: string;
+  password: string;
+  vehicleInfo: string;
+}): Promise<AuthResponse> {
+  const res = await apiRequest<AuthResponse>('/api/auth/register', {
+    method: 'POST',
+    auth: false,
+    body: {
+      role: 'DRIVER',
+      fullName: input.fullName,
+      phone: input.phone,
+      email: input.email || '',
+      password: input.password,
+      vehicleInfo: input.vehicleInfo,
+    },
+  });
+  await setToken(res.token);
+  return res;
+}
+
+export async function login(phone: string, password: string): Promise<AuthResponse> {
+  const res = await apiRequest<AuthResponse>('/api/auth/login', {
+    method: 'POST',
+    auth: false,
+    body: { phone, password },
+  });
+  await setToken(res.token);
+  return res;
+}
+
+export async function fetchMe(): Promise<AuthUser> {
+  const res = await apiRequest<{ user: AuthUser }>('/api/auth/me');
+  return res.user;
+}
+
+export async function logout(): Promise<void> {
+  await setToken(null);
+}
