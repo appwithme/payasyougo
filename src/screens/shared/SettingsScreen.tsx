@@ -40,8 +40,8 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
             <SettingsRow
               icon="notifications-outline"
               title="Notifications"
-              hint="Coming soon"
-              disabled
+              hint="Payment and trip alerts"
+              onPress={() => navigation.navigate('NotificationsSettings')}
             />
           </View>
 
