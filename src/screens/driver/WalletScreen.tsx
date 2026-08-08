@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
 import InkSheetScreen from '../../components/InkSheetScreen';
@@ -114,21 +113,14 @@ const WalletScreen = () => {
       hero={
         <Animated.View entering={FadeInDown.delay(60).duration(420)} style={styles.heroBody}>
           <Text style={styles.heroTitle}>Wallet</Text>
-          <Text style={styles.heroSub}>Campus MoMo earnings</Text>
 
-          <LinearGradient
-            colors={['rgba(255,255,255,0.12)', 'rgba(255,255,255,0.04)']}
-            style={styles.balanceHero}
-          >
-            <Text style={styles.balanceLabel}>Available balance</Text>
+          <View style={styles.heroBalance}>
+            <Text style={styles.balanceLabel}>Available</Text>
             <Text style={styles.balanceValue}>GH₵{balance.toFixed(2)}</Text>
-            <View style={styles.balanceMeta}>
-              <Ionicons name="sunny-outline" size={14} color={COLORS.primary} />
-              <Text style={styles.balanceMetaText}>
-                GH₵{today.toFixed(2)} earned today
-              </Text>
-            </View>
-          </LinearGradient>
+            <Text style={styles.balanceToday}>
+              GH₵{today.toFixed(2)} earned today
+            </Text>
+          </View>
         </Animated.View>
       }
       heroBottom={SPACING.lg}
@@ -186,14 +178,14 @@ const WalletScreen = () => {
                 return (
                   <TouchableOpacity
                     key={p.id}
-                    style={[styles.providerChip, selected && styles.providerChipOn]}
+                    style={[styles.providerTile, selected && styles.providerTileOn]}
                     onPress={() => setProvider(p.id)}
                     activeOpacity={0.85}
                     accessibilityLabel={p.name}
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
                   >
-                    <Image source={p.logo} style={styles.providerLogo} resizeMode="contain" />
+                    <Image source={p.logo} style={styles.providerLogo} resizeMode="cover" />
                   </TouchableOpacity>
                 );
               })}
@@ -239,7 +231,7 @@ const WalletScreen = () => {
 const styles = StyleSheet.create({
   heroBody: {
     marginTop: SPACING.md,
-    gap: SPACING.md,
+    gap: SPACING.lg,
   },
   heroTitle: {
     fontFamily: 'Sora_700Bold',
@@ -247,42 +239,27 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     letterSpacing: -0.8,
   },
-  heroSub: {
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 15,
-    color: 'rgba(255,255,255,0.55)',
-    marginTop: -8,
-  },
-  balanceHero: {
-    borderRadius: RADIUS.lg,
-    padding: SPACING.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
+  heroBalance: {
     gap: 6,
   },
   balanceLabel: {
     fontFamily: 'DMSans_700Bold',
     fontSize: 11,
-    letterSpacing: 1.3,
+    letterSpacing: 1.4,
     textTransform: 'uppercase',
     color: COLORS.primary,
   },
   balanceValue: {
     fontFamily: 'Sora_700Bold',
-    fontSize: 36,
+    fontSize: 42,
     color: COLORS.white,
-    letterSpacing: -1,
+    letterSpacing: -1.4,
   },
-  balanceMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 4,
-  },
-  balanceMetaText: {
+  balanceToday: {
     fontFamily: 'DMSans_500Medium',
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.65)',
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.55)',
+    marginTop: 2,
   },
   scroll: {
     paddingHorizontal: SPACING.lg,
@@ -363,26 +340,22 @@ const styles = StyleSheet.create({
   },
   providerRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: SPACING.md,
   },
-  providerChip: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    borderRadius: RADIUS.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.surfaceAlt,
+  providerTile: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
-  providerChipOn: {
+  providerTileOn: {
     borderColor: COLORS.ink,
-    backgroundColor: COLORS.primaryMuted,
   },
   providerLogo: {
-    width: 40,
-    height: 40,
+    width: '100%',
+    height: '100%',
   },
   errorText: {
     fontFamily: 'DMSans_500Medium',
