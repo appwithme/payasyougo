@@ -241,24 +241,23 @@ export async function me(userId: string) {
 const profileSchema = z.object({
   fullName: z.string().min(2).optional(),
   phone: z.string().min(9).optional().or(z.literal('')),
-  email: z.string().email().optional().or(z.literal('')),
 });
 
 export async function updateProfile(userId: string, body: unknown) {
+  const raw = (body ?? {}) as Record<string, unknown>;
+  if ('email' in raw) {
+    throw new AppError('Email cannot be changed', 400);
+  }
+
   const input = profileSchema.parse(body);
 
   const data: {
     fullName?: string;
     phone?: string | null;
-    email?: string | null;
   } = {};
 
   if (typeof input.fullName === 'string' && input.fullName.trim()) {
     data.fullName = input.fullName.trim();
-  }
-
-  if (typeof input.email === 'string') {
-    data.email = input.email.trim() || null;
   }
 
   if (typeof input.phone === 'string') {
