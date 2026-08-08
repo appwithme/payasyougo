@@ -1,10 +1,14 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Linking } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreenNative from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  NavigationContainerRef,
+} from '@react-navigation/native';
+import * as ExpoLinking from 'expo-linking';
 import {
   useFonts,
   Sora_600SemiBold,
@@ -20,10 +24,113 @@ import { AppProvider } from './src/context/AppContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import AnimatedSplash from './src/screens/shared/SplashScreen';
 import { ONBOARDING_KEY } from './src/screens/shared/OnboardingScreen';
+import {
+  enableShotMode,
+  isShotMode,
+  setPendingShot,
+} from './src/dev/shotTour';
+import { useShotTour } from './src/dev/useShotTour';
 
 SplashScreenNative.preventAutoHideAsync().catch(() => undefined);
 
 type BootRoute = 'Onboarding' | 'Welcome';
+
+function parseShotId(url: string | null): string | null {
+  if (!url) return null;
+  const match =
+    url.match(/[?&/]shot[/:=]([^/&#?]+)/i) || url.match(/shot\/([^/&#?]+)/i);
+  return match?.[1] ? decodeURIComponent(match[1]) : null;
+}
+
+function AppShell({ initialRoute }: { initialRoute: BootRoute }) {
+  const navigationRef = useRef<NavigationContainerRef<any>>(null);
+  useShotTour(navigationRef);
+
+  const linking = {
+    prefixes: [ExpoLinking.createURL('/'), 'payasyougo://', 'exp://'],
+    config: {
+      screens: {
+        Onboarding: 'onboarding',
+        Welcome: 'welcome',
+        PassengerLogin: 'passenger-login',
+        PassengerSignup: 'passenger-signup',
+        DriverLogin: 'driver-login',
+        DriverSignup: 'driver-signup',
+        PassengerApp: {
+          path: 'passenger',
+          screens: {
+            HomeTab: {
+              path: 'home',
+              screens: {
+                PassengerDashboard: 'dashboard',
+                BookTrip: 'book',
+                EnterDriverId: 'enter-driver',
+                ScanDriverQr: 'scan-qr',
+                ConfirmTrip: 'confirm',
+                PaymentSuccess: 'success',
+                TripHistory: 'history',
+                PassengerProfile: 'profile',
+                EditProfile: 'edit-profile',
+                Settings: 'settings',
+                NotificationsSettings: 'notifications',
+              },
+            },
+            BookTab: 'book-tab',
+            HistoryTab: 'history-tab',
+            ProfileTab: 'profile-tab',
+          },
+        },
+        DriverApp: {
+          path: 'driver',
+          screens: {
+            DashboardTab: {
+              path: 'home',
+              screens: {
+                DriverDashboard: 'dashboard',
+                DriverQr: 'qr',
+                DriverProfile: 'profile',
+                EditProfile: 'edit-profile',
+                Settings: 'settings',
+                NotificationsSettings: 'notifications',
+                TransactionHistory: 'txns',
+              },
+            },
+            TxnTab: 'txns',
+            WalletTab: 'wallet',
+            ProfileTab: 'profile-tab',
+          },
+        },
+      },
+    },
+    async getInitialURL() {
+      const url = await Linking.getInitialURL();
+      const shot = parseShotId(url);
+      if (shot) {
+        enableShotMode();
+        setPendingShot(shot);
+      }
+      return url;
+    },
+    subscribe(listener: (url: string) => void) {
+      const sub = Linking.addEventListener('url', ({ url }) => {
+        const shot = parseShotId(url);
+        if (shot) {
+          enableShotMode();
+          setPendingShot(shot);
+        }
+        listener(url);
+      });
+      return () => sub.remove();
+    },
+  };
+
+  return (
+    <NavigationContainer ref={navigationRef} linking={linking}>
+      <StatusBar style="dark" />
+      <RootNavigator initialRouteName={initialRoute} />
+    </NavigationContainer>
+  );
+}
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -41,6 +148,15 @@ export default function App() {
   useEffect(() => {
     (async () => {
       try {
+        const url = await Linking.getInitialURL();
+        const shot = parseShotId(url);
+        if (shot) {
+          enableShotMode();
+          setPendingShot(shot);
+          await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
+          setInitialRoute('Welcome');
+          return;
+        }
         const done = await AsyncStorage.getItem(ONBOARDING_KEY);
         setInitialRoute(done === 'true' ? 'Welcome' : 'Onboarding');
       } catch {
@@ -49,10 +165,9 @@ export default function App() {
     })();
   }, []);
 
-  // Move into animated splash once fonts + route preference are ready
   useEffect(() => {
     if (fontsLoaded && initialRoute && phase === 'loading') {
-      setPhase('splash');
+      setPhase(isShotMode() ? 'app' : 'splash');
     }
   }, [fontsLoaded, initialRoute, phase]);
 
@@ -66,9 +181,8 @@ export default function App() {
     }
   }, []);
 
-  // Only hide native splash once our animated splash is on screen
   useEffect(() => {
-    if (phase === 'splash') {
+    if (phase === 'splash' || phase === 'app') {
       const t = setTimeout(() => {
         hideNativeSplash();
       }, 50);
@@ -96,10 +210,7 @@ export default function App() {
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
         <AppProvider>
-          <NavigationContainer>
-            <StatusBar style="dark" />
-            <RootNavigator initialRouteName={initialRoute} />
-          </NavigationContainer>
+          <AppShell initialRoute={initialRoute} />
         </AppProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
