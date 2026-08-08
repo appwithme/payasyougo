@@ -19,8 +19,10 @@ const DriverCard = ({ driver }: { driver: Driver | null }) => {
   if (!driver) return null;
 
   const full = Math.floor(driver.rating ?? 0);
-  const ratingLabel = Number(driver.rating).toFixed(1);
+  const hasRatings = (driver.ratingCount ?? 0) > 0;
+  const ratingLabel = hasRatings ? Number(driver.rating).toFixed(1) : 'New';
   const trips = driver.totalTrips ?? 0;
+  const tripLabel = trips === 1 ? '1 trip' : `${trips} trips`;
 
   return (
     <>
@@ -43,7 +45,9 @@ const DriverCard = ({ driver }: { driver: Driver | null }) => {
 
         <View style={styles.trailing}>
           <View style={styles.ratingPill}>
-            <Ionicons name="star" size={11} color={COLORS.primaryDark} />
+            {hasRatings ? (
+              <Ionicons name="star" size={11} color={COLORS.primaryDark} />
+            ) : null}
             <Text style={styles.ratingPillText}>{ratingLabel}</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
@@ -82,15 +86,24 @@ const DriverCard = ({ driver }: { driver: Driver | null }) => {
             </View>
 
             <View style={styles.starsRow}>
-              {Array.from({ length: 5 }, (_, i) => (
-                <Ionicons
-                  key={i}
-                  name={i < full ? 'star' : 'star-outline'}
-                  size={16}
-                  color={COLORS.primaryDark}
-                />
-              ))}
-              <Text style={styles.starsLabel}>{ratingLabel} rating</Text>
+              {hasRatings ? (
+                <>
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <Ionicons
+                      key={i}
+                      name={i < full ? 'star' : 'star-outline'}
+                      size={16}
+                      color={COLORS.primaryDark}
+                    />
+                  ))}
+                  <Text style={styles.starsLabel}>
+                    {ratingLabel} · {driver.ratingCount}{' '}
+                    {driver.ratingCount === 1 ? 'rating' : 'ratings'}
+                  </Text>
+                </>
+              ) : (
+                <Text style={styles.starsLabel}>No passenger ratings yet</Text>
+              )}
             </View>
 
             <View style={styles.detailCard}>
@@ -103,7 +116,7 @@ const DriverCard = ({ driver }: { driver: Driver | null }) => {
               <DetailRow
                 icon="navigate-outline"
                 label="Trips completed"
-                value={trips > 0 ? String(trips) : '—'}
+                value={tripLabel}
               />
               {driver.phone ? (
                 <>
