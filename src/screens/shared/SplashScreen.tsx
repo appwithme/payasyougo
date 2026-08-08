@@ -17,6 +17,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import BrandMark from '../../components/BrandMark';
+import AuthBlobBackground from '../../components/AuthBlobBackground';
 import { COLORS } from '../../theme/colors';
 
 const { height: H } = Dimensions.get('window');
@@ -101,6 +102,7 @@ export default function SplashScreen({ onFinish }: Props) {
   return (
     <Animated.View style={[styles.root, rootStyle]}>
       <StatusBar barStyle="dark-content" />
+      <AuthBlobBackground />
 
       <View style={styles.stage}>
         <View style={styles.markWrap}>
@@ -133,6 +135,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 32,
     marginBottom: H * 0.04,
+    zIndex: 1,
   },
   markWrap: {
     width: 220,
