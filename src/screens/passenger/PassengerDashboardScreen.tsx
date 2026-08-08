@@ -70,7 +70,7 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
         <Animated.View entering={FadeInUp.delay(160).duration(450)} style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent trips</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('TripHistory')}>
+            <TouchableOpacity onPress={() => navigation.navigate('HistoryTab' as never)}>
               <Text style={styles.seeAll}>See all</Text>
             </TouchableOpacity>
           </View>
