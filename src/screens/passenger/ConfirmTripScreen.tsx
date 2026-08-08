@@ -46,7 +46,7 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
   const { currentUser, refreshTrips } = useApp();
 
   const [provider, setProvider] = useState<MoMoProvider>('MTN');
-  const [momoPhone, setMomoPhone] = useState(currentUser?.phone || '');
+  const [momoPhone, setMomoPhone] = useState('0551234987');
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState('');
   const [error, setError] = useState('');
@@ -64,7 +64,7 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
     }
     setError('');
     setLoading(true);
-    setLoadingStep('Waiting for MoMo approval…');
+    setLoadingStep('Starting MoMo charge…');
 
     try {
       const paymentResult = await paymentService.processMoMoPayment({
@@ -74,17 +74,20 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
         driverCode: driver.id,
         from,
         to,
-        onStatus: setLoadingStep,
+        onStatus: (msg) => setLoadingStep(msg),
       });
 
       if (!paymentResult.success || !paymentResult.transaction) {
         setError(paymentResult.error || 'Payment failed.');
         setLoading(false);
+        setLoadingStep('');
         return;
       }
 
+      setLoadingStep('Confirming payment…');
       await refreshTrips();
       setLoading(false);
+      setLoadingStep('');
 
       navigation.navigate('PaymentSuccess', {
         transaction: paymentResult.transaction,
@@ -92,6 +95,7 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
       });
     } catch (err: any) {
       setLoading(false);
+      setLoadingStep('');
       setError(err?.message || 'Something went wrong. Try again.');
     }
   };
@@ -183,12 +187,13 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
               keyboardType="phone-pad"
               iconName="call-outline"
               style={{ marginTop: SPACING.md }}
+              editable={!loading}
             />
 
             <View style={styles.securityNote}>
               <Ionicons name="lock-closed-outline" size={14} color={COLORS.textMuted} />
               <Text style={styles.securityText}>
-                Approve the prompt on your phone. We never store your PIN.
+                Test mode: use 0551234987 (Paystack MTN test number). Live keys will use real MoMo.
               </Text>
             </View>
           </Animated.View>
@@ -203,7 +208,7 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
 
         <Animated.View entering={FadeInUp.delay(160).duration(400)} style={styles.footer}>
           <Button
-            title={loading ? loadingStep : `Pay ${fareLabel}`}
+            title={loading ? loadingStep || 'Processing…' : `Pay ${fareLabel}`}
             variant="ink"
             onPress={handlePay}
             loading={loading}
