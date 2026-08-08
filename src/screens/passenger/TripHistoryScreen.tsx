@@ -6,7 +6,6 @@ import {
   FlatList,
   TextInput,
   TouchableOpacity,
-  ActivityIndicator,
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -128,7 +127,7 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
       <View style={styles.empty}>
         <Text style={styles.emptyTitle}>No trips yet</Text>
         <Text style={styles.emptySubtitle}>
-          After you pay a fare, rebook it from here in one tap.
+          After you pay a fare, it shows up here.
         </Text>
       </View>
     ) : filtered.length === 0 ? (
@@ -162,13 +161,8 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
               mode="passenger"
               last={index === filtered.length - 1}
               onRebook={handleRebook}
+              rebooking={rebookingId === item.id}
             />
-            {rebookingId === item.id ? (
-              <View style={styles.rebookBusy}>
-                <ActivityIndicator size="small" color={COLORS.ink} />
-                <Text style={styles.rebookBusyText}>Opening route…</Text>
-              </View>
-            ) : null}
           </View>
         ))}
       </View>
@@ -331,17 +325,6 @@ const styles = StyleSheet.create({
     ...type.caption,
     fontSize: 12,
     marginBottom: 2,
-  },
-  rebookBusy: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: -6,
-    marginBottom: 10,
-  },
-  rebookBusyText: {
-    ...type.caption,
-    color: COLORS.ink,
   },
   empty: {
     backgroundColor: COLORS.surface,

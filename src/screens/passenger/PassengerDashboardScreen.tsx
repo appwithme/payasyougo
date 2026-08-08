@@ -149,6 +149,7 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
                   mode="passenger"
                   last={i === recentTrips.length - 1}
                   onRebook={handleRebook}
+                  rebooking={rebookingId === trip.id}
                 />
               ))
             )}
