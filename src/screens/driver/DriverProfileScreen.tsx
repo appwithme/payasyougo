@@ -118,6 +118,19 @@ const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
         </View>
 
         <Button
+          title="Edit profile"
+          variant="secondary"
+          onPress={() => navigation.navigate('EditProfile')}
+          icon={<Ionicons name="create-outline" size={20} color={COLORS.ink} />}
+        />
+        <Button
+          title="Settings"
+          variant="ghost"
+          onPress={() => navigation.navigate('Settings')}
+          icon={<Ionicons name="settings-outline" size={20} color={COLORS.ink} />}
+        />
+
+        <Button
           title="Logout"
           variant="danger"
           onPress={handleLogout}
