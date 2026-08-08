@@ -24,28 +24,55 @@ const TransactionCard = ({
   rebooking?: boolean;
 }) => {
   const isPassenger = mode === 'passenger';
-  const person = isPassenger ? item.driverName : item.passengerName;
+  const isWithdrawal = item.kind === 'withdrawal';
+  const person = isPassenger
+    ? item.driverName
+    : isWithdrawal
+      ? item.provider || 'Mobile Money'
+      : item.passengerName;
   const statusColor = STATUS_COLOR[item.status] ?? COLORS.textMuted;
+  const amountPrefix = isPassenger || isWithdrawal ? '−' : '+';
+  const title = isWithdrawal ? 'Withdrawal' : (
+    <>
+      {item.from}
+      <Text style={styles.arrow}> → </Text>
+      {item.to}
+    </>
+  );
 
   return (
     <View style={[styles.row, !last && styles.rowBorder]}>
       <View style={styles.main}>
         <Text style={styles.route} numberOfLines={1}>
-          {item.from}
-          <Text style={styles.arrow}> → </Text>
-          {item.to}
+          {title}
         </Text>
         <Text style={styles.meta} numberOfLines={1}>
-          {person}
-          {person ? ' · ' : ''}
-          {item.date} · {item.time}
+          {isWithdrawal ? (
+            <>
+              {item.to}
+              {item.to ? ' · ' : ''}
+              {item.date} · {item.time}
+            </>
+          ) : (
+            <>
+              {person}
+              {person ? ' · ' : ''}
+              {item.date} · {item.time}
+            </>
+          )}
         </Text>
       </View>
 
       <View style={styles.right}>
         <View style={styles.rightTop}>
-          <Text style={[styles.amount, !isPassenger && styles.amountCredit]}>
-            {isPassenger ? '−' : '+'}GH₵{Number(item.amount).toFixed(2)}
+          <Text
+            style={[
+              styles.amount,
+              !isPassenger && !isWithdrawal && styles.amountCredit,
+              isWithdrawal && styles.amountDebit,
+            ]}
+          >
+            {amountPrefix}GH₵{Number(item.amount).toFixed(2)}
           </Text>
           {isPassenger && onRebook ? (
             <TouchableOpacity
@@ -135,6 +162,9 @@ const styles = StyleSheet.create({
   },
   amountCredit: {
     color: COLORS.success,
+  },
+  amountDebit: {
+    color: COLORS.ink,
   },
   statusRow: {
     flexDirection: 'row',
