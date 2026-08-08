@@ -69,7 +69,7 @@ export default function EditProfileScreen({ navigation }: { navigation: any }) {
             showsVerticalScrollIndicator={false}
           >
             <Text style={styles.lead}>
-              Update your name and phone. Email stays linked to how you signed up.
+              Update your name and phone number.
             </Text>
 
             <View style={styles.form}>
@@ -96,9 +96,6 @@ export default function EditProfileScreen({ navigation }: { navigation: any }) {
                 editable={false}
                 placeholder="Email"
               />
-              <Text style={styles.lockedHint}>
-                Email can’t be changed — it was used for registration.
-              </Text>
             </View>
 
             <Button title="Save changes" onPress={handleSave} loading={saving} />
@@ -129,10 +126,5 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.border,
-  },
-  lockedHint: {
-    ...type.caption,
-    fontSize: 12,
-    marginTop: -4,
   },
 });
