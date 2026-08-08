@@ -24,7 +24,8 @@ Fill in:
 
 ```bash
 npm install
-npx prisma migrate dev --name init
+npx prisma migrate deploy
+npx prisma generate
 npm run prisma:seed
 ```
 
@@ -38,7 +39,17 @@ npm run dev
 
 Health check: `GET http://localhost:4000/health`
 
-## 5. Paystack webhook (local)
+## 5. Paystack MoMo testing
+
+You are on **test keys**. Real MoMo numbers are declined.
+
+| Network | Test number | Notes |
+|---------|-------------|--------|
+| MTN | `0551234987` | Official Paystack Ghana test MoMo number |
+
+In the app Confirm payment screen, use that number with the **MTN** tile.
+
+## 6. Paystack webhook (optional for local)
 
 ```bash
 ngrok http 4000
@@ -50,7 +61,7 @@ In Paystack Dashboard → Settings → API Keys & Webhooks, set:
 
 The app also **polls** `/api/payments/:id/status`, so payments can complete without a webhook during early testing.
 
-## 6. Point Expo at the API
+## 7. Point Expo at the API
 
 In the app root `.env`:
 

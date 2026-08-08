@@ -1,51 +1,87 @@
+<div align="center">
+
+<img src="./assets/brand/logo-pin-p.png" alt="PayAsYouGo" width="96" />
+
 # PayAsYouGo
 
-A mobile transport payment application for **University of Cape Coast (UCC)** students and commercial drivers. Passengers pay fixed campus route fares digitally via Mobile Money (MoMo); drivers track earnings, wallet balance, and trip history in real time.
+**Campus rides. Instant MoMo. Zero cash friction.**
 
-> **Status:** Expo app + Express API on Neon PostgreSQL. MoMo payments use **Paystack test** mode. See [backend/README.md](./backend/README.md) to create Neon and run the API.
+A mobile transport payment app for **University of Cape Coast (UCC)** — passengers pay fixed campus fares with Mobile Money; drivers get paid into a live wallet.
 
----
+<br />
 
-## Features
+![Expo](https://img.shields.io/badge/Expo-54-000000?style=for-the-badge&logo=expo&logoColor=white)
+![React Native](https://img.shields.io/badge/React%20Native-0.81-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Express](https://img.shields.io/badge/Express-API-404D59?style=for-the-badge&logo=express&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/Neon-PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white)
+![Paystack](https://img.shields.io/badge/Paystack-MoMo-00C3F7?style=for-the-badge&logo=paystack&logoColor=white)
 
-### Passengers
-- Register and log in (JWT session)
-- Select campus routes with fares from the API
-- Look up drivers by ID and pay via Paystack test MoMo
-- View trip history persisted in Neon
+<br />
 
-### Drivers
-- Register and log in
-- Dashboard with wallet balance, today's earnings, and total trips (from DB)
-- Transaction history
-- Profile with unique driver code
+<img src="./assets/brand/momo-icon.png" alt="MTN MoMo" width="40" height="40" />
+&nbsp;&nbsp;
+<img src="./assets/brand/telecel-cash.png" alt="Telecel Cash" width="40" height="40" />
 
----
+<sub>Pay with **MTN MoMo** or **Telecel Cash** via Paystack</sub>
 
-## Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| Mobile app | React Native, Expo ~54, TypeScript |
-| Navigation | React Navigation (Native Stack + Bottom Tabs) |
-| State | React Context API + SecureStore JWT |
-| API | Node.js, Express, Prisma |
-| Database | Neon PostgreSQL |
-| Payments | Paystack test Mobile Money |
+</div>
 
 ---
 
-## Getting Started
+## ✨ What it does
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 🧳 Passengers
+- Sign up / log in (JWT + optional Google)
+- Pick campus **From → To** with live fares
+- Link a driver by **Driver ID**
+- Pay MoMo (MTN / Telecel)
+- Rate the driver after payment
+- Trip history & profile photo
+
+</td>
+<td width="50%" valign="top">
+
+### 🚕 Drivers
+- Unique **Driver ID** for passengers
+- Live wallet & today’s earnings
+- Trip / payment history
+- Profile with vehicle + rating
+- Ratings update from passenger feedback
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🧱 Stack
+
+| Layer | Tech |
+|:------|:-----|
+| 📱 App | React Native · Expo ~54 · TypeScript |
+| 🧭 Nav | React Navigation (tabs + stacks) · floating tab bar |
+| 🔐 Session | SecureStore JWT · React Context |
+| 🖥️ API | Node.js · Express · Prisma |
+| 🗄️ DB | Neon PostgreSQL |
+| 💳 Payments | Paystack Mobile Money (GHS) |
+
+---
+
+## 🚀 Quick start
 
 ### Prerequisites
 
-- Node.js 18+
-- npm
-- [Expo Go](https://expo.dev/go) on your phone
-- A [Neon](https://console.neon.tech) Postgres project
-- [Paystack](https://dashboard.paystack.com) **test** API keys
+- Node.js **18+** & npm  
+- [Expo Go](https://expo.dev/go)  
+- [Neon](https://console.neon.tech) Postgres project  
+- [Paystack](https://dashboard.paystack.com) **test** API keys  
 
-### Installation
+### 1 · Install
 
 ```bash
 git clone <repository-url>
@@ -54,147 +90,163 @@ npm install
 cd backend && npm install && cd ..
 ```
 
-### Backend (Neon + Paystack)
+### 2 · Backend
 
-Follow **[backend/README.md](./backend/README.md)** to:
+Follow **[backend/README.md](./backend/README.md)** (Neon + Paystack + migrate + seed), then:
 
-1. Create a Neon project and copy `DATABASE_URL`
-2. Add Paystack test keys to `backend/.env`
-3. Run migrations + seed
-4. Start the API: `npm run api`
+```bash
+cd backend
+npm run dev
+```
 
-### App environment
+API health: `GET http://localhost:4000/health`
 
-Copy `.env.example` → `.env` in the project root:
+### 3 · App env
+
+Root `.env` (from `.env.example`):
 
 ```env
 EXPO_PUBLIC_API_URL=http://YOUR_LAN_IP:4000
 EXPO_PUBLIC_MOCK_MODE=false
 ```
 
-Use your Mac’s LAN IP when testing on a physical phone.
+> 💡 Use your Mac’s **LAN IP** (not `localhost`) when testing on a physical phone.
 
-### Run the app
+### 4 · Run Expo
 
 ```bash
 npx expo start
 ```
 
-Then scan the QR code with Expo Go (same Wi‑Fi as the API).
+Scan the QR with Expo Go (same Wi‑Fi as the API).
 
 ---
 
-## Accounts
+## 💳 Paystack MoMo (important)
 
-Register from the app, or use these seeded **admin test** accounts:
+Payments use Paystack’s **charge** API. The app collects:
+
+| Field | Why |
+|:------|:----|
+| Network (MTN / Telecel) | Maps to Paystack `mtn` / `vod` |
+| MoMo phone number | Where the payment prompt is sent |
+
+Receipt details (route, amount, driver, reference) come from **your database** after Paystack confirms — not from that phone field alone.
+
+### 🧪 Test mode
+
+With `sk_test_…` keys, **real phone numbers are declined**. Use Paystack’s official test number:
+
+| Network | Test number | Notes |
+|:--------|:------------|:------|
+| **MTN** | `0551234987` | No PIN / OTP in test |
+
+```text
+Declined. Please use the test mobile money number
+since you are doing a test transaction.
+```
+
+↑ That error means you’re on test keys with a live number — switch to `0551234987`.
+
+### Going live later
+
+1. Switch to Paystack **live** keys  
+2. Use real passenger MoMo numbers  
+3. Enable Ghana MoMo (GHS) on the Paystack business  
+4. Optionally set a webhook: `POST /api/payments/webhook`  
+   (the app also **polls** payment status, so local testing works without ngrok)
+
+---
+
+## 👤 Seeded test accounts
 
 | Role | Phone | Password | Driver ID |
-|------|-------|----------|-----------|
-| Passenger | `0550000111` | `admin123` | — |
-| Driver | `0240000111` | `admin123` | `DRV100` |
+|:-----|:------|:---------|:----------|
+| 🧳 Passenger | `0550000111` | `admin123` | — |
+| 🚕 Driver | `0240000111` | `admin123` | `DRV100` |
 
-Re-seed anytime with `cd backend && npm run prisma:seed`.
+```bash
+cd backend && npm run prisma:seed
+```
 
-### Google sign-in (passengers only)
+### Google sign-in (passengers)
 
-1. Create OAuth client IDs in [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (Web + iOS + Android)
-2. Paste into root `.env`:
+1. Create OAuth clients in [Google Cloud Console](https://console.cloud.google.com/apis/credentials)  
+2. Root `.env`:
    ```env
    EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=...
    EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=...
    EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=...
    ```
-3. Paste the same IDs into `backend/.env` as `GOOGLE_WEB_CLIENT_ID`, `GOOGLE_IOS_CLIENT_ID`, `GOOGLE_ANDROID_CLIENT_ID`
-4. Restart API + Expo
+3. Same IDs in `backend/.env` as `GOOGLE_*_CLIENT_ID`  
+4. Restart API + Expo  
 
 ---
 
-## Project Structure
+## 📁 Project layout
 
-```
+```text
 payasyougo/
-├── App.tsx
-├── app.json
-├── backend/                # Express + Prisma + Neon API
-│   ├── prisma/
-│   └── src/
-├── src/
-│   ├── components/
-│   ├── config/             # API URL env
-│   ├── context/
-│   ├── navigation/
-│   ├── screens/
-│   ├── services/           # apiClient, auth, payments, routes
-│   ├── theme/
-│   └── types/
-└── docs/
+├── 📱 App.tsx / app.json
+├── 🖼️ assets/brand/          # logo, MoMo & Telecel marks
+├── 🖥️ backend/
+│   ├── prisma/               # schema · migrations · seed
+│   └── src/                  # Express · Paystack · auth
+├── 📂 src/
+│   ├── components/           # DriverCard, RouteSelector, …
+│   ├── navigation/           # Floating tab bar + stacks
+│   ├── screens/              # passenger · driver · shared
+│   ├── services/             # API · payments · auth
+│   └── theme/                # colors · typography
+└── 📚 docs/
 ```
 
 ---
 
-## Campus Routes
+## 🗺️ Campus routes
 
-| From | To | Fare (GHS) |
-|------|-----|------------|
-| Science | Casford | 3.00 |
-| Science | Ayensu | 3.00 |
-| Ayensu | Science | 3.00 |
-| Ayensu | Casford | 5.00 |
-| Casford | Science | 3.00 |
-| Science | Valco | 3.00 |
-| Amissah Arthur | Science | 4.00 |
-| Amissah Arthur | Valco | 4.00 |
-| Amissah Arthur | KNH | 5.00 |
+Fares live in Neon (seeded). Stops include Science, Casford, Ayensu, Valco, Amissah Arthur, KNH, and more — **bidirectional** pairs where configured.
 
-Full route reference: [docs/ROUTES.md](./docs/ROUTES.md)
+Full reference → [docs/ROUTES.md](./docs/ROUTES.md)
 
 ---
 
-## Documentation
+## 📚 Docs
 
-| Document | Description |
-|----------|-------------|
-| [Overview](./docs/OVERVIEW.md) | Project background, goals, and scope |
-| [Architecture](./docs/ARCHITECTURE.md) | System design and directory layout |
-| [Data Models](./docs/DATA_MODELS.md) | Users, transactions, routes |
-| [Navigation](./docs/NAVIGATION.md) | Screen flows for passengers and drivers |
-| [Services](./docs/SERVICES.md) | Mock API layer and payment simulation |
-| [Backend Plan](./docs/BACKEND.md) | Neon PostgreSQL + Express API design |
-| [Implementation Plan](./docs/IMPLEMENTATION_PLAN.md) | Production roadmap |
-| [Tasks](./docs/TASKS.md) | Phase-by-phase checklist |
-| [User Manual](./docs/USER_MANUAL.md) | Passenger and driver guides |
-| [Deployment](./docs/DEPLOYMENT.md) | Staging and production deployment |
-| [Environment](./docs/ENVIRONMENT.md) | Environment variables reference |
+| Doc | About |
+|:----|:------|
+| [Overview](./docs/OVERVIEW.md) | Background & scope |
+| [Architecture](./docs/ARCHITECTURE.md) | System design |
+| [Data Models](./docs/DATA_MODELS.md) | Users, trips, routes |
+| [Navigation](./docs/NAVIGATION.md) | Screen flows |
+| [Backend](./docs/BACKEND.md) | API design |
+| [Environment](./docs/ENVIRONMENT.md) | Env vars |
+| [Deployment](./docs/DEPLOYMENT.md) | Ship checklist |
+| [User Manual](./docs/USER_MANUAL.md) | How to use the app |
 
 ---
 
-## Mock Mode
+## 👥 Authors
 
-The app runs in **mock mode** by default. All auth, data, and payments use in-memory services — no backend or real MoMo charges.
+**University of Cape Coast** — Department of Computer Science and Information Technology
 
-| Component | Mock behavior |
-|-----------|---------------|
-| Auth | Phone + password against seed data; signup OTP accepts any 4 digits |
-| Data | In-memory arrays in `AppContext` (lost on app restart) |
-| Payments | 2.5s simulated delay, ~95% success rate |
-| Notifications | In-process pub/sub (not push notifications) |
+- Gyebi Obed Bediako  
+- Oppong Emmanuel  
+- Rockson Mensah  
+- Shamsudeen N.A Osekre  
+- Mohammed Richmond Yaw  
 
----
-
-## Authors
-
-University of Cape Coast — Department of Computer Science and Information Technology
-
-- Gyebi Obed Bediako
-- Oppong Emmanuel
-- Rockson Mensah
-- Shamsudeen N.A Osekre
-- Mohammed Richmond Yaw
-
-**Supervisor:** Mr. Sandro Amofa
+**Supervisor:** Mr. Sandro Amofa  
 
 ---
 
-## License
+## 📄 License
 
 See [LICENSE](./LICENSE).
+
+<div align="center">
+<br />
+<img src="./assets/brand/logo-pin-p.png" alt="" width="36" />
+<br />
+<sub>PayAsYouGo · UCC campus MoMo</sub>
+</div>
