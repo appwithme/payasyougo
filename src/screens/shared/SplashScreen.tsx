@@ -6,7 +6,6 @@ import {
   StatusBar,
   Dimensions,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   Easing,
   interpolate,
@@ -101,13 +100,7 @@ export default function SplashScreen({ onFinish }: Props) {
 
   return (
     <Animated.View style={[styles.root, rootStyle]}>
-      <StatusBar barStyle="light-content" />
-
-      <LinearGradient
-        colors={['#243552', '#1B2B4B', '#121C30']}
-        locations={[0, 0.5, 1]}
-        style={StyleSheet.absoluteFill}
-      />
+      <StatusBar barStyle="dark-content" />
 
       <View style={styles.stage}>
         <View style={styles.markWrap}>
@@ -132,7 +125,7 @@ export default function SplashScreen({ onFinish }: Props) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: COLORS.ink,
+    backgroundColor: '#FFFFFF',
   },
   stage: {
     flex: 1,
@@ -162,17 +155,17 @@ const styles = StyleSheet.create({
   brand: {
     fontFamily: 'Sora_700Bold',
     fontSize: 34,
-    color: COLORS.white,
+    color: COLORS.ink,
     letterSpacing: -1.3,
   },
   brandGo: {
-    color: COLORS.primary,
+    color: COLORS.primaryDark,
   },
   tag: {
     marginTop: 8,
     fontFamily: 'DMSans_500Medium',
     fontSize: 14,
-    color: 'rgba(255,255,255,0.55)',
+    color: COLORS.textMuted,
     letterSpacing: 0.4,
   },
 });

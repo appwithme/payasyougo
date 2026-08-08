@@ -1,60 +1,26 @@
 import React from 'react';
-import { View, ViewStyle } from 'react-native';
-import CustomBrandMark from './CustomBrandMark';
-import { COLORS } from '../theme/colors';
+import { Image, View, ViewStyle, ImageStyle, StyleSheet } from 'react-native';
 
 type Props = {
   size?: number;
   style?: ViewStyle;
+  /** Kept for call-site compatibility — all variants use the pin-P mark */
   variant?: 'pin3d' | 'icon' | 'pin' | 'squircle';
 };
 
-export default function BrandMark({ size = 72, style, variant = 'pin3d' }: Props) {
-  if (variant === 'pin') {
-    const dot = size * 0.22;
-    return (
-      <View
-        style={[
-          {
-            width: size,
-            height: size,
-            borderRadius: size * 0.28,
-            backgroundColor: COLORS.primary,
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: size * 0.08,
-          },
-          style,
-        ]}
-      >
-        <View
-          style={{
-            width: dot,
-            height: dot,
-            borderRadius: dot / 2,
-            backgroundColor: COLORS.ink,
-          }}
-        />
-        <View
-          style={{
-            width: size * 0.08,
-            height: size * 0.2,
-            borderRadius: 2,
-            backgroundColor: COLORS.ink,
-          }}
-        />
-        <View
-          style={{
-            width: dot,
-            height: dot,
-            borderRadius: 2,
-            backgroundColor: COLORS.ink,
-            transform: [{ rotate: '45deg' }],
-          }}
-        />
-      </View>
-    );
-  }
+const LOGO = require('../../assets/brand/logo-pin-p.png');
 
-  return <CustomBrandMark size={size} style={style} />;
+/**
+ * App brand mark — custom pin + P logo.
+ */
+export default function BrandMark({ size = 72, style }: Props) {
+  return (
+    <View style={[{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }, style]}>
+      <Image
+        source={LOGO}
+        style={{ width: size, height: size } as ImageStyle}
+        resizeMode="contain"
+      />
+    </View>
+  );
 }
