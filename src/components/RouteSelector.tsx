@@ -1,7 +1,4 @@
-// ============================================================
-// ROUTE SELECTOR COMPONENT
-// ============================================================
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,11 +6,11 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LOCATIONS, ROUTES } from '../data/mockData';
+import { fetchRoutes } from '../services/routesService';
 import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../theme/colors';
-
 import { RouteInfo } from '../types';
 
 interface RouteSelection {
@@ -26,10 +23,28 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
   const [from, setFrom] = useState<string | null>(null);
   const [to, setTo] = useState<string | null>(null);
   const [openPicker, setOpenPicker] = useState<'from' | 'to' | null>(null);
+  const [locations, setLocations] = useState<string[]>([]);
+  const [routes, setRoutes] = useState<RouteInfo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await fetchRoutes();
+        setLocations(data.locations);
+        setRoutes(data.routes);
+      } catch (err: any) {
+        setError(err?.message || 'Failed to load routes');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   const getRoute = (f: string | null, t: string | null) => {
     if (!f || !t) return null;
-    return ROUTES.find(r => r.from === f && r.to === t) || null;
+    return routes.find((r) => r.from === f && r.to === t) || null;
   };
 
   const handleSelect = (location: string) => {
@@ -39,7 +54,10 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
     if (openPicker === 'from') {
       newFrom = location;
       setFrom(location);
-      if (location === to) { newTo = null; setTo(null); }
+      if (location === to) {
+        newTo = null;
+        setTo(null);
+      }
     } else {
       newTo = location;
       setTo(location);
@@ -51,7 +69,25 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
   };
 
   const currentRoute = getRoute(from, to);
-  const toOptions = LOCATIONS.filter(l => l !== from);
+  const toOptions = locations.filter((l) => l !== from);
+
+  if (loading) {
+    return (
+      <View style={[styles.wrapper, styles.centered]}>
+        <ActivityIndicator color={COLORS.ink} />
+        <Text style={styles.loadingText}>Loading routes…</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.wrapper, styles.centered]}>
+        <Ionicons name="cloud-offline-outline" size={22} color={COLORS.error} />
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.wrapper}>
@@ -74,7 +110,9 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
 
       <TouchableOpacity
         style={styles.selector}
-        onPress={() => { if (from) setOpenPicker('to'); }}
+        onPress={() => {
+          if (from) setOpenPicker('to');
+        }}
         activeOpacity={from ? 0.8 : 0.4}
       >
         <View style={styles.dotTo} />
@@ -111,7 +149,7 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
               {openPicker === 'from' ? 'Select Pickup Location' : 'Select Destination'}
             </Text>
             <FlatList
-              data={openPicker === 'to' ? toOptions : LOCATIONS}
+              data={openPicker === 'to' ? toOptions : locations}
               keyExtractor={(item) => item}
               renderItem={({ item }) => (
                 <TouchableOpacity
@@ -119,11 +157,7 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
                   onPress={() => handleSelect(item)}
                   activeOpacity={0.7}
                 >
-                  <Ionicons
-                    name="location-outline"
-                    size={24}
-                    color={COLORS.textPrimary}
-                  />
+                  <Ionicons name="location-outline" size={24} color={COLORS.textPrimary} />
                   <Text style={styles.optionText}>{item}</Text>
                 </TouchableOpacity>
               )}
@@ -143,6 +177,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     ...SHADOW.sm,
+  },
+  centered: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    minHeight: 120,
+  },
+  loadingText: {
+    color: COLORS.textMuted,
+    fontSize: FONT_SIZE.sm,
+  },
+  errorText: {
+    color: COLORS.error,
+    fontSize: FONT_SIZE.sm,
+    textAlign: 'center',
+    marginTop: 6,
   },
   selector: {
     flexDirection: 'row',
@@ -201,8 +251,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: SPACING.xs,
   },
-
-  // Modal
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
