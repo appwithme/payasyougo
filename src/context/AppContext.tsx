@@ -252,6 +252,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentUser(user);
       return { success: true };
     } catch (err: any) {
+      if (err?.status === 401) {
+        await authService.logout();
+        setCurrentUser(null);
+        setUserRole(null);
+        return {
+          success: false,
+          error: 'Your session expired. Please sign in again.',
+        };
+      }
       return { success: false, error: err?.message || 'Could not update profile' };
     }
   };
