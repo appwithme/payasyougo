@@ -17,7 +17,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import CustomBrandMark from '../../components/CustomBrandMark';
+import BrandMark from '../../components/BrandMark';
 import { COLORS } from '../../theme/colors';
 
 const { height: H } = Dimensions.get('window');
@@ -113,7 +113,7 @@ export default function SplashScreen({ onFinish }: Props) {
         <View style={styles.markWrap}>
           <Animated.View pointerEvents="none" style={[styles.ring, ringStyle]} />
           <Animated.View style={markStyle}>
-            <CustomBrandMark size={132} />
+            <BrandMark size={132} />
           </Animated.View>
         </View>
 
