@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   ScrollView,
   StatusBar,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  ImageSourcePropType,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,10 +24,21 @@ import { COLORS, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { MoMoProvider } from '../../types';
 
-const PROVIDERS: { id: MoMoProvider; name: string; short: string; tint: string }[] = [
-  { id: 'MTN', name: 'MTN MoMo', short: 'MTN', tint: '#FFCC00' },
-  { id: 'VODAFONE', name: 'Telecel Cash', short: 'Telecel', tint: '#E60000' },
-  { id: 'AIRTELTIGO', name: 'AT Money', short: 'AT', tint: '#003399' },
+const PROVIDERS: {
+  id: MoMoProvider;
+  name: string;
+  logo: ImageSourcePropType;
+}[] = [
+  {
+    id: 'MTN',
+    name: 'MTN MoMo',
+    logo: require('../../../assets/brand/momo-icon.png'),
+  },
+  {
+    id: 'VODAFONE',
+    name: 'Telecel Cash',
+    logo: require('../../../assets/brand/telecel-cash.png'),
+  },
 ];
 
 const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any }) => {
@@ -150,15 +163,9 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
                     onPress={() => setProvider(p.id)}
                     activeOpacity={0.85}
                   >
-                    <View
-                      style={[
-                        styles.providerDot,
-                        { backgroundColor: p.tint },
-                        active && styles.providerDotActive,
-                      ]}
-                    />
+                    <Image source={p.logo} style={styles.providerLogo} resizeMode="cover" />
                     <Text style={[styles.providerText, active && styles.providerTextActive]}>
-                      {p.short}
+                      {p.name}
                     </Text>
                   </TouchableOpacity>
                 );
@@ -283,26 +290,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 10,
     backgroundColor: COLORS.surface,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: COLORS.border,
     borderRadius: RADIUS.md,
     paddingVertical: 14,
+    paddingHorizontal: 12,
   },
   providerChipActive: {
-    backgroundColor: COLORS.ink,
     borderColor: COLORS.ink,
+    backgroundColor: COLORS.surfaceAlt,
   },
-  providerDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    opacity: 0.9,
-  },
-  providerDotActive: {
-    borderWidth: 1.5,
-    borderColor: COLORS.white,
+  providerLogo: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
   },
   providerText: {
     ...type.label,
@@ -310,7 +313,7 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
   providerTextActive: {
-    color: COLORS.white,
+    color: COLORS.ink,
   },
 
   securityNote: {
