@@ -24,7 +24,7 @@ const DriverLoginScreen = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!phone.trim()) {
       setError('Please enter your phone number');
       return;
@@ -35,11 +35,9 @@ const DriverLoginScreen = ({ navigation }: { navigation: any }) => {
     }
     setError('');
     setLoading(true);
-    setTimeout(() => {
-      const result = loginDriver(phone.trim(), password);
-      setLoading(false);
-      if (!result.success) setError(result.error || 'Invalid credentials');
-    }, 800);
+    const result = await loginDriver(phone.trim(), password);
+    setLoading(false);
+    if (!result.success) setError(result.error || 'Invalid credentials');
   };
 
   return (
@@ -59,14 +57,6 @@ const DriverLoginScreen = ({ navigation }: { navigation: any }) => {
           <Text style={styles.title}>Driver portal</Text>
           <Text style={styles.subtitle}>Track fares, wallet, and daily earnings</Text>
         </Animated.View>
-
-        <View style={styles.hint}>
-          <Ionicons name="key-outline" size={18} color={COLORS.ink} />
-          <Text style={styles.hintText}>
-            Demo · <Text style={styles.hintBold}>0240000001</Text> /{' '}
-            <Text style={styles.hintBold}>driver123</Text>
-          </Text>
-        </View>
 
         {!!error && (
           <View style={styles.errorBox}>
