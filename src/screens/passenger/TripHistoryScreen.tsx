@@ -13,9 +13,11 @@ import TransactionCard from '../../components/TransactionCard';
 import Header from '../../components/Header';
 import { COLORS, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
+import { useTabBarPadding } from '../../navigation/FloatingTabBar';
 
 const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
   const { passengerTrips } = useApp();
+  const tabPad = useTabBarPadding();
 
   const totalSpent = passengerTrips.reduce((sum, t) => sum + t.amount, 0);
 
@@ -53,7 +55,7 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
           renderItem={({ item }) => (
             <TransactionCard item={item} mode="passenger" />
           )}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[styles.list, { paddingBottom: tabPad }]}
           showsVerticalScrollIndicator={false}
         />
       )}
@@ -90,7 +92,6 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingHorizontal: SPACING.lg,
-    paddingBottom: 100,
   },
   empty: {
     flex: 1,
