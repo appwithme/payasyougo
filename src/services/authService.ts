@@ -35,6 +35,8 @@ export async function registerDriver(input: {
   email?: string;
   password: string;
   vehicleInfo: string;
+  ghanaCardNumber: string;
+  licenseNumber: string;
 }): Promise<AuthResponse> {
   const res = await apiRequest<AuthResponse>('/api/auth/register', {
     method: 'POST',
@@ -46,10 +48,23 @@ export async function registerDriver(input: {
       email: input.email || '',
       password: input.password,
       vehicleInfo: input.vehicleInfo,
+      ghanaCardNumber: input.ghanaCardNumber,
+      licenseNumber: input.licenseNumber,
     },
   });
   await setToken(res.token);
   return res;
+}
+
+export async function verifyDriverIdentity(input: {
+  type: 'ghana_card' | 'license';
+  number: string;
+}): Promise<{ verified: boolean; normalized: string; message: string }> {
+  return apiRequest('/api/auth/verify-id', {
+    method: 'POST',
+    auth: false,
+    body: input,
+  });
 }
 
 export async function login(phone: string, password: string): Promise<AuthResponse> {
