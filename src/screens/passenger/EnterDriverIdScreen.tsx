@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import Header from '../../components/Header';
 import Input from '../../components/Input';
 import DriverCard from '../../components/DriverCard';
@@ -57,19 +58,21 @@ const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: an
       <Header title="Driver" onBack={() => navigation.goBack()} transparent />
 
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        <View style={styles.tripSummary}>
+        <Animated.View entering={FadeInDown.duration(350)} style={styles.tripSummary}>
           <Text style={styles.tripRoute}>
             {from} → {to}
           </Text>
           <Text style={styles.tripFare}>GH₵{fare}</Text>
-        </View>
+        </Animated.View>
 
-        <Text style={styles.title}>Enter driver ID</Text>
-        <Text style={styles.subtitle}>
-          Ask your driver for the ID on their profile to link this payment.
-        </Text>
+        <Animated.View entering={FadeInDown.delay(60).duration(400)}>
+          <Text style={styles.title}>Enter driver ID</Text>
+          <Text style={styles.subtitle}>
+            Ask your driver for the ID on their profile to link this payment.
+          </Text>
+        </Animated.View>
 
-        <View style={styles.inputWrap}>
+        <Animated.View entering={FadeInUp.delay(100).duration(400)} style={styles.inputWrap}>
           <Input
             label="Driver ID"
             placeholder="e.g. DRV001"
@@ -85,30 +88,32 @@ const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: an
               <Text style={styles.lookingText}>Looking up driver…</Text>
             </View>
           )}
-        </View>
+        </Animated.View>
 
         {foundDriver && (
-          <View style={styles.driverSection}>
+          <Animated.View entering={FadeInUp.duration(350)} style={styles.driverSection}>
             <View style={styles.foundRow}>
               <Ionicons name="checkmark-circle" size={16} color={COLORS.success} />
               <Text style={styles.foundLabel}>Driver found</Text>
             </View>
             <DriverCard driver={foundDriver} />
-          </View>
+          </Animated.View>
         )}
 
-        <Button
-          title="Continue to payment"
-          onPress={() =>
-            navigation.navigate('ConfirmTrip', {
-              from,
-              to,
-              fare,
-              driver: foundDriver,
-            })
-          }
-          disabled={!foundDriver}
-        />
+        <Animated.View entering={FadeInUp.delay(140).duration(400)}>
+          <Button
+            title="Continue to payment"
+            onPress={() =>
+              navigation.navigate('ConfirmTrip', {
+                from,
+                to,
+                fare,
+                driver: foundDriver,
+              })
+            }
+            disabled={!foundDriver}
+          />
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
