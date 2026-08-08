@@ -15,11 +15,9 @@ export type GoogleProfile = {
  * Accepts web / iOS / Android client IDs configured in env.
  */
 export async function verifyGoogleIdToken(idToken: string): Promise<GoogleProfile> {
-  const audiences = [
-    env.GOOGLE_WEB_CLIENT_ID,
-    env.GOOGLE_IOS_CLIENT_ID,
-    env.GOOGLE_ANDROID_CLIENT_ID,
-  ].filter((v): v is string => !!v && !v.includes('replace'));
+  const audiences = [env.GOOGLE_WEB_CLIENT_ID, env.GOOGLE_IOS_CLIENT_ID, env.GOOGLE_ANDROID_CLIENT_ID]
+    .map((v) => (v || '').trim())
+    .filter((v) => v && !v.includes('replace') && v.length > 20);
 
   if (audiences.length === 0) {
     throw new AppError(
