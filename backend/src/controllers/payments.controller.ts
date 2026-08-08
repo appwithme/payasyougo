@@ -40,6 +40,7 @@ function formatTxn(tx: {
 
   return {
     id: tx.id,
+    kind: 'trip' as const,
     amount: decimalToNumber(tx.amount),
     from: tx.route.fromLocation,
     to: tx.route.toLocation,
@@ -53,6 +54,38 @@ function formatTxn(tx: {
     passengerName: tx.passenger.fullName,
     passengerId: tx.passenger.id,
     passengerRating: tx.passengerRating ?? undefined,
+  };
+}
+
+function formatWithdrawalTxn(w: {
+  id: string;
+  amount: any;
+  status: TransactionStatus;
+  provider: string | null;
+  momoPhone: string | null;
+  paystackRef: string | null;
+  createdAt: Date;
+}) {
+  const date = w.createdAt.toISOString().slice(0, 10);
+  const time = w.createdAt.toLocaleTimeString('en-GH', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const network = w.provider || 'Mobile Money';
+  const phone = w.momoPhone || '';
+
+  return {
+    id: w.id,
+    kind: 'withdrawal' as const,
+    amount: decimalToNumber(w.amount),
+    from: 'Wallet',
+    to: phone ? `${network} ${phone}` : network,
+    date,
+    time,
+    status: w.status.toLowerCase() as 'completed' | 'pending' | 'failed',
+    paymentRef: w.paystackRef || undefined,
+    provider: w.provider || undefined,
+    passengerName: 'Withdrawal',
   };
 }
 
@@ -263,12 +296,27 @@ export async function listTransactions(userId: string, role: Role) {
   const driver = await prisma.driver.findUnique({ where: { userId } });
   if (!driver) throw new AppError('Driver profile not found', 404);
 
-  const rows = await prisma.transaction.findMany({
-    where: { driverId: driver.id },
-    include: includeTxn,
-    orderBy: { createdAt: 'desc' },
-  });
-  return rows.map(formatTxn);
+  const [rows, withdrawals] = await Promise.all([
+    prisma.transaction.findMany({
+      where: { driverId: driver.id },
+      include: includeTxn,
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.withdrawal.findMany({
+      where: { driverId: driver.id },
+      orderBy: { createdAt: 'desc' },
+    }),
+  ]);
+
+  const merged = [
+    ...rows.map((tx) => ({ at: tx.createdAt.getTime(), item: formatTxn(tx) })),
+    ...withdrawals.map((w) => ({
+      at: w.createdAt.getTime(),
+      item: formatWithdrawalTxn(w),
+    })),
+  ].sort((a, b) => b.at - a.at);
+
+  return merged.map((m) => m.item);
 }
 
 const rateSchema = z.object({
