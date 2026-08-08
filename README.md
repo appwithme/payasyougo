@@ -167,7 +167,7 @@ In **live / production**, Telecel works the same as MTN: the app sends provider 
 
 | Role | Name | Phone | Password | Driver ID |
 |:-----|:-----|:------|:---------|:----------|
-| Passenger | Admin Passenger | `0550000111` | `admin123` | — |
+| Passenger | Kofi Mensah | `0550000111` | `admin123` | — |
 | Driver | Kwame Owusu | `0240000001` | `driver123` | `DRV001` |
 | Driver | Ama Asantewaa | `0200000002` | `driver456` | `DRV002` |
 | Driver | Kwame Asiamah | `0240000111` | `admin123` | `DRV100` |
