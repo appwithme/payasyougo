@@ -11,8 +11,8 @@ import { type } from '../../theme/typography';
 
 const DriverLoginScreen = ({ navigation }: { navigation: any }) => {
   const { loginDriver } = useApp();
-  const [phone, setPhone] = useState(QA_DRIVER_DEFAULT.phone);
-  const [password, setPassword] = useState(QA_DRIVER_DEFAULT.password);
+  const [phone, setPhone] = useState<string>(QA_DRIVER_DEFAULT.phone);
+  const [password, setPassword] = useState<string>(QA_DRIVER_DEFAULT.password);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
