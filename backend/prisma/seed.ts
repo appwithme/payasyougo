@@ -38,14 +38,31 @@ const ROUTES = FARE_EDGES.flatMap(([a, b, fare]) => [
 ]);
 
 /** Fixed accounts for QA / Paystack test runs */
-const TEST_ACCOUNTS = {
-  passenger: {
-    phone: '0550000111',
-    password: 'admin123',
-    fullName: 'Admin Passenger',
-    email: 'admin.passenger@payasyougo.com',
+const TEST_PASSENGER = {
+  phone: '0550000111',
+  password: 'admin123',
+  fullName: 'Admin Passenger',
+  email: 'admin.passenger@payasyougo.com',
+};
+
+const TEST_DRIVERS = [
+  {
+    phone: '0240000001',
+    password: 'driver123',
+    fullName: 'Kwame Owusu',
+    email: 'kwame.owusu@payasyougo.com',
+    uniqueCode: 'DRV001',
+    vehicleInfo: 'Toyota Yaris - ER 1234-21',
   },
-  driver: {
+  {
+    phone: '0200000002',
+    password: 'driver456',
+    fullName: 'Ama Asantewaa',
+    email: 'ama.asantewaa@payasyougo.com',
+    uniqueCode: 'DRV002',
+    vehicleInfo: 'Hyundai i10 - GR 5678-22',
+  },
+  {
     phone: '0240000111',
     password: 'admin123',
     fullName: 'Kwame Asiamah',
@@ -53,7 +70,7 @@ const TEST_ACCOUNTS = {
     uniqueCode: 'DRV100',
     vehicleInfo: 'Toyota Corolla - GR 1000-24',
   },
-};
+] as const;
 
 async function main() {
   for (const route of ROUTES) {
@@ -69,80 +86,84 @@ async function main() {
     });
   }
 
-  const passengerHash = await bcrypt.hash(TEST_ACCOUNTS.passenger.password, 10);
+  const passengerHash = await bcrypt.hash(TEST_PASSENGER.password, 10);
   await prisma.user.upsert({
-    where: { phone: TEST_ACCOUNTS.passenger.phone },
+    where: { phone: TEST_PASSENGER.phone },
     update: {
-      fullName: TEST_ACCOUNTS.passenger.fullName,
-      email: TEST_ACCOUNTS.passenger.email,
+      fullName: TEST_PASSENGER.fullName,
+      email: TEST_PASSENGER.email,
       passwordHash: passengerHash,
       role: Role.PASSENGER,
     },
     create: {
-      fullName: TEST_ACCOUNTS.passenger.fullName,
-      phone: TEST_ACCOUNTS.passenger.phone,
-      email: TEST_ACCOUNTS.passenger.email,
+      fullName: TEST_PASSENGER.fullName,
+      phone: TEST_PASSENGER.phone,
+      email: TEST_PASSENGER.email,
       passwordHash: passengerHash,
       role: Role.PASSENGER,
     },
   });
 
-  const driverHash = await bcrypt.hash(TEST_ACCOUNTS.driver.password, 10);
-  const driverUser = await prisma.user.upsert({
-    where: { phone: TEST_ACCOUNTS.driver.phone },
-    update: {
-      fullName: TEST_ACCOUNTS.driver.fullName,
-      email: TEST_ACCOUNTS.driver.email,
-      passwordHash: driverHash,
-      role: Role.DRIVER,
-    },
-    create: {
-      fullName: TEST_ACCOUNTS.driver.fullName,
-      phone: TEST_ACCOUNTS.driver.phone,
-      email: TEST_ACCOUNTS.driver.email,
-      passwordHash: driverHash,
-      role: Role.DRIVER,
-      driver: {
-        create: {
-          uniqueCode: TEST_ACCOUNTS.driver.uniqueCode,
-          vehicleInfo: TEST_ACCOUNTS.driver.vehicleInfo,
+  for (const account of TEST_DRIVERS) {
+    const driverHash = await bcrypt.hash(account.password, 10);
+    const driverUser = await prisma.user.upsert({
+      where: { phone: account.phone },
+      update: {
+        fullName: account.fullName,
+        email: account.email,
+        passwordHash: driverHash,
+        role: Role.DRIVER,
+      },
+      create: {
+        fullName: account.fullName,
+        phone: account.phone,
+        email: account.email,
+        passwordHash: driverHash,
+        role: Role.DRIVER,
+        driver: {
+          create: {
+            uniqueCode: account.uniqueCode,
+            vehicleInfo: account.vehicleInfo,
+            rating: 0,
+            ratingCount: 0,
+          },
+        },
+      },
+      include: { driver: true },
+    });
+
+    if (!driverUser.driver) {
+      await prisma.driver.create({
+        data: {
+          userId: driverUser.id,
+          uniqueCode: account.uniqueCode,
+          vehicleInfo: account.vehicleInfo,
           rating: 0,
           ratingCount: 0,
         },
-      },
-    },
-    include: { driver: true },
-  });
-
-  if (!driverUser.driver) {
-    await prisma.driver.create({
-      data: {
-        userId: driverUser.id,
-        uniqueCode: TEST_ACCOUNTS.driver.uniqueCode,
-        vehicleInfo: TEST_ACCOUNTS.driver.vehicleInfo,
-        rating: 0,
-        ratingCount: 0,
-      },
-    });
-  } else {
-    await prisma.driver.update({
-      where: { userId: driverUser.id },
-      data: {
-        uniqueCode: TEST_ACCOUNTS.driver.uniqueCode,
-        vehicleInfo: TEST_ACCOUNTS.driver.vehicleInfo,
-      },
-    });
+      });
+    } else {
+      await prisma.driver.update({
+        where: { userId: driverUser.id },
+        data: {
+          uniqueCode: account.uniqueCode,
+          vehicleInfo: account.vehicleInfo,
+        },
+      });
+    }
   }
 
   console.log(
     `Seeded ${ROUTES.length} routes across ${LOCATIONS.length} stops + admin test accounts:`
   );
   console.log(
-    `  Passenger  phone=${TEST_ACCOUNTS.passenger.phone}  password=${TEST_ACCOUNTS.passenger.password}`
+    `  Passenger  phone=${TEST_PASSENGER.phone}  password=${TEST_PASSENGER.password}`
   );
-  console.log(
-    `  Driver     phone=${TEST_ACCOUNTS.driver.phone}  password=${TEST_ACCOUNTS.driver.password}  code=${TEST_ACCOUNTS.driver.uniqueCode}`
-  );
+  for (const account of TEST_DRIVERS) {
+    console.log(
+      `  Driver     phone=${account.phone}  password=${account.password}  code=${account.uniqueCode}`
+    );
+  }
 }
 
 main()
