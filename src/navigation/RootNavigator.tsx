@@ -32,9 +32,17 @@ const RootNavigator = ({ initialRouteName = 'Welcome' }: Props) => {
     );
   }
 
+  const resolvedInitial: keyof RootStackParamList =
+    userRole === 'passenger'
+      ? 'PassengerApp'
+      : userRole === 'driver'
+        ? 'DriverApp'
+        : initialRouteName;
+
   return (
     <Stack.Navigator
-      initialRouteName={initialRouteName}
+      key={userRole ?? 'guest'}
+      initialRouteName={resolvedInitial}
       screenOptions={{
         headerShown: false,
         animation: 'fade',
