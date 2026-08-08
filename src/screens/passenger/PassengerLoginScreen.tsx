@@ -1,20 +1,11 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  StatusBar,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
-import BrandLogo from '../../components/BrandLogo';
 import GoogleSignInButton from '../../components/GoogleSignInButton';
+import AuthSheetScreen from '../../components/AuthSheetScreen';
 import { QA_PASSENGER } from '../../data/qaAccounts';
 import { COLORS, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
@@ -49,76 +40,14 @@ const PassengerLoginScreen = ({ navigation }: { navigation: any }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back}>
-          <Ionicons name="chevron-back" size={22} color={COLORS.ink} />
-        </TouchableOpacity>
-
-        <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
-          <BrandLogo size="sm" />
-          <Text style={styles.title}>Welcome back</Text>
-          <Text style={styles.subtitle}>Sign in to pay campus fares with MoMo</Text>
-        </Animated.View>
-
-        {!!error && (
-          <View style={styles.errorBox}>
-            <Ionicons name="alert-circle" size={18} color={COLORS.error} />
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        )}
-
-        <View style={styles.form}>
-          <Input
-            label="Phone number"
-            placeholder="055 XXX XXXX"
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="phone-pad"
-            iconName="call-outline"
-            autoCapitalize="none"
-            autoComplete="tel"
-            textContentType="telephoneNumber"
-            importantForAutofill="yes"
-          />
-          <Input
-            label="Password"
-            placeholder="Your password"
-            value={password}
-            onChangeText={setPassword}
-            iconName="lock-closed-outline"
-            secureTextEntry
-            autoCapitalize="none"
-            autoComplete="password"
-            textContentType="password"
-            importantForAutofill="yes"
-          />
-
-          <TouchableOpacity
-            style={styles.autofillBtn}
-            onPress={fillQaAccount}
-            accessibilityRole="button"
-            accessibilityLabel="Autofill test passenger account"
-          >
-            <Ionicons name="flash-outline" size={16} color={COLORS.ink} />
-            <Text style={styles.autofillText}>Autofill test account</Text>
-          </TouchableOpacity>
-
+    <AuthSheetScreen
+      eyebrow="Passenger"
+      title="Welcome back"
+      subtitle="Sign in to pay campus fares with MoMo."
+      onBack={() => navigation.goBack()}
+      footer={
+        <>
           <Button title="Sign in" onPress={handleLogin} loading={loading} variant="ink" />
-
-          <View style={styles.dividerRow}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.divider} />
-          </View>
-
-          <GoogleSignInButton onError={setError} />
-
           <TouchableOpacity
             onPress={() => navigation.navigate('PassengerSignup')}
             style={styles.link}
@@ -126,29 +55,63 @@ const PassengerLoginScreen = ({ navigation }: { navigation: any }) => {
             <Text style={styles.linkText}>New here? </Text>
             <Text style={styles.linkAccent}>Create account</Text>
           </TouchableOpacity>
+        </>
+      }
+    >
+      {!!error && (
+        <View style={styles.errorBox}>
+          <Ionicons name="alert-circle" size={18} color={COLORS.error} />
+          <Text style={styles.errorText}>{error}</Text>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      )}
+
+      <Input
+        label="Phone number"
+        placeholder="055 XXX XXXX"
+        value={phone}
+        onChangeText={setPhone}
+        keyboardType="phone-pad"
+        iconName="call-outline"
+        autoCapitalize="none"
+        autoComplete="tel"
+        textContentType="telephoneNumber"
+        importantForAutofill="yes"
+      />
+      <Input
+        label="Password"
+        placeholder="Your password"
+        value={password}
+        onChangeText={setPassword}
+        iconName="lock-closed-outline"
+        secureTextEntry
+        autoCapitalize="none"
+        autoComplete="password"
+        textContentType="password"
+        importantForAutofill="yes"
+      />
+
+      <TouchableOpacity
+        style={styles.autofillBtn}
+        onPress={fillQaAccount}
+        accessibilityRole="button"
+        accessibilityLabel="Autofill test passenger account"
+      >
+        <Ionicons name="flash-outline" size={16} color={COLORS.ink} />
+        <Text style={styles.autofillText}>Autofill test account</Text>
+      </TouchableOpacity>
+
+      <View style={styles.dividerRow}>
+        <View style={styles.divider} />
+        <Text style={styles.dividerText}>or</Text>
+        <View style={styles.divider} />
+      </View>
+
+      <GoogleSignInButton onError={setError} />
+    </AuthSheetScreen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  scroll: { padding: SPACING.lg, flexGrow: 1 },
-  back: {
-    width: 44,
-    height: 44,
-    borderRadius: RADIUS.md,
-    backgroundColor: COLORS.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    marginBottom: SPACING.lg,
-  },
-  header: { marginBottom: SPACING.lg, gap: SPACING.sm },
-  title: { ...type.title, marginTop: SPACING.sm },
-  subtitle: { ...type.body },
   errorBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -156,34 +119,48 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.errorLight,
     borderRadius: RADIUS.md,
     padding: SPACING.md,
-    marginBottom: SPACING.lg,
   },
-  errorText: { ...type.caption, color: COLORS.error, flex: 1, fontFamily: 'DMSans_700Bold' },
-  form: { gap: 4 },
+  errorText: {
+    ...type.caption,
+    color: COLORS.error,
+    flex: 1,
+    fontFamily: 'DMSans_700Bold',
+  },
   autofillBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: SPACING.xs,
-    marginBottom: SPACING.md,
     paddingVertical: SPACING.xs,
   },
-  autofillText: { ...type.caption, color: COLORS.ink, fontFamily: 'DMSans_700Bold' },
+  autofillText: {
+    ...type.caption,
+    color: COLORS.ink,
+    fontFamily: 'DMSans_700Bold',
+  },
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    marginTop: SPACING.lg,
+    marginTop: SPACING.sm,
   },
   divider: { flex: 1, height: 1, backgroundColor: COLORS.border },
   dividerText: { ...type.caption, color: COLORS.textMuted },
   link: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: SPACING.lg,
+    paddingVertical: SPACING.sm,
   },
-  linkText: { ...type.body },
-  linkAccent: { ...type.bodyBold },
+  linkText: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 15,
+    color: COLORS.textSecondary,
+  },
+  linkAccent: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 15,
+    color: COLORS.ink,
+  },
 });
 
 export default PassengerLoginScreen;
