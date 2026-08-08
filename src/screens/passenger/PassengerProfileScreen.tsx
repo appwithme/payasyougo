@@ -10,13 +10,13 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
-import Header from '../../components/Header';
-import Button from '../../components/Button';
 import UserAvatar from '../../components/UserAvatar';
-import { COLORS, SPACING, RADIUS } from '../../theme/colors';
+import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { Passenger } from '../../types';
 import { useTabBarPadding } from '../../navigation/FloatingTabBar';
@@ -25,14 +25,15 @@ const PassengerProfileScreen = ({ navigation }: { navigation: any }) => {
   const { currentUser, logout, passengerTrips, updateAvatar } = useApp();
   const tabPad = useTabBarPadding();
   const passenger = currentUser as Passenger | null;
-  const totalSpent = passengerTrips.reduce((sum, t) => sum + t.amount, 0);
+  const completed = passengerTrips.filter((t) => t.status === 'completed');
+  const totalSpent = completed.reduce((sum, t) => sum + Number(t.amount || 0), 0);
   const [uploading, setUploading] = useState(false);
 
   const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
+    Alert.alert('Log out', 'Sign out of this account?', [
       { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Logout',
+        text: 'Log out',
         style: 'destructive',
         onPress: async () => {
           await logout();
@@ -95,111 +96,185 @@ const PassengerProfileScreen = ({ navigation }: { navigation: any }) => {
     }
   };
 
-  const InfoRow = ({
-    icon,
-    label,
-    value,
-  }: {
-    icon: any;
-    label: string;
-    value?: string | null;
-  }) => (
-    <View style={styles.infoRow}>
-      <View style={styles.infoIcon}>
-        <Ionicons name={icon} size={18} color={COLORS.ink} />
-      </View>
-      <View style={styles.infoText}>
-        <Text style={styles.infoLabel}>{label}</Text>
-        <Text style={styles.infoValue}>{value || '—'}</Text>
+  return (
+    <View style={styles.root}>
+      <StatusBar barStyle="light-content" />
+
+      <LinearGradient
+        colors={['#15233F', COLORS.ink, '#2A3F63']}
+        locations={[0, 0.55, 1]}
+        style={styles.hero}
+      >
+        <SafeAreaView edges={['top']} style={styles.heroSafe}>
+          <Animated.Text entering={FadeIn.duration(400)} style={styles.brand}>
+            payasyou<Text style={styles.brandGo}>go</Text>
+          </Animated.Text>
+
+          <Animated.View entering={FadeInDown.delay(80).duration(450)} style={styles.heroBody}>
+            <TouchableOpacity
+              onPress={handleChangePhoto}
+              activeOpacity={0.9}
+              disabled={uploading}
+              style={styles.avatarRing}
+              accessibilityRole="button"
+              accessibilityLabel="Change profile photo"
+            >
+              <UserAvatar
+                name={passenger?.name}
+                uri={passenger?.avatar}
+                size={86}
+                radius={28}
+              />
+              <View style={styles.cameraBadge}>
+                {uploading ? (
+                  <ActivityIndicator size="small" color={COLORS.ink} />
+                ) : (
+                  <Ionicons name="camera" size={13} color={COLORS.ink} />
+                )}
+              </View>
+            </TouchableOpacity>
+
+            <Text style={styles.heroName} numberOfLines={1}>
+              {passenger?.name || 'Passenger'}
+            </Text>
+            <Text style={styles.heroRole}>Passenger</Text>
+          </Animated.View>
+        </SafeAreaView>
+      </LinearGradient>
+
+      <View style={styles.sheet}>
+        <SafeAreaView edges={['bottom']} style={styles.sheetInner}>
+          <ScrollView
+            contentContainerStyle={[styles.scroll, { paddingBottom: tabPad }]}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+          >
+            <Animated.View entering={FadeInUp.delay(120).duration(420)} style={styles.stats}>
+              <View style={styles.statTile}>
+                <Text style={styles.statValue}>{completed.length}</Text>
+                <Text style={styles.statLabel}>Paid trips</Text>
+              </View>
+              <View style={[styles.statTile, styles.statTileAccent]}>
+                <Text style={styles.statValue}>GH₵{totalSpent.toFixed(0)}</Text>
+                <Text style={styles.statLabel}>Spent</Text>
+              </View>
+            </Animated.View>
+
+            <Animated.View entering={FadeInUp.delay(180).duration(420)} style={styles.panel}>
+              <Text style={styles.panelTitle}>Account</Text>
+              <DetailRow
+                icon="call-outline"
+                label="Phone"
+                value={passenger?.phone?.trim() ? passenger.phone : 'Not set'}
+                muted={!passenger?.phone?.trim()}
+              />
+              <View style={styles.panelRule} />
+              <DetailRow
+                icon="mail-outline"
+                label="Email"
+                value={passenger?.email || 'Not set'}
+                muted={!passenger?.email}
+              />
+            </Animated.View>
+
+            <Animated.View entering={FadeInUp.delay(240).duration(420)} style={styles.actions}>
+              <TouchableOpacity
+                style={styles.primaryAction}
+                onPress={() => navigation.navigate('HistoryTab' as never)}
+                activeOpacity={0.85}
+              >
+                <View style={styles.actionIcon}>
+                  <Ionicons name="receipt-outline" size={18} color={COLORS.ink} />
+                </View>
+                <View style={styles.actionCopy}>
+                  <Text style={styles.actionTitle}>Trip history</Text>
+                  <Text style={styles.actionHint}>Routes, receipts, rebook</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.logoutBtn}
+                onPress={handleLogout}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="log-out-outline" size={18} color={COLORS.error} />
+                <Text style={styles.logoutText}>Log out</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </ScrollView>
+        </SafeAreaView>
       </View>
     </View>
   );
-
-  return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="dark-content" />
-      <Header title="Profile" />
-
-      <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: tabPad }]}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.avatarSection}>
-          <TouchableOpacity
-            onPress={handleChangePhoto}
-            activeOpacity={0.85}
-            disabled={uploading}
-            style={styles.avatarWrap}
-          >
-            <UserAvatar
-              name={passenger?.name}
-              uri={passenger?.avatar}
-              size={88}
-              radius={28}
-            />
-            <View style={styles.cameraBadge}>
-              {uploading ? (
-                <ActivityIndicator size="small" color={COLORS.ink} />
-              ) : (
-                <Ionicons name="camera" size={14} color={COLORS.ink} />
-              )}
-            </View>
-          </TouchableOpacity>
-          <Text style={styles.name}>{passenger?.name}</Text>
-          <Text style={styles.roleLabel}>Passenger</Text>
-          <TouchableOpacity onPress={handleChangePhoto} disabled={uploading}>
-            <Text style={styles.changePhoto}>
-              {uploading ? 'Updating…' : 'Change photo'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.statsRow}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{passengerTrips.length}</Text>
-            <Text style={styles.statLabel}>Trips</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>GH₵{totalSpent}</Text>
-            <Text style={styles.statLabel}>Spent</Text>
-          </View>
-        </View>
-
-        <View style={styles.infoCard}>
-          <InfoRow icon="call-outline" label="Phone" value={passenger?.phone} />
-          <View style={styles.separator} />
-          <InfoRow icon="mail-outline" label="Email" value={passenger?.email} />
-          <View style={styles.separator} />
-          <InfoRow icon="id-card-outline" label="Passenger ID" value={passenger?.id} />
-        </View>
-
-        <Button
-          title="Logout"
-          variant="danger"
-          onPress={handleLogout}
-          icon={<Ionicons name="log-out-outline" size={20} color={COLORS.error} />}
-        />
-      </ScrollView>
-    </SafeAreaView>
-  );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  scroll: { padding: SPACING.lg, gap: SPACING.xl },
+function DetailRow({
+  icon,
+  label,
+  value,
+  muted,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value: string;
+  muted?: boolean;
+}) {
+  return (
+    <View style={styles.detailRow}>
+      <View style={styles.detailIcon}>
+        <Ionicons name={icon} size={16} color={COLORS.ink} />
+      </View>
+      <View style={styles.detailCopy}>
+        <Text style={styles.detailLabel}>{label}</Text>
+        <Text
+          style={[styles.detailValue, muted && styles.detailMuted]}
+          numberOfLines={1}
+        >
+          {value}
+        </Text>
+      </View>
+    </View>
+  );
+}
 
-  avatarSection: {
-    alignItems: 'center',
-    gap: SPACING.sm,
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: COLORS.ink,
   },
-  avatarWrap: {
-    position: 'relative',
+  hero: {
+    paddingBottom: SPACING.xl + 8,
+  },
+  heroSafe: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.sm,
+  },
+  brand: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 15,
+    color: COLORS.white,
+    letterSpacing: -0.3,
+  },
+  brandGo: {
+    color: COLORS.primary,
+  },
+  heroBody: {
+    alignItems: 'center',
+    marginTop: SPACING.lg,
+    gap: 8,
+  },
+  avatarRing: {
+    padding: 4,
+    borderRadius: 34,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    marginBottom: 4,
   },
   cameraBadge: {
     position: 'absolute',
-    right: -2,
-    bottom: -2,
+    right: 2,
+    bottom: 2,
     width: 28,
     height: 28,
     borderRadius: 14,
@@ -207,51 +282,93 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: COLORS.background,
+    borderColor: COLORS.ink,
   },
-  name: { ...type.title, fontSize: 22 },
-  roleLabel: { ...type.caption },
-  changePhoto: {
-    ...type.label,
-    color: COLORS.textSecondary,
+  heroName: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 24,
+    color: COLORS.white,
+    letterSpacing: -0.5,
+    maxWidth: '90%',
+  },
+  heroRole: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.55)',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+
+  sheet: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+    borderTopLeftRadius: RADIUS.xl,
+    borderTopRightRadius: RADIUS.xl,
+    marginTop: -18,
+  },
+  sheetInner: { flex: 1 },
+  scroll: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.lg,
+    gap: SPACING.lg,
+  },
+
+  stats: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  statTile: {
+    flex: 1,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOW.sm,
+  },
+  statTileAccent: {
+    backgroundColor: COLORS.primaryMuted,
+    borderColor: 'rgba(245,184,0,0.35)',
+  },
+  statValue: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 22,
+    color: COLORS.ink,
+    letterSpacing: -0.5,
+  },
+  statLabel: {
+    ...type.caption,
     marginTop: 4,
   },
 
-  statsRow: {
-    flexDirection: 'row',
+  panel: {
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
-    padding: SPACING.lg,
+    padding: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.border,
+    ...SHADOW.sm,
   },
-  statItem: { flex: 1, alignItems: 'center' },
-  statValue: {
-    fontFamily: 'Sora_700Bold',
-    fontSize: 20,
+  panelTitle: {
+    fontFamily: 'Sora_600SemiBold',
+    fontSize: 15,
     color: COLORS.ink,
+    marginBottom: 8,
   },
-  statLabel: { ...type.caption, marginTop: 4 },
-  statDivider: {
-    width: 1,
+  panelRule: {
+    height: StyleSheet.hairlineWidth,
     backgroundColor: COLORS.border,
-    marginHorizontal: SPACING.md,
+    marginVertical: 4,
+    marginLeft: 48,
   },
-
-  infoCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    padding: SPACING.lg,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  infoRow: {
+  detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.md,
-    paddingVertical: SPACING.sm,
+    gap: 12,
+    paddingVertical: 10,
   },
-  infoIcon: {
+  detailIcon: {
     width: 36,
     height: 36,
     borderRadius: 12,
@@ -259,13 +376,74 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  infoText: { flex: 1 },
-  infoLabel: { ...type.caption },
-  infoValue: { ...type.bodyBold, marginTop: 2 },
-  separator: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginVertical: SPACING.xs,
+  detailCopy: {
+    flex: 1,
+    gap: 2,
+    minWidth: 0,
+  },
+  detailLabel: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 12,
+    color: COLORS.textMuted,
+  },
+  detailValue: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 15,
+    color: COLORS.ink,
+  },
+  detailMuted: {
+    color: COLORS.textMuted,
+    fontFamily: 'DMSans_500Medium',
+  },
+
+  actions: {
+    gap: 12,
+  },
+  primaryAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOW.sm,
+  },
+  actionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    backgroundColor: COLORS.primaryMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  actionTitle: {
+    fontFamily: 'Sora_600SemiBold',
+    fontSize: 15,
+    color: COLORS.ink,
+  },
+  actionHint: {
+    ...type.caption,
+    fontSize: 12,
+  },
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.errorLight,
+  },
+  logoutText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 15,
+    color: COLORS.error,
   },
 });
 
