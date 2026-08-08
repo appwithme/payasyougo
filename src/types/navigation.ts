@@ -27,6 +27,7 @@ export type PassengerHomeStackParamList = {
     to: string;
     fare: number;
     routeId: string;
+    prefillDriverId?: string;
   };
   ConfirmTrip: {
     from: string;
@@ -49,6 +50,7 @@ export type PassengerBookStackParamList = {
     to: string;
     fare: number;
     routeId: string;
+    prefillDriverId?: string;
   };
   ConfirmTrip: {
     from: string;
