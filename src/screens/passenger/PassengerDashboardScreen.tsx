@@ -21,7 +21,7 @@ import { type } from '../../theme/typography';
 import { useTabBarPadding } from '../../navigation/FloatingTabBar';
 import { Transaction } from '../../types';
 
-const PAY_RIDE_ICON = require('../../../assets/brand/pay-ride-icon-clear.png');
+const PAY_RIDE_ICON = require('../../../assets/brand/pay-ride-icon-outline.png');
 const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
   const { currentUser, passengerTrips } = useApp();
   const tabPad = useTabBarPadding();
