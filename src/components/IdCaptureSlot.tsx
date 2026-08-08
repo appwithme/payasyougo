@@ -67,7 +67,7 @@ export default function IdCaptureSlot({
       <Text style={styles.label}>{side}</Text>
 
       <View style={styles.exampleCard}>
-        <Image source={exampleSource} style={styles.example} resizeMode="cover" />
+        <Image source={exampleSource} style={styles.example} resizeMode="contain" />
         <View style={styles.exampleMeta}>
           <Text style={styles.exampleBadge}>Example</Text>
           <Text style={styles.exampleHint}>
@@ -139,7 +139,7 @@ export default function IdCaptureSlot({
 
             <View style={styles.guideWrap}>
               <View style={styles.exampleFloat}>
-                <Image source={exampleSource} style={styles.exampleFloatImg} resizeMode="cover" />
+                  <Image source={exampleSource} style={styles.exampleFloatImg} resizeMode="contain" />
                 <Text style={styles.exampleFloatLabel}>Example</Text>
               </View>
               <View style={styles.cardFrame} />
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     width: 96,
     height: 60,
     borderRadius: 8,
-    backgroundColor: COLORS.surfaceAlt,
+    backgroundColor: 'transparent',
   },
   exampleMeta: { flex: 1, gap: 4 },
   exampleBadge: {
