@@ -62,9 +62,12 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
             </TouchableOpacity>
           ) : null}
           <Text style={styles.heroTitle}>Where to?</Text>
-          <Text style={styles.heroSub}>Pick campus pickup and drop-off</Text>
+          <Text style={styles.heroMeta}>Pick campus pickup and drop-off</Text>
           {fareLabel ? (
-            <Text style={styles.heroFare}>{fareLabel}</Text>
+            <View style={styles.heroFareBlock}>
+              <Text style={styles.fareLabel}>Fare</Text>
+              <Text style={styles.heroFare}>{fareLabel}</Text>
+            </View>
           ) : null}
         </Animated.View>
       }
@@ -115,8 +118,8 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
 
 const styles = StyleSheet.create({
   heroBody: {
-    marginTop: SPACING.lg,
-    gap: 6,
+    marginTop: SPACING.md,
+    gap: SPACING.lg,
   },
   backBtn: {
     width: 36,
@@ -125,7 +128,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: -8,
   },
   heroTitle: {
     fontFamily: 'Sora_700Bold',
@@ -133,17 +136,27 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     letterSpacing: -0.8,
   },
-  heroSub: {
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 15,
+  heroMeta: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 14,
     color: 'rgba(255,255,255,0.55)',
+    marginTop: -10,
+  },
+  heroFareBlock: {
+    gap: 4,
+  },
+  fareLabel: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 11,
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+    color: COLORS.primary,
   },
   heroFare: {
-    marginTop: 6,
     fontFamily: 'Sora_700Bold',
-    fontSize: 20,
-    color: COLORS.primary,
-    letterSpacing: -0.4,
+    fontSize: 32,
+    color: COLORS.white,
+    letterSpacing: -1,
   },
   scroll: {
     paddingHorizontal: SPACING.lg,
