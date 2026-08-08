@@ -1,4 +1,5 @@
 import React from 'react';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
 import { COLORS } from '../theme/colors';
@@ -21,7 +22,15 @@ type Props = {
 };
 
 const RootNavigator = ({ initialRouteName = 'Welcome' }: Props) => {
-  const { userRole } = useApp();
+  const { userRole, bootstrapping } = useApp();
+
+  if (bootstrapping) {
+    return (
+      <View style={styles.boot}>
+        <ActivityIndicator size="large" color={COLORS.ink} />
+      </View>
+    );
+  }
 
   return (
     <Stack.Navigator
@@ -49,5 +58,14 @@ const RootNavigator = ({ initialRouteName = 'Welcome' }: Props) => {
     </Stack.Navigator>
   );
 };
+
+const styles = StyleSheet.create({
+  boot: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.background,
+  },
+});
 
 export default RootNavigator;

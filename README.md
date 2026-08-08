@@ -40,8 +40,10 @@ A mobile transport payment application for **University of Cape Coast (UCC)** st
 ### Prerequisites
 
 - Node.js 18+
-- npm or yarn
-- [Expo Go](https://expo.dev/go) on your phone (recommended for testing)
+- npm
+- [Expo Go](https://expo.dev/go) on your phone
+- A [Neon](https://console.neon.tech) Postgres project
+- [Paystack](https://dashboard.paystack.com) **test** API keys
 
 ### Installation
 
@@ -49,17 +51,28 @@ A mobile transport payment application for **University of Cape Coast (UCC)** st
 git clone <repository-url>
 cd payasyougo
 npm install
+cd backend && npm install && cd ..
 ```
 
-### Environment
+### Backend (Neon + Paystack)
 
-Create or verify `.env` in the project root:
+Follow **[backend/README.md](./backend/README.md)** to:
+
+1. Create a Neon project and copy `DATABASE_URL`
+2. Add Paystack test keys to `backend/.env`
+3. Run migrations + seed
+4. Start the API: `npm run api`
+
+### App environment
+
+Copy `.env.example` → `.env` in the project root:
 
 ```env
-EXPO_PUBLIC_MOCK_MODE=true
+EXPO_PUBLIC_API_URL=http://YOUR_LAN_IP:4000
+EXPO_PUBLIC_MOCK_MODE=false
 ```
 
-Set to `false` when live payment APIs are configured (not yet implemented).
+Use your Mac’s LAN IP when testing on a physical phone.
 
 ### Run the app
 
@@ -67,28 +80,13 @@ Set to `false` when live payment APIs are configured (not yet implemented).
 npx expo start
 ```
 
-Then:
-- Press **`i`** for iOS Simulator
-- Press **`a`** for Android Emulator
-- Scan the **QR code** with **Expo Go** on your phone (same Wi‑Fi network)
+Then scan the QR code with Expo Go (same Wi‑Fi as the API).
 
 ---
 
-## Demo Credentials
+## Accounts
 
-### Passenger
-| Field | Value |
-|-------|-------|
-| Phone | `0551002000` |
-| Password | `pass1234` |
-
-### Drivers
-| ID | Phone | Password |
-|----|-------|----------|
-| DRV001 | `0240000001` | `driver123` |
-| DRV002 | `0200000002` | `driver456` |
-
-**Signup OTP:** Any 4-digit code is accepted in mock mode.
+Register a passenger or driver from the app. The API seed also creates optional QA users for API testing only (not shown in the UI) — see `backend/prisma/seed.ts`.
 
 ---
 
@@ -96,21 +94,21 @@ Then:
 
 ```
 payasyougo/
-├── App.tsx                 # Root component
-├── app.json                # Expo config
+├── App.tsx
+├── app.json
+├── backend/                # Express + Prisma + Neon API
+│   ├── prisma/
+│   └── src/
 ├── src/
-│   ├── components/         # Reusable UI (Button, Cards, Inputs)
-│   ├── context/            # Global state (AppContext)
-│   ├── data/               # Mock seed data and routes
-│   ├── navigation/         # Root, Passenger, Driver navigators
-│   ├── screens/            # Full-page screens
-│   │   ├── driver/
-│   │   ├── passenger/
-│   │   └── shared/
-│   ├── services/           # Payment, transaction, notification
-│   ├── theme/              # Colors, spacing, typography
-│   └── types/              # TypeScript interfaces
-└── docs/                   # Project documentation
+│   ├── components/
+│   ├── config/             # API URL env
+│   ├── context/
+│   ├── navigation/
+│   ├── screens/
+│   ├── services/           # apiClient, auth, payments, routes
+│   ├── theme/
+│   └── types/
+└── docs/
 ```
 
 ---
