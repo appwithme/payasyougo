@@ -20,6 +20,8 @@ import { type } from '../../theme/typography';
 
 const GHANA_CARD_FRONT = require('../../../assets/id/ghana-card-front.png');
 const GHANA_CARD_BACK = require('../../../assets/id/ghana-card-back.png');
+const DRIVER_LICENSE_FRONT = require('../../../assets/id/driver-license-front.png');
+const DRIVER_LICENSE_BACK = require('../../../assets/id/driver-license-back.png');
 
 const STEPS = [
   {
@@ -38,7 +40,7 @@ const STEPS = [
     key: 'license',
     label: 'Licence',
     title: 'Verify licence',
-    subtitle: 'Enter your DVLA driver licence number.',
+    subtitle: 'Photograph the front and back of your DVLA driver licence.',
   },
   {
     key: 'vehicle',
@@ -109,6 +111,8 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
   const [ghanaNormalized, setGhanaNormalized] = useState('');
 
   const [license, setLicense] = useState('');
+  const [licenseFrontUri, setLicenseFrontUri] = useState<string | null>(null);
+  const [licenseBackUri, setLicenseBackUri] = useState<string | null>(null);
   const [licenseVerified, setLicenseVerified] = useState(false);
   const [licenseNormalized, setLicenseNormalized] = useState('');
 
@@ -164,6 +168,7 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
     if (!vehicle.trim()) e.vehicle = 'Vehicle details are required';
     if (!ghanaFrontUri || !ghanaBackUri) e.form = 'Capture both sides of your Ghana Card first';
     if (!ghanaVerified) e.form = 'Verify your Ghana Card first';
+    if (!licenseFrontUri || !licenseBackUri) e.form = 'Capture both sides of your driver licence first';
     if (!licenseVerified) e.form = 'Verify your driver licence first';
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -193,9 +198,18 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
         return;
       }
     }
-    if (step === 2 && !licenseVerified) {
-      setErrors({ license: 'Verify your driver licence to continue' });
-      return;
+    if (step === 2) {
+      if (!licenseFrontUri || !licenseBackUri) {
+        setErrors({
+          licenseFront: !licenseFrontUri ? 'Capture the front of your driver licence' : undefined,
+          licenseBack: !licenseBackUri ? 'Capture the back of your driver licence' : undefined,
+        });
+        return;
+      }
+      if (!licenseVerified) {
+        setErrors({ license: 'Verify your driver licence to continue' });
+        return;
+      }
     }
     setErrors({});
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
@@ -230,8 +244,12 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
   };
 
   const verifyLicense = async () => {
-    if (!license.trim()) {
-      setErrors({ license: 'Enter your driver licence number' });
+    const e: Record<string, string> = {};
+    if (!licenseFrontUri) e.licenseFront = 'Capture the front of your driver licence';
+    if (!licenseBackUri) e.licenseBack = 'Capture the back of your driver licence';
+    if (!license.trim()) e.license = 'Enter your driver licence number';
+    if (Object.keys(e).length > 0) {
+      setErrors(e);
       return;
     }
     setVerifying(true);
@@ -443,15 +461,9 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
     if (key === 'license') {
       return (
         <>
-          <View style={styles.infoCard}>
-            <Ionicons name="document-text-outline" size={20} color={COLORS.ink} />
-            <Text style={styles.infoText}>
-              Enter your DVLA driver licence number exactly as printed on the card.
-            </Text>
-          </View>
           <Input
             label="Driver licence number"
-            placeholder="e.g. DL1234567"
+            placeholder="e.g. NAG-03102017-10785"
             value={license}
             onChangeText={(v) => {
               setLicense(v);
@@ -463,6 +475,42 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
             autoCapitalize="characters"
             error={errors.license}
           />
+
+          <View style={styles.infoCard}>
+            <Ionicons name="camera-outline" size={20} color={COLORS.ink} />
+            <Text style={styles.infoText}>
+              Capture clear photos of both sides. Use the examples as a guide for framing.
+            </Text>
+          </View>
+
+          <IdCaptureSlot
+            label="Driver licence"
+            side="Front"
+            exampleSource={DRIVER_LICENSE_FRONT}
+            uri={licenseFrontUri}
+            error={errors.licenseFront}
+            onChange={(uri) => {
+              setLicenseFrontUri(uri);
+              setLicenseVerified(false);
+              setLicenseNormalized('');
+              clearFieldError('licenseFront');
+            }}
+          />
+
+          <IdCaptureSlot
+            label="Driver licence"
+            side="Back"
+            exampleSource={DRIVER_LICENSE_BACK}
+            uri={licenseBackUri}
+            error={errors.licenseBack}
+            onChange={(uri) => {
+              setLicenseBackUri(uri);
+              setLicenseVerified(false);
+              setLicenseNormalized('');
+              clearFieldError('licenseBack');
+            }}
+          />
+
           <TouchableOpacity
             style={styles.autofillBtn}
             onPress={fillSignupSample}
@@ -472,6 +520,7 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
             <Ionicons name="flash-outline" size={16} color={COLORS.ink} />
             <Text style={styles.autofillText}>Autofill sample details</Text>
           </TouchableOpacity>
+
           {licenseVerified ? (
             <View style={styles.verifiedBox}>
               <Ionicons name="checkmark-circle" size={18} color={COLORS.success} />
