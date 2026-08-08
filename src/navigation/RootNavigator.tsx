@@ -32,16 +32,19 @@ const RootNavigator = ({ initialRouteName = 'Welcome' }: Props) => {
     );
   }
 
+  // Always pick an initial route that exists for the current auth branch
   const resolvedInitial: keyof RootStackParamList =
     userRole === 'passenger'
       ? 'PassengerApp'
       : userRole === 'driver'
         ? 'DriverApp'
-        : initialRouteName;
+        : initialRouteName === 'PassengerApp' || initialRouteName === 'DriverApp'
+          ? 'Welcome'
+          : initialRouteName;
 
   return (
     <Stack.Navigator
-      key={userRole ?? 'guest'}
+      key={userRole ?? `guest-${resolvedInitial}`}
       initialRouteName={resolvedInitial}
       screenOptions={{
         headerShown: false,
@@ -51,9 +54,13 @@ const RootNavigator = ({ initialRouteName = 'Welcome' }: Props) => {
     >
       {userRole === 'passenger' ? (
         <Stack.Screen name="PassengerApp" component={PassengerNavigator} />
-      ) : userRole === 'driver' ? (
+      ) : null}
+
+      {userRole === 'driver' ? (
         <Stack.Screen name="DriverApp" component={DriverNavigator} />
-      ) : (
+      ) : null}
+
+      {userRole == null ? (
         <>
           <Stack.Screen name="Onboarding" component={OnboardingScreen} />
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
@@ -62,7 +69,7 @@ const RootNavigator = ({ initialRouteName = 'Welcome' }: Props) => {
           <Stack.Screen name="DriverLogin" component={DriverLoginScreen} />
           <Stack.Screen name="DriverSignup" component={DriverSignupScreen} />
         </>
-      )}
+      ) : null}
     </Stack.Navigator>
   );
 };

@@ -1,21 +1,14 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 import CustomBrandMark from './CustomBrandMark';
 import { COLORS } from '../theme/colors';
 
 type Props = {
   size?: number;
   style?: ViewStyle;
-  /**
-   * `pin3d` / `icon` / `squircle` — custom amber tile mark
-   * `pin` — compact route chip
-   */
   variant?: 'pin3d' | 'icon' | 'pin' | 'squircle';
 };
 
-/**
- * Brand mark — always the hand-built geometric tile (no AI bitmaps).
- */
 export default function BrandMark({ size = 72, style, variant = 'pin3d' }: Props) {
   if (variant === 'pin') {
     return <MiniPin size={size} style={style} />;
@@ -68,5 +61,3 @@ function MiniPin({ size = 40, style }: { size?: number; style?: ViewStyle }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({});

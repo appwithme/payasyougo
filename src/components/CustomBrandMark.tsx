@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 import { COLORS } from '../theme/colors';
 
 type Props = {
@@ -9,9 +9,8 @@ type Props = {
 
 /**
  * Flat geometric brand mark — amber tile + ink route glyph.
- * No gradients, no 3D, no stock icons.
  */
-export default function CustomBrandMark({ size = 48, style }: Props) {
+function CustomBrandMark({ size = 48, style }: Props) {
   const r = size * 0.28;
   const pad = size * 0.22;
   const stroke = Math.max(2.5, size * 0.07);
@@ -33,7 +32,6 @@ export default function CustomBrandMark({ size = 48, style }: Props) {
       ]}
     >
       <View style={{ width: '100%', height: '100%', justifyContent: 'center' }}>
-        {/* From node */}
         <View
           style={{
             width: dot,
@@ -43,7 +41,6 @@ export default function CustomBrandMark({ size = 48, style }: Props) {
             marginBottom: size * 0.06,
           }}
         />
-        {/* Route stem */}
         <View
           style={{
             width: stroke,
@@ -54,7 +51,6 @@ export default function CustomBrandMark({ size = 48, style }: Props) {
             marginBottom: size * 0.06,
           }}
         />
-        {/* To node — diamond / pin tip */}
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <View
             style={{
@@ -80,31 +76,4 @@ export default function CustomBrandMark({ size = 48, style }: Props) {
   );
 }
 
-/** Tiny variant for chrome / list rows */
-export function BrandDot({ size = 28, style }: Props) {
-  return (
-    <View
-      style={[
-        {
-          width: size,
-          height: size,
-          borderRadius: size * 0.3,
-          backgroundColor: COLORS.primary,
-          alignItems: 'center',
-          justifyContent: 'center',
-        },
-        style,
-      ]}
-    >
-      <View
-        style={{
-          width: size * 0.28,
-          height: size * 0.28,
-          borderRadius: 2,
-          backgroundColor: COLORS.ink,
-          transform: [{ rotate: '45deg' }],
-        }}
-      />
-    </View>
-  );
-}
+export default CustomBrandMark;
