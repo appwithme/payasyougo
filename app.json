@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#FFF9F0"
+      "backgroundColor": "#EAF3FA"
     },
     "runtimeVersion": {
       "policy": "appVersion"
@@ -21,7 +21,7 @@
     "android": {
       "package": "com.payasyougo.app",
       "adaptiveIcon": {
-        "backgroundColor": "#F5B800",
+        "backgroundColor": "#EAF3FA",
         "foregroundImage": "./assets/icon.png"
       }
     },

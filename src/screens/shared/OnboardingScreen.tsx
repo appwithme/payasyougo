@@ -23,7 +23,7 @@ import { type } from '../../theme/typography';
 const { width } = Dimensions.get('window');
 
 /** Bump version so existing Expo Go installs see onboarding again after redesign */
-export const ONBOARDING_KEY = 'payasyougo_onboarding_v2';
+export const ONBOARDING_KEY = 'payasyougo_onboarding_v3';
 
 const SLIDES: {
   key: string;
@@ -88,7 +88,9 @@ export default function OnboardingScreen({ navigation }: Props) {
       <View style={styles.topBar}>
         <View style={styles.brandRow}>
           <BrandMark size={28} />
-          <Text style={styles.brand}>PayAsYouGo</Text>
+          <Text style={styles.brand}>
+            payasyou<Text style={styles.brandAccent}>go</Text>
+          </Text>
         </View>
         {index < SLIDES.length - 1 ? (
           <Button title="Skip" onPress={finish} variant="ghost" style={styles.skip} />
@@ -148,7 +150,7 @@ export default function OnboardingScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: COLORS.background },
+  root: { flex: 1, backgroundColor: '#EAF3FA' },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -157,7 +159,14 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.sm,
   },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  brand: { ...type.subheading, fontSize: 16 },
+  brand: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 16,
+    color: '#152033',
+    letterSpacing: -0.4,
+    textTransform: 'lowercase',
+  },
+  brandAccent: { color: COLORS.primaryDark },
   skip: { minHeight: 40, paddingVertical: 8, paddingHorizontal: 12 },
   skipPlaceholder: { width: 64 },
 

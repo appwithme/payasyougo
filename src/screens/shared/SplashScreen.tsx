@@ -12,16 +12,14 @@ import Animated, {
   interpolate,
   runOnJS,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
-import BrandMark from '../../components/BrandMark';
+import { MapPin } from '../../components/BrandMark';
 import { COLORS } from '../../theme/colors';
-import { type } from '../../theme/typography';
 
 const { width: W, height: H } = Dimensions.get('window');
 
 type Props = { onFinish: () => void };
 
-function FloatingDot({
+function SoftOrb({
   x,
   y,
   size,
@@ -41,8 +39,8 @@ function FloatingDot({
       delay,
       withRepeat(
         withSequence(
-          withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.sin) }),
-          withTiming(0, { duration: 1800, easing: Easing.inOut(Easing.sin) })
+          withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.sin) }),
+          withTiming(0, { duration: 2000, easing: Easing.inOut(Easing.sin) })
         ),
         -1,
         false
@@ -51,11 +49,8 @@ function FloatingDot({
   }, []);
 
   const style = useAnimatedStyle(() => ({
-    opacity: interpolate(t.value, [0, 1], [0.25, 0.85]),
-    transform: [
-      { translateY: interpolate(t.value, [0, 1], [0, -14]) },
-      { scale: interpolate(t.value, [0, 1], [0.85, 1.15]) },
-    ],
+    opacity: interpolate(t.value, [0, 1], [0.2, 0.55]),
+    transform: [{ translateY: interpolate(t.value, [0, 1], [0, -12]) }],
   }));
 
   return (
@@ -76,96 +71,69 @@ function FloatingDot({
   );
 }
 
-function OrbitRing({ delay }: { delay: number }) {
-  const rot = useSharedValue(0);
-  const opacity = useSharedValue(0);
-
-  useEffect(() => {
-    opacity.value = withDelay(delay, withTiming(1, { duration: 500 }));
-    rot.value = withDelay(
-      delay,
-      withRepeat(withTiming(1, { duration: 10000, easing: Easing.linear }), -1, false)
-    );
-  }, []);
-
-  const style = useAnimatedStyle(() => ({
-    opacity: opacity.value * 0.35,
-    transform: [{ rotate: `${rot.value * 360}deg` }],
-  }));
-
-  return (
-    <Animated.View style={[styles.orbit, style]}>
-      <View style={styles.orbitDot} />
-    </Animated.View>
-  );
-}
-
+/**
+ * Splash inspired by ride-style branding:
+ * 1) Amber pin pops in the center
+ * 2) Pin slides left
+ * 3) lowercase "payasyougo" rolls in on the right
+ * 4) Soft ambient orbs, then fade to onboarding
+ */
 export default function SplashScreen({ onFinish }: Props) {
-  // 0 = pop in center, 1 = slide left + name in
-  const phase = useSharedValue(0);
-  const logoScale = useSharedValue(0.2);
-  const logoOpacity = useSharedValue(0);
-  const nameX = useSharedValue(48);
+  const pinScale = useSharedValue(0.15);
+  const pinOpacity = useSharedValue(0);
+  const pinX = useSharedValue(0);
+  const nameX = useSharedValue(56);
   const nameOpacity = useSharedValue(0);
-  const tagOpacity = useSharedValue(0);
+  const cardOpacity = useSharedValue(0);
+  const cardScale = useSharedValue(0.92);
   const decorOpacity = useSharedValue(0);
   const exitOpacity = useSharedValue(1);
 
   useEffect(() => {
-    // 1) Logo pops up in center
-    logoOpacity.value = withTiming(1, { duration: 280 });
-    logoScale.value = withSpring(1, { damping: 11, stiffness: 160 });
+    // Soft ambient
+    decorOpacity.value = withTiming(1, { duration: 600 });
 
-    decorOpacity.value = withDelay(200, withTiming(1, { duration: 500 }));
+    // White card fades behind pin (ride-style tile)
+    cardOpacity.value = withDelay(80, withTiming(1, { duration: 350 }));
+    cardScale.value = withDelay(80, withSpring(1, { damping: 14, stiffness: 140 }));
 
-    // 2) After beat: logo slides left, name rolls in from right
-    const slideAt = 900;
-    phase.value = withDelay(slideAt, withSpring(1, { damping: 16, stiffness: 90 }));
-    nameOpacity.value = withDelay(slideAt + 120, withTiming(1, { duration: 420 }));
-    nameX.value = withDelay(
-      slideAt + 120,
-      withSpring(0, { damping: 15, stiffness: 110 })
-    );
-    tagOpacity.value = withDelay(slideAt + 320, withTiming(1, { duration: 380 }));
+    // 1) Pin pops
+    pinOpacity.value = withTiming(1, { duration: 220 });
+    pinScale.value = withSpring(1, { damping: 10, stiffness: 170 });
 
-    // 3) Hold, then fade out → onboarding
-    const doneAt = 3200;
+    // 2–3) Pin slides left, name rolls in from right
+    const slideAt = 850;
+    pinX.value = withDelay(slideAt, withSpring(-58, { damping: 15, stiffness: 95 }));
+    nameOpacity.value = withDelay(slideAt + 100, withTiming(1, { duration: 400 }));
+    nameX.value = withDelay(slideAt + 100, withSpring(0, { damping: 14, stiffness: 110 }));
+
+    // Exit
     const timer = setTimeout(() => {
-      exitOpacity.value = withTiming(0, { duration: 380 }, (finished) => {
+      exitOpacity.value = withTiming(0, { duration: 360 }, (finished) => {
         if (finished) runOnJS(onFinish)();
       });
-    }, doneAt);
+    }, 3100);
 
     return () => clearTimeout(timer);
   }, []);
 
-  const clusterStyle = useAnimatedStyle(() => ({
+  const rootStyle = useAnimatedStyle(() => ({
     opacity: exitOpacity.value,
-    transform: [
-      {
-        translateX: interpolate(phase.value, [0, 1], [0, -56]),
-      },
-    ],
   }));
 
-  const logoStyle = useAnimatedStyle(() => ({
-    opacity: logoOpacity.value,
-    transform: [
-      { scale: logoScale.value },
-      {
-        // keep logo slightly left of center once phase advances (cluster also moves)
-        translateX: interpolate(phase.value, [0, 1], [0, -8]),
-      },
-    ],
+  const cardStyle = useAnimatedStyle(() => ({
+    opacity: cardOpacity.value * exitOpacity.value,
+    transform: [{ scale: cardScale.value }],
+  }));
+
+  const pinStyle = useAnimatedStyle(() => ({
+    opacity: pinOpacity.value,
+    transform: [{ translateX: pinX.value }, { scale: pinScale.value }],
   }));
 
   const nameStyle = useAnimatedStyle(() => ({
-    opacity: nameOpacity.value * exitOpacity.value,
+    opacity: nameOpacity.value,
     transform: [{ translateX: nameX.value }],
-  }));
-
-  const tagStyle = useAnimatedStyle(() => ({
-    opacity: tagOpacity.value * exitOpacity.value,
   }));
 
   const decorStyle = useAnimatedStyle(() => ({
@@ -175,42 +143,45 @@ export default function SplashScreen({ onFinish }: Props) {
   return (
     <View style={styles.root}>
       <StatusBar barStyle="dark-content" />
-      <LinearGradient
-        colors={['#FFF9F0', '#FFE6A0', '#F5B800']}
-        locations={[0, 0.62, 1]}
-        style={StyleSheet.absoluteFill}
-      />
-
-      <Animated.View style={[StyleSheet.absoluteFill, decorStyle]} pointerEvents="none">
-        <FloatingDot x={W * 0.12} y={H * 0.18} size={10} delay={0} color={COLORS.ink} />
-        <FloatingDot x={W * 0.78} y={H * 0.22} size={14} delay={200} color="#fff" />
-        <FloatingDot x={W * 0.18} y={H * 0.72} size={12} delay={400} color="#fff" />
-        <FloatingDot x={W * 0.82} y={H * 0.68} size={8} delay={100} color={COLORS.ink} />
-        <FloatingDot x={W * 0.5} y={H * 0.12} size={6} delay={300} color={COLORS.ink} />
-        <FloatingDot x={W * 0.08} y={H * 0.48} size={7} delay={500} color="#fff" />
-        <FloatingDot x={W * 0.9} y={H * 0.42} size={9} delay={150} color={COLORS.ink} />
-
-        <View style={styles.arcTop} />
-        <View style={styles.arcBottom} />
-        <OrbitRing delay={400} />
-      </Animated.View>
-
-      <View style={styles.stage}>
-        <Animated.View style={[styles.cluster, clusterStyle]}>
-          <Animated.View style={logoStyle}>
-            <BrandMark size={88} />
-          </Animated.View>
-
-          <Animated.View style={[styles.nameBlock, nameStyle]}>
-            <Text style={styles.name}>PayAsYouGo</Text>
-            <Animated.Text style={[styles.tagline, tagStyle]}>
-              Campus rides · Digital fares
-            </Animated.Text>
-          </Animated.View>
-        </Animated.View>
+      {/* pale blue-cream like the ride inspo backdrop */}
+      <View style={StyleSheet.absoluteFillObject}>
+        <View style={styles.bg} />
       </View>
 
-      <Animated.Text style={[styles.footer, tagStyle]}>University of Cape Coast</Animated.Text>
+      <Animated.View style={[StyleSheet.absoluteFill, decorStyle]} pointerEvents="none">
+        <SoftOrb x={W * 0.1} y={H * 0.16} size={18} delay={0} color="#FFFFFF" />
+        <SoftOrb x={W * 0.78} y={H * 0.2} size={12} delay={180} color={COLORS.primary} />
+        <SoftOrb x={W * 0.15} y={H * 0.74} size={14} delay={320} color="#FFFFFF" />
+        <SoftOrb x={W * 0.82} y={H * 0.7} size={10} delay={80} color={COLORS.primary} />
+        <SoftOrb x={W * 0.48} y={H * 0.1} size={8} delay={240} color="#D6E6F5" />
+        <View style={styles.softCircle} />
+      </Animated.View>
+
+      <Animated.View style={[styles.stage, rootStyle]}>
+        {/* ride-style white squircle */}
+        <Animated.View style={[styles.card, cardStyle]}>
+          <View style={styles.row}>
+            <Animated.View style={pinStyle}>
+              <MapPin size={54} />
+            </Animated.View>
+
+            <Animated.View style={[styles.nameBlock, nameStyle]}>
+              <Text style={styles.word}>
+                payasyou
+                <Text style={styles.go}>go</Text>
+              </Text>
+            </Animated.View>
+          </View>
+        </Animated.View>
+
+        <Animated.Text style={[styles.tag, nameStyle]}>
+          campus rides · digital fares
+        </Animated.Text>
+      </Animated.View>
+
+      <Animated.Text style={[styles.footer, nameStyle]}>
+        University of Cape Coast
+      </Animated.Text>
     </View>
   );
 }
@@ -218,81 +189,75 @@ export default function SplashScreen({ onFinish }: Props) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: COLORS.background,
-    justifyContent: 'center',
+    backgroundColor: '#EAF3FA',
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bg: {
+    flex: 1,
+    backgroundColor: '#EAF3FA',
+  },
+  softCircle: {
+    position: 'absolute',
+    top: H * 0.22,
+    left: W * 0.5 - 140,
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: 'rgba(255,255,255,0.45)',
   },
   stage: {
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 28,
   },
-  cluster: {
+  card: {
+    backgroundColor: COLORS.white,
+    borderRadius: 36,
+    paddingVertical: 28,
+    paddingHorizontal: 28,
+    minWidth: Math.min(W * 0.82, 340),
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#1A2A3A',
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.12,
+    shadowRadius: 28,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.9)',
+  },
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    justifyContent: 'center',
+    minHeight: 64,
   },
   nameBlock: {
+    marginLeft: 4,
     justifyContent: 'center',
-    maxWidth: W * 0.52,
   },
-  name: {
-    ...type.hero,
+  word: {
+    fontFamily: 'Sora_700Bold',
     fontSize: 28,
-    lineHeight: 32,
+    color: '#152033',
+    letterSpacing: -1,
+    textTransform: 'lowercase',
   },
-  tagline: {
-    ...type.caption,
-    color: COLORS.ink,
-    opacity: 0.65,
-    marginTop: 4,
+  go: {
+    color: COLORS.primaryDark,
+  },
+  tag: {
+    marginTop: 22,
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 13,
+    color: '#5A6B7D',
+    letterSpacing: 0.2,
   },
   footer: {
     position: 'absolute',
     bottom: 48,
-    ...type.caption,
-    color: COLORS.ink,
-    opacity: 0.5,
-  },
-  arcTop: {
-    position: 'absolute',
-    top: H * 0.08,
-    alignSelf: 'center',
-    left: W * 0.2,
-    width: W * 0.6,
-    height: W * 0.6,
-    borderRadius: W * 0.3,
-    borderWidth: 1.5,
-    borderColor: 'rgba(26,26,26,0.08)',
-  },
-  arcBottom: {
-    position: 'absolute',
-    bottom: H * 0.05,
-    right: -W * 0.15,
-    width: W * 0.55,
-    height: W * 0.55,
-    borderRadius: W * 0.275,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.35)',
-  },
-  orbit: {
-    position: 'absolute',
-    top: H * 0.28,
-    left: W * 0.5 - 90,
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    borderWidth: 1,
-    borderColor: 'rgba(26,26,26,0.1)',
-    borderStyle: 'dashed',
-  },
-  orbitDot: {
-    position: 'absolute',
-    top: -5,
-    left: 85,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: COLORS.ink,
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 12,
+    color: '#7A8B9C',
   },
 });

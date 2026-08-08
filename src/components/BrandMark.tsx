@@ -1,113 +1,82 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
-import { COLORS } from '../theme/colors';
+import { COLORS, SHADOW } from '../theme/colors';
 
 type Props = {
   size?: number;
   style?: ViewStyle;
-  /** yellow badge (default) or ink badge */
-  tone?: 'yellow' | 'ink' | 'plain';
+  /** white tile like the ride inspo, or bare pin only */
+  variant?: 'squircle' | 'pin';
 };
 
 /**
- * Hand-drawn geometric mark — no AI bitmap.
- * Yellow rounded tile + charcoal shuttle body.
+ * Ride-inspired brand mark:
+ * white squircle tile + amber map pin (our accent instead of red).
  */
-export default function BrandMark({ size = 72, style, tone = 'yellow' }: Props) {
-  const r = size * 0.28;
-  const pad = size * 0.18;
-  const bodyW = size - pad * 2;
-  const bodyH = size * 0.42;
-  const wheel = size * 0.12;
-  const bg =
-    tone === 'yellow' ? COLORS.primary : tone === 'ink' ? COLORS.ink : 'transparent';
-  const ink = tone === 'ink' ? COLORS.primary : COLORS.ink;
-  const window = tone === 'ink' ? 'rgba(245,184,0,0.35)' : 'rgba(255,255,255,0.55)';
+export default function BrandMark({ size = 72, style, variant = 'squircle' }: Props) {
+  if (variant === 'pin') {
+    return <MapPin size={size} style={style} />;
+  }
+
+  const radius = size * 0.28;
+  const pinSize = size * 0.52;
 
   return (
     <View
       style={[
-        styles.badge,
+        styles.squircle,
         {
           width: size,
           height: size,
-          borderRadius: r,
-          backgroundColor: bg,
-          borderWidth: tone === 'plain' ? 0 : 1,
-          borderColor: tone === 'yellow' ? 'rgba(26,26,26,0.1)' : 'rgba(255,255,255,0.12)',
+          borderRadius: radius,
         },
+        SHADOW.md,
         style,
       ]}
     >
-      {/* shuttle body */}
+      <MapPin size={pinSize} />
+    </View>
+  );
+}
+
+export function MapPin({ size = 40, style }: { size?: number; style?: ViewStyle }) {
+  const head = size * 0.72;
+  const hole = size * 0.22;
+
+  return (
+    <View style={[{ width: size, height: size, alignItems: 'center' }, style]}>
+      {/* pin head */}
       <View
         style={{
-          width: bodyW,
-          height: bodyH,
-          borderRadius: size * 0.12,
-          backgroundColor: ink,
-          marginTop: size * 0.22,
-          overflow: 'hidden',
+          width: head,
+          height: head,
+          borderRadius: head / 2,
+          backgroundColor: COLORS.primary,
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <View
           style={{
-            position: 'absolute',
-            right: bodyW * 0.08,
-            top: bodyH * 0.18,
-            width: bodyW * 0.28,
-            height: bodyH * 0.42,
-            borderRadius: 4,
-            backgroundColor: window,
-          }}
-        />
-        <View
-          style={{
-            position: 'absolute',
-            left: bodyW * 0.12,
-            top: bodyH * 0.22,
-            width: bodyW * 0.14,
-            height: bodyH * 0.34,
-            borderRadius: 3,
-            backgroundColor: window,
+            width: hole,
+            height: hole,
+            borderRadius: hole / 2,
+            backgroundColor: COLORS.white,
           }}
         />
       </View>
-
-      {/* wheels */}
-      <View style={[styles.wheels, { width: bodyW, marginTop: -wheel * 0.35 }]}>
-        <View
-          style={{
-            width: wheel,
-            height: wheel,
-            borderRadius: wheel / 2,
-            backgroundColor: ink,
-            borderWidth: 2,
-            borderColor: bg === 'transparent' ? COLORS.background : bg,
-          }}
-        />
-        <View
-          style={{
-            width: wheel,
-            height: wheel,
-            borderRadius: wheel / 2,
-            backgroundColor: ink,
-            borderWidth: 2,
-            borderColor: bg === 'transparent' ? COLORS.background : bg,
-          }}
-        />
-      </View>
-
-      {/* fare accent line */}
+      {/* pin tip */}
       <View
         style={{
-          position: 'absolute',
-          bottom: size * 0.14,
-          width: size * 0.22,
-          height: 3,
-          borderRadius: 2,
-          backgroundColor: tone === 'ink' ? COLORS.primary : COLORS.ink,
-          opacity: 0.85,
+          width: 0,
+          height: 0,
+          marginTop: -size * 0.06,
+          borderLeftWidth: size * 0.18,
+          borderRightWidth: size * 0.18,
+          borderTopWidth: size * 0.28,
+          borderLeftColor: 'transparent',
+          borderRightColor: 'transparent',
+          borderTopColor: COLORS.primary,
         }}
       />
     </View>
@@ -115,14 +84,11 @@ export default function BrandMark({ size = 72, style, tone = 'yellow' }: Props) 
 }
 
 const styles = StyleSheet.create({
-  badge: {
+  squircle: {
+    backgroundColor: COLORS.white,
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    overflow: 'hidden',
-  },
-  wheels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: '8%',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(26,26,26,0.06)',
   },
 });

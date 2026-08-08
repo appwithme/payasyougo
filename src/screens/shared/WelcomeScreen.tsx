@@ -49,7 +49,7 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
       <StatusBar barStyle="dark-content" />
 
       <LinearGradient
-        colors={['#FFF9F0', '#FFE8A8', COLORS.primary]}
+        colors={['#EAF3FA', '#F5FAFE', '#FFFFFF']}
         locations={[0, 0.55, 1]}
         style={styles.hero}
       >
@@ -59,9 +59,11 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
         <SafeAreaView style={styles.heroSafe} edges={['top']}>
           <Animated.View entering={FadeInDown.duration(500)} style={styles.brandBlock}>
             <Animated.View style={bobStyle}>
-              <BrandMark size={86} />
+              <BrandMark size={88} />
             </Animated.View>
-            <Text style={styles.appName}>PayAsYouGo</Text>
+            <Text style={styles.appName}>
+              payasyou<Text style={styles.appNameAccent}>go</Text>
+            </Text>
             <Text style={styles.tagline}>Digital fares for UCC campus rides</Text>
           </Animated.View>
         </SafeAreaView>
@@ -107,7 +109,7 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: COLORS.background },
+  root: { flex: 1, backgroundColor: '#EAF3FA' },
   hero: {
     flex: 1.15,
     justifyContent: 'flex-end',
@@ -121,7 +123,7 @@ const styles = StyleSheet.create({
     height: W * 0.7,
     borderRadius: W * 0.35,
     borderWidth: 1.5,
-    borderColor: 'rgba(26,26,26,0.08)',
+    borderColor: 'rgba(21,32,51,0.06)',
   },
   heroDecorSm: {
     position: 'absolute',
@@ -130,7 +132,7 @@ const styles = StyleSheet.create({
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'rgba(245,184,0,0.18)',
   },
   heroSafe: {
     flex: 1,
@@ -139,8 +141,18 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xl,
   },
   brandBlock: { alignItems: 'flex-start' },
-  appName: { ...type.hero, fontSize: 36, marginTop: SPACING.md },
-  tagline: { ...type.body, marginTop: 6, maxWidth: 280 },
+  appName: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 34,
+    color: '#152033',
+    letterSpacing: -1,
+    marginTop: SPACING.md,
+    textTransform: 'lowercase',
+  },
+  appNameAccent: {
+    color: COLORS.primaryDark,
+  },
+  tagline: { ...type.body, marginTop: 6, maxWidth: 280, color: '#5A6B7D' },
   sheet: {
     backgroundColor: COLORS.surface,
     borderTopLeftRadius: 28,
