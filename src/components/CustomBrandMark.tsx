@@ -7,10 +7,8 @@ type Props = {
   style?: ViewStyle;
 };
 
-/**
- * Flat geometric brand mark — amber tile + ink route glyph.
- */
-function CustomBrandMark({ size = 48, style }: Props) {
+/** Flat geometric brand mark — amber tile + ink route glyph. */
+export function CustomBrandMark({ size = 48, style }: Props) {
   const r = size * 0.28;
   const pad = size * 0.22;
   const stroke = Math.max(2.5, size * 0.07);
