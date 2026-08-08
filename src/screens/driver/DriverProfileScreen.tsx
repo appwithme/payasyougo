@@ -16,9 +16,11 @@ import { useApp } from '../../context/AppContext';
 import Header from '../../components/Header';
 import Button from '../../components/Button';
 import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import { useTabBarPadding } from '../../navigation/FloatingTabBar';
 
 const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
   const { logout, getDriverData } = useApp();
+  const tabPad = useTabBarPadding();
   const driver = getDriverData();
 
   const handleLogout = () => {
@@ -69,7 +71,10 @@ const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
       <StatusBar barStyle="dark-content" />
       <Header title="Driver Profile" onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: tabPad }]}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.avatarSection}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>{driver.name.charAt(0).toUpperCase()}</Text>
@@ -116,7 +121,7 @@ const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  scroll: { padding: SPACING.lg, paddingBottom: 100, gap: SPACING.xl },
+  scroll: { padding: SPACING.lg, gap: SPACING.xl },
 
   avatarSection: {
     alignItems: 'center',
