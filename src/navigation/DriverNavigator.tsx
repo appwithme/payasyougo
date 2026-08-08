@@ -1,12 +1,17 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { DriverTabParamList, DriverDashboardStackParamList } from '../types/navigation';
+import {
+  DriverTabParamList,
+  DriverDashboardStackParamList,
+  DriverWalletStackParamList,
+} from '../types/navigation';
 import { FloatingTabBar, floatingTabScreenOptions } from './FloatingTabBar';
 
 import DriverDashboardScreen from '../screens/driver/DriverDashboardScreen';
 import TransactionHistoryScreen from '../screens/driver/TransactionHistoryScreen';
 import WalletScreen from '../screens/driver/WalletScreen';
+import WithdrawalSuccessScreen from '../screens/driver/WithdrawalSuccessScreen';
 import DriverProfileScreen from '../screens/driver/DriverProfileScreen';
 import DriverQrScreen from '../screens/driver/DriverQrScreen';
 import EditProfileScreen from '../screens/shared/EditProfileScreen';
@@ -16,6 +21,7 @@ import NotificationsSettingsScreen from '../screens/shared/NotificationsSettings
 const Tab = createBottomTabNavigator<DriverTabParamList>();
 const Stack = createNativeStackNavigator<DriverDashboardStackParamList>();
 const ProfileStackNav = createNativeStackNavigator();
+const WalletStackNav = createNativeStackNavigator<DriverWalletStackParamList>();
 
 const DashboardStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -42,6 +48,13 @@ const ProfileStack = () => (
   </ProfileStackNav.Navigator>
 );
 
+const WalletStack = () => (
+  <WalletStackNav.Navigator screenOptions={{ headerShown: false }}>
+    <WalletStackNav.Screen name="WalletHome" component={WalletScreen} />
+    <WalletStackNav.Screen name="WithdrawalSuccess" component={WithdrawalSuccessScreen} />
+  </WalletStackNav.Navigator>
+);
+
 const DriverNavigator = () => (
   <Tab.Navigator
     tabBar={(props) => <FloatingTabBar {...props} />}
@@ -49,7 +62,7 @@ const DriverNavigator = () => (
   >
     <Tab.Screen name="DashboardTab" component={DashboardStack} />
     <Tab.Screen name="TxnTab" component={TransactionHistoryScreen} />
-    <Tab.Screen name="WalletTab" component={WalletScreen} />
+    <Tab.Screen name="WalletTab" component={WalletStack} />
     <Tab.Screen name="ProfileTab" component={ProfileStack} />
   </Tab.Navigator>
 );
