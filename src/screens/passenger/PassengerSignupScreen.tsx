@@ -13,6 +13,7 @@ import { useApp } from '../../context/AppContext';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import GoogleSignInButton from '../../components/GoogleSignInButton';
+import { makePassengerSignupSample } from '../../data/qaAccounts';
 import { COLORS, FONT_SIZE, SPACING, RADIUS } from '../../theme/colors';
 
 const PassengerSignupScreen = ({ navigation }: { navigation: any }) => {
@@ -31,6 +32,16 @@ const PassengerSignupScreen = ({ navigation }: { navigation: any }) => {
     confirmPassword?: string;
     form?: string;
   }>();
+
+  const fillSignupSample = () => {
+    const sample = makePassengerSignupSample();
+    setName(sample.name);
+    setPhone(sample.phone);
+    setEmail(sample.email);
+    setPassword(sample.password);
+    setConfirmPassword(sample.password);
+    setErrors(undefined);
+  };
 
   const handleRegister = async () => {
     const e: typeof errors = {};
@@ -88,6 +99,8 @@ const PassengerSignupScreen = ({ navigation }: { navigation: any }) => {
             onChangeText={setName}
             iconName="person-outline"
             error={errors?.name}
+            autoComplete="name"
+            textContentType="name"
           />
           <Input
             label="Phone Number"
@@ -98,6 +111,8 @@ const PassengerSignupScreen = ({ navigation }: { navigation: any }) => {
             iconName="call-outline"
             error={errors?.phone}
             autoCapitalize="none"
+            autoComplete="tel"
+            textContentType="telephoneNumber"
           />
           <Input
             label="Email (optional)"
@@ -107,6 +122,8 @@ const PassengerSignupScreen = ({ navigation }: { navigation: any }) => {
             keyboardType="email-address"
             iconName="mail-outline"
             autoCapitalize="none"
+            autoComplete="email"
+            textContentType="emailAddress"
           />
           <Input
             label="Password"
@@ -117,6 +134,8 @@ const PassengerSignupScreen = ({ navigation }: { navigation: any }) => {
             secureTextEntry
             autoCapitalize="none"
             error={errors?.password}
+            autoComplete="new-password"
+            textContentType="newPassword"
           />
           <Input
             label="Confirm Password"
@@ -127,7 +146,19 @@ const PassengerSignupScreen = ({ navigation }: { navigation: any }) => {
             secureTextEntry
             autoCapitalize="none"
             error={errors?.confirmPassword}
+            autoComplete="new-password"
+            textContentType="newPassword"
           />
+
+          <TouchableOpacity
+            style={styles.autofillBtn}
+            onPress={fillSignupSample}
+            accessibilityRole="button"
+            accessibilityLabel="Autofill registration sample"
+          >
+            <Ionicons name="flash-outline" size={16} color={COLORS.textPrimary} />
+            <Text style={styles.autofillText}>Autofill sample details</Text>
+          </TouchableOpacity>
 
           <Button title="Create Account" onPress={handleRegister} loading={loading} style={styles.btn} />
 
@@ -192,6 +223,18 @@ const styles = StyleSheet.create({
   },
   errorText: { color: COLORS.error, flex: 1, fontWeight: '700', fontSize: FONT_SIZE.sm },
   form: { gap: SPACING.md },
+  autofillBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: SPACING.xs,
+    marginTop: -SPACING.xs,
+  },
+  autofillText: {
+    color: COLORS.textPrimary,
+    fontSize: FONT_SIZE.sm,
+    fontWeight: '700',
+  },
   btn: { marginTop: SPACING.md },
   dividerRow: {
     flexDirection: 'row',
