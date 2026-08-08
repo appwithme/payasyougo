@@ -2,7 +2,7 @@
 export const QA_PASSENGER = {
   phone: '0550000111',
   password: 'admin123',
-  label: 'Admin Passenger',
+  label: 'Kofi Mensah',
 } as const;
 
 export const QA_DRIVERS = [
