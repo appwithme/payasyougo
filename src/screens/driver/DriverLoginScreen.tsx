@@ -14,15 +14,22 @@ import { useApp } from '../../context/AppContext';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import BrandLogo from '../../components/BrandLogo';
+import { QA_DRIVER_DEFAULT, QA_DRIVERS } from '../../data/qaAccounts';
 import { COLORS, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
 
 const DriverLoginScreen = ({ navigation }: { navigation: any }) => {
   const { loginDriver } = useApp();
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState(QA_DRIVER_DEFAULT.phone);
+  const [password, setPassword] = useState(QA_DRIVER_DEFAULT.password);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const fillAccount = (account: (typeof QA_DRIVERS)[number]) => {
+    setPhone(account.phone);
+    setPassword(account.password);
+    setError('');
+  };
 
   const handleLogin = async () => {
     if (!phone.trim()) {
@@ -74,6 +81,9 @@ const DriverLoginScreen = ({ navigation }: { navigation: any }) => {
             keyboardType="phone-pad"
             iconName="call-outline"
             autoCapitalize="none"
+            autoComplete="tel"
+            textContentType="telephoneNumber"
+            importantForAutofill="yes"
           />
           <Input
             label="Password"
@@ -83,7 +93,42 @@ const DriverLoginScreen = ({ navigation }: { navigation: any }) => {
             iconName="lock-closed-outline"
             secureTextEntry
             autoCapitalize="none"
+            autoComplete="password"
+            textContentType="password"
+            importantForAutofill="yes"
           />
+
+          <View style={styles.autofillRow}>
+            <Text style={styles.autofillLabel}>Autofill</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.autofillChips}
+            >
+              {QA_DRIVERS.map((account) => (
+                <TouchableOpacity
+                  key={account.code}
+                  style={[
+                    styles.chip,
+                    phone === account.phone && styles.chipActive,
+                  ]}
+                  onPress={() => fillAccount(account)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Autofill ${account.label}`}
+                >
+                  <Text
+                    style={[
+                      styles.chipText,
+                      phone === account.phone && styles.chipTextActive,
+                    ]}
+                  >
+                    {account.code}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+
           <Button title="Sign in" onPress={handleLogin} loading={loading} variant="ink" />
 
           <TouchableOpacity
@@ -127,6 +172,26 @@ const styles = StyleSheet.create({
   },
   errorText: { ...type.caption, color: COLORS.error, flex: 1, fontFamily: 'DMSans_700Bold' },
   form: { gap: 4 },
+  autofillRow: {
+    marginBottom: SPACING.md,
+    gap: SPACING.xs,
+  },
+  autofillLabel: { ...type.label, color: COLORS.textMuted },
+  autofillChips: { gap: SPACING.sm, paddingVertical: 2 },
+  chip: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.surface,
+  },
+  chipActive: {
+    borderColor: COLORS.ink,
+    backgroundColor: COLORS.ink,
+  },
+  chipText: { ...type.caption, color: COLORS.textPrimary, fontFamily: 'DMSans_700Bold' },
+  chipTextActive: { color: COLORS.white },
   link: {
     flexDirection: 'row',
     justifyContent: 'center',
