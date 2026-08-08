@@ -52,7 +52,7 @@ const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
           <View style={styles.heroRow}>
             <View style={styles.heroCopy}>
               <Text style={styles.greeting}>Hi, {firstName}</Text>
-              <Text style={styles.subGreeting}>Collect campus MoMo fares</Text>
+              <Text style={styles.heroMeta}>Collect campus MoMo fares</Text>
             </View>
             <TouchableOpacity
               onPress={() => navigation.navigate('DriverProfile')}
@@ -219,9 +219,9 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     letterSpacing: -0.8,
   },
-  subGreeting: {
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 15,
+  heroMeta: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 14,
     color: 'rgba(255,255,255,0.55)',
   },
   avatarRing: {
