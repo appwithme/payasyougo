@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  StatusBar,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../../context/AppContext';
 import * as authService from '../../services/authService';
@@ -15,6 +7,7 @@ import Button from '../../components/Button';
 import Input from '../../components/Input';
 import IdCaptureSlot from '../../components/IdCaptureSlot';
 import AccountCreatedView from '../../components/AccountCreatedView';
+import AuthSheetScreen from '../../components/AuthSheetScreen';
 import { makeDriverSignupSample, makeVehicleSignupSample } from '../../data/qaAccounts';
 import { COLORS, FONT_SIZE, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
@@ -74,7 +67,7 @@ function SignupStepper({ activeIndex }: { activeIndex: number }) {
                 ]}
               >
                 {done ? (
-                  <Ionicons name="checkmark" size={14} color={COLORS.white} />
+                  <Ionicons name="checkmark" size={14} color={COLORS.ink} />
                 ) : (
                   <Text style={[styles.stepNumber, reached && styles.stepNumberActive]}>
                     {i + 1}
@@ -642,31 +635,14 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        <TouchableOpacity onPress={handleBack} style={styles.back}>
-          <View style={styles.backIconWrap}>
-            <Ionicons name="chevron-back" size={24} color={COLORS.textPrimary} />
-          </View>
-        </TouchableOpacity>
-
-        <View style={styles.header}>
-          <SignupStepper activeIndex={step} />
-          <Text style={styles.title}>{current.title}</Text>
-          <Text style={styles.subtitle}>{current.subtitle}</Text>
-        </View>
-
-        {!!errors.form && (
-          <View style={styles.errorBox}>
-            <Ionicons name="alert-circle" size={18} color={COLORS.error} />
-            <Text style={styles.errorText}>{errors.form}</Text>
-          </View>
-        )}
-
-        <View style={styles.form}>{renderStepBody(current.key)}</View>
-
-        <View style={styles.footer}>
+    <AuthSheetScreen
+      eyebrow={`Step ${step + 1} of ${STEPS.length}`}
+      title={current.title}
+      subtitle={current.subtitle}
+      onBack={handleBack}
+      heroExtra={<SignupStepper activeIndex={step} />}
+      footer={
+        <>
           {step < STEPS.length - 1 ? (
             <Button title="Continue" variant="ink" onPress={handleNext} />
           ) : (
@@ -677,19 +653,26 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
               loading={loading}
             />
           )}
-
           {step === 0 ? (
             <TouchableOpacity
               onPress={() => navigation.navigate('DriverLogin')}
               style={styles.loginLink}
             >
               <Text style={styles.loginLinkText}>Already have an account? </Text>
-              <Text style={[styles.loginLinkText, styles.linkAccent]}>Login</Text>
+              <Text style={styles.linkAccent}>Login</Text>
             </TouchableOpacity>
           ) : null}
+        </>
+      }
+    >
+      {!!errors.form && (
+        <View style={styles.errorBox}>
+          <Ionicons name="alert-circle" size={18} color={COLORS.error} />
+          <Text style={styles.errorText}>{errors.form}</Text>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      )}
+      {renderStepBody(current.key)}
+    </AuthSheetScreen>
   );
 };
 
