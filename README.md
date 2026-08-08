@@ -38,7 +38,7 @@ A mobile transport payment app for **University of Cape Coast (UCC)** — passen
 ### 🧳 Passengers
 - Sign up / log in (JWT + optional Google)
 - Pick campus **From → To** with live fares
-- Link a driver by **Driver ID**
+- Link a driver by **Driver ID** or **QR scan**
 - Pay MoMo (MTN / Telecel)
 - Rate the driver after payment
 - Trip history & profile photo
@@ -51,7 +51,7 @@ A mobile transport payment app for **University of Cape Coast (UCC)** — passen
 - Live wallet, today’s earnings & MoMo withdrawals
 - Trip / payment history
 - Profile with vehicle + rating
-- Ratings update from passenger feedback
+- Ghana Card + licence capture on signup (campus pilot)
 
 </td>
 </tr>
@@ -101,6 +101,14 @@ npm run dev
 
 API health: `GET http://localhost:4000/health`
 
+**Neon `DATABASE_URL` tip:** use the pooled connection string with `sslmode=require` and a longer connect timeout (cold starts). Prefer:
+
+```env
+DATABASE_URL="postgresql://…@…-pooler.…/neondb?sslmode=require&connect_timeout=15"
+```
+
+Avoid `channel_binding=require` — Prisma often fails to connect with that flag.
+
 ### 3 · App env
 
 Root `.env` (from `.env.example`):
@@ -108,9 +116,14 @@ Root `.env` (from `.env.example`):
 ```env
 EXPO_PUBLIC_API_URL=http://YOUR_LAN_IP:4000
 EXPO_PUBLIC_MOCK_MODE=false
+
+# Optional — passenger Google sign-in (Web client ID is enough for Expo)
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=
+EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=
+EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=
 ```
 
-> 💡 Use your Mac’s **LAN IP** (not `localhost`) when testing on a physical phone.
+> 💡 Use your Mac’s **LAN IP** (not `localhost`) when testing on a physical phone. Simulator can use `http://localhost:4000`.
 
 ### 4 · Run Expo
 
@@ -118,7 +131,17 @@ EXPO_PUBLIC_MOCK_MODE=false
 npx expo start
 ```
 
-Scan the QR with Expo Go (same Wi‑Fi as the API).
+Scan the QR with Expo Go (same Wi‑Fi as the API). Restart Expo after changing any `EXPO_PUBLIC_*` env var.
+
+### First launch vs logout
+
+| Moment | Screen |
+|:-------|:-------|
+| **First install** (onboarding not completed) | Intro carousel → then Welcome |
+| **Later cold starts** | Welcome (role picker) |
+| **After logout** | Welcome — not the intro carousel |
+
+Onboarding is stored in AsyncStorage (`payasyougo_onboarding_v6`) and only shown once until that key is cleared or bumped.
 
 ---
 
@@ -172,9 +195,9 @@ In **live / production**, Telecel works the same as MTN: the app sends provider 
 | Driver | Ama Asantewaa | `0200000002` | `driver456` | `DRV002` |
 | Driver | Kwame Asiamah | `0240000111` | `admin123` | `DRV100` |
 
-All three drivers are created by `prisma/seed.ts` (re-run after a fresh Neon DB).
+Created by `prisma/seed.ts` (re-run after a fresh Neon DB). Login screens include **Autofill test account** for local QA.
 
-**New driver registration** is a 4-step flow: Account → Ghana Card verify → Licence verify → Vehicle. Ghana Card must look like `GHA-XXXXXXXXX-X`. Licence numbers are checked for format uniqueness (campus pilot — not live NIA/DVLA).
+**New driver registration** is a 4-step flow: Account → Ghana Card verify → Licence verify → Vehicle. Ghana Card must look like `GHA-XXXXXXXXX-X`. Licence numbers are checked for format uniqueness (campus pilot — not live NIA/DVLA). Signup autofill only fills the **current** step so later steps don’t wipe ID verification.
 
 Drivers can show a **QR code** from the dashboard. Passengers scan it on **Link driver** instead of typing the ID.
 
@@ -185,14 +208,20 @@ cd backend && npm run prisma:seed
 ### Google sign-in (passengers)
 
 1. Create OAuth clients in [Google Cloud Console](https://console.cloud.google.com/apis/credentials)  
-2. Root `.env`:
+2. For the **Web** client, add authorized redirect URI: `https://localhost`  
+3. Root `.env` — **Web client ID is required** for the in-app button:
    ```env
-   EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=...
-   EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=...
-   EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=...
+   EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=xxxxx.apps.googleusercontent.com
    ```
-3. Same IDs in `backend/.env` as `GOOGLE_*_CLIENT_ID`  
-4. Restart API + Expo  
+4. `backend/.env` — same Web ID + client secret (for code exchange):
+   ```env
+   GOOGLE_WEB_CLIENT_ID=xxxxx.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=GOCSPX-…
+   ```
+5. Optional: iOS / Android client IDs for native audiences  
+6. Restart API + Expo  
+
+Without `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, the login UI shows a setup hint instead of **Continue with Google**.
 
 ---
 
@@ -201,15 +230,17 @@ cd backend && npm run prisma:seed
 ```text
 payasyougo/
 ├── 📱 App.tsx / app.json
-├── 🖼️ assets/brand/          # logo, MoMo & Telecel marks
+├── 🖼️ assets/brand/          # logo, welcome video, MoMo & Telecel marks
+├── 🖼️ assets/id/             # Ghana Card / licence example images
 ├── 🖥️ backend/
 │   ├── prisma/               # schema · migrations · seed
 │   └── src/                  # Express · Paystack · auth
 ├── 📂 src/
-│   ├── components/           # DriverCard, RouteSelector, …
+│   ├── components/           # Auth sheet, Google button, ID capture, …
+│   ├── data/                 # QA autofill samples
 │   ├── navigation/           # Floating tab bar + stacks
 │   ├── screens/              # passenger · driver · shared
-│   ├── services/             # API · payments · auth
+│   ├── services/             # API · payments · auth · Google
 │   └── theme/                # colors · typography
 └── 📚 docs/
 ```
