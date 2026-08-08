@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
 import paymentService from '../../services/paymentService';
 import Header from '../../components/Header';
@@ -84,7 +85,7 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
       <Header title="Confirm payment" onBack={() => navigation.goBack()} transparent />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.section}>
+        <Animated.View entering={FadeInDown.duration(350)} style={styles.section}>
           <Text style={styles.sectionLabel}>Trip</Text>
           <View style={styles.summaryCard}>
             <Text style={styles.summaryRoute}>
@@ -92,14 +93,14 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
             </Text>
             <Text style={styles.summaryFare}>GH₵{fare}</Text>
           </View>
-        </View>
+        </Animated.View>
 
-        <View style={styles.section}>
+        <Animated.View entering={FadeInUp.delay(60).duration(400)} style={styles.section}>
           <Text style={styles.sectionLabel}>Driver</Text>
           <DriverCard driver={driver} />
-        </View>
+        </Animated.View>
 
-        <View style={styles.section}>
+        <Animated.View entering={FadeInUp.delay(120).duration(400)} style={styles.section}>
           <Text style={styles.sectionLabel}>Mobile money</Text>
           <View style={styles.providerGrid}>
             {providers.map((p) => (
@@ -144,23 +145,23 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
               A prompt will appear on your phone. We never store your PIN.
             </Text>
           </View>
-        </View>
+        </Animated.View>
 
         {!!error && (
-          <View style={styles.errorBox}>
+          <Animated.View entering={FadeInDown.duration(250)} style={styles.errorBox}>
             <Ionicons name="alert-circle" size={20} color={COLORS.error} />
             <Text style={styles.errorText}>{error}</Text>
-          </View>
+          </Animated.View>
         )}
 
-        <View style={styles.footer}>
+        <Animated.View entering={FadeInUp.delay(180).duration(400)} style={styles.footer}>
           <Button
             title={loading ? loadingStep : `Pay GH₵${fare} with MoMo`}
             onPress={handlePay}
             loading={loading}
             style={styles.btn}
           />
-        </View>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
