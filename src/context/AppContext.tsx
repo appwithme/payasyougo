@@ -50,6 +50,7 @@ interface AppContextType {
   }) => Promise<{ success: boolean; driver?: Driver; error?: string }>;
   withdrawDriverFunds: (amount: number) => { success: boolean; error?: string };
   logout: () => Promise<void>;
+  updateAvatar: (avatarUrl: string) => Promise<{ success: boolean; error?: string }>;
   refreshTrips: () => Promise<void>;
   refreshDriverWallet: () => Promise<void>;
   clearNotification: () => void;
@@ -228,6 +229,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setPendingNotification(null);
   };
 
+  const updateAvatar = async (avatarUrl: string) => {
+    try {
+      const user = await authService.updateAvatar(avatarUrl);
+      setCurrentUser(user);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Could not update photo' };
+    }
+  };
+
   const clearNotification = () => setPendingNotification(null);
 
   const getDriverData = (): Driver | null => {
@@ -248,6 +259,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         signupDriver,
         withdrawDriverFunds,
         logout,
+        updateAvatar,
         passengerTrips,
         driverTransactions,
         refreshTrips,
