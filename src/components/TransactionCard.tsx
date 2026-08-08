@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Transaction } from '../types';
 import { COLORS, SPACING } from '../theme/colors';
 
@@ -14,11 +15,13 @@ const TransactionCard = ({
   mode = 'passenger',
   last = false,
   onRebook,
+  rebooking = false,
 }: {
   item: Transaction;
   mode?: 'passenger' | 'driver';
   last?: boolean;
   onRebook?: (item: Transaction) => void;
+  rebooking?: boolean;
 }) => {
   const isPassenger = mode === 'passenger';
   const person = isPassenger ? item.driverName : item.passengerName;
@@ -37,23 +40,30 @@ const TransactionCard = ({
           {person ? ' · ' : ''}
           {item.date} · {item.time}
         </Text>
-        {isPassenger && onRebook ? (
-          <TouchableOpacity
-            onPress={() => onRebook(item)}
-            hitSlop={8}
-            style={styles.rebookBtn}
-            accessibilityRole="button"
-            accessibilityLabel={`Rebook ${item.from} to ${item.to}`}
-          >
-            <Text style={styles.rebookText}>Rebook</Text>
-          </TouchableOpacity>
-        ) : null}
       </View>
 
       <View style={styles.right}>
-        <Text style={[styles.amount, !isPassenger && styles.amountCredit]}>
-          {isPassenger ? '−' : '+'}GH₵{Number(item.amount).toFixed(2)}
-        </Text>
+        <View style={styles.rightTop}>
+          <Text style={[styles.amount, !isPassenger && styles.amountCredit]}>
+            {isPassenger ? '−' : '+'}GH₵{Number(item.amount).toFixed(2)}
+          </Text>
+          {isPassenger && onRebook ? (
+            <TouchableOpacity
+              onPress={() => onRebook(item)}
+              hitSlop={8}
+              disabled={rebooking}
+              style={styles.reloadBtn}
+              accessibilityRole="button"
+              accessibilityLabel={`Reload trip ${item.from} to ${item.to}`}
+            >
+              {rebooking ? (
+                <ActivityIndicator size="small" color={COLORS.ink} />
+              ) : (
+                <Ionicons name="reload" size={16} color={COLORS.ink} />
+              )}
+            </TouchableOpacity>
+          ) : null}
+        </View>
         <View style={styles.statusRow}>
           <View style={[styles.dot, { backgroundColor: statusColor }]} />
           <Text style={[styles.status, { color: statusColor }]}>
@@ -97,25 +107,25 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     lineHeight: 16,
   },
-  rebookBtn: {
-    alignSelf: 'flex-start',
-    marginTop: 6,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 999,
-    backgroundColor: COLORS.primaryMuted,
-    borderWidth: 1,
-    borderColor: COLORS.primary,
-  },
-  rebookText: {
-    fontFamily: 'DMSans_700Bold',
-    fontSize: 12,
-    color: COLORS.ink,
-  },
   right: {
     alignItems: 'flex-end',
     gap: 5,
     paddingTop: 2,
+  },
+  rightTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  reloadBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.primaryMuted,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   amount: {
     fontFamily: 'Sora_700Bold',
