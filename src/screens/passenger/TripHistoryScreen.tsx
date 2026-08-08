@@ -4,18 +4,18 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  StatusBar,
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
 import TransactionCard from '../../components/TransactionCard';
+import InkSheetScreen from '../../components/InkSheetScreen';
 import { resolveRebookRoute } from '../../services/rebookService';
-import { COLORS, SPACING, RADIUS } from '../../theme/colors';
+import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { useTabBarPadding } from '../../navigation/FloatingTabBar';
 import { Transaction } from '../../types';
@@ -83,26 +83,8 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
     }
   };
 
-  const listHeader = (
-    <View style={styles.top}>
-      <View style={styles.titleRow}>
-        <Text style={styles.title}>Trips</Text>
-        {completed.length > 0 ? (
-          <Text style={styles.spent}>
-            GH₵{totalSpent.toFixed(0)}
-            <Text style={styles.spentUnit}> spent</Text>
-          </Text>
-        ) : null}
-      </View>
-
-      <Text style={styles.meta}>
-        {passengerTrips.length === 0
-          ? 'Fares you pay show up here'
-          : `${passengerTrips.length} total · ${completed.length} paid${
-              failedCount ? ` · ${failedCount} failed` : ''
-            }`}
-      </Text>
-
+  const tools = (
+    <Animated.View entering={FadeInUp.delay(100).duration(420)} style={styles.tools}>
       {passengerTrips.length > 0 ? (
         <>
           <View style={styles.search}>
@@ -136,117 +118,160 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
               );
             })}
           </View>
-
-          <Text style={styles.resultCount}>
-            Showing {filtered.length}
-            {filtered.length !== passengerTrips.length
-              ? ` of ${passengerTrips.length}`
-              : ''}
-          </Text>
         </>
       ) : null}
-    </View>
+    </Animated.View>
   );
 
-  return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="dark-content" />
+  const listBody =
+    passengerTrips.length === 0 ? (
+      <View style={styles.empty}>
+        <Text style={styles.emptyTitle}>No trips yet</Text>
+        <Text style={styles.emptySubtitle}>
+          After you pay a fare, rebook it from here in one tap.
+        </Text>
+      </View>
+    ) : filtered.length === 0 ? (
+      <View style={styles.empty}>
+        <Text style={styles.emptyTitle}>No matches</Text>
+        <Text style={styles.emptySubtitle}>
+          Try another search or clear the status filter.
+        </Text>
+        <TouchableOpacity
+          onPress={() => {
+            setQuery('');
+            setStatusFilter('all');
+          }}
+          style={styles.clearBtn}
+        >
+          <Text style={styles.clearText}>Clear filters</Text>
+        </TouchableOpacity>
+      </View>
+    ) : (
+      <View style={styles.listPanel}>
+        <Text style={styles.resultCount}>
+          Showing {filtered.length}
+          {filtered.length !== passengerTrips.length
+            ? ` of ${passengerTrips.length}`
+            : ''}
+        </Text>
+        {filtered.map((item, index) => (
+          <View key={item.id}>
+            <TransactionCard
+              item={item}
+              mode="passenger"
+              last={index === filtered.length - 1}
+              onRebook={handleRebook}
+            />
+            {rebookingId === item.id ? (
+              <View style={styles.rebookBusy}>
+                <ActivityIndicator size="small" color={COLORS.ink} />
+                <Text style={styles.rebookBusyText}>Opening route…</Text>
+              </View>
+            ) : null}
+          </View>
+        ))}
+      </View>
+    );
 
-      {passengerTrips.length === 0 ? (
-        <View style={styles.page}>
-          {listHeader}
-          <View style={styles.empty}>
-            <Text style={styles.emptyTitle}>No trips yet</Text>
-            <Text style={styles.emptySubtitle}>
-              After you pay a fare, rebook it from here in one tap.
-            </Text>
-          </View>
-        </View>
-      ) : filtered.length === 0 ? (
-        <View style={styles.page}>
-          {listHeader}
-          <View style={styles.empty}>
-            <Text style={styles.emptyTitle}>No matches</Text>
-            <Text style={styles.emptySubtitle}>
-              Try another search or clear the status filter.
-            </Text>
-            <TouchableOpacity
-              onPress={() => {
-                setQuery('');
-                setStatusFilter('all');
-              }}
-              style={styles.clearBtn}
-            >
-              <Text style={styles.clearText}>Clear filters</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      ) : (
-        <FlatList
-          data={filtered}
-          keyExtractor={(item) => item.id}
-          ListHeaderComponent={listHeader}
-          renderItem={({ item, index }) => (
-            <View>
-              <TransactionCard
-                item={item}
-                mode="passenger"
-                last={index === filtered.length - 1}
-                onRebook={handleRebook}
-              />
-              {rebookingId === item.id ? (
-                <View style={styles.rebookBusy}>
-                  <ActivityIndicator size="small" color={COLORS.ink} />
-                  <Text style={styles.rebookBusyText}>Opening route…</Text>
-                </View>
-              ) : null}
+  return (
+    <InkSheetScreen
+      hero={
+        <Animated.View entering={FadeInDown.delay(60).duration(420)} style={styles.heroBody}>
+          <Text style={styles.heroTitle}>Trips</Text>
+          <Text style={styles.heroSub}>
+            {passengerTrips.length === 0
+              ? 'Fares you pay show up here'
+              : `${passengerTrips.length} total · ${completed.length} paid${
+                  failedCount ? ` · ${failedCount} failed` : ''
+                }`}
+          </Text>
+          {completed.length > 0 ? (
+            <View style={styles.heroStats}>
+              <View style={styles.heroStat}>
+                <Text style={styles.heroStatValue}>{completed.length}</Text>
+                <Text style={styles.heroStatLabel}>Paid</Text>
+              </View>
+              <View style={styles.heroStatRule} />
+              <View style={styles.heroStat}>
+                <Text style={styles.heroStatValue}>GH₵{totalSpent.toFixed(0)}</Text>
+                <Text style={styles.heroStatLabel}>Spent</Text>
+              </View>
             </View>
-          )}
-          contentContainerStyle={[styles.page, { paddingBottom: tabPad }]}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        />
-      )}
-    </SafeAreaView>
+          ) : null}
+        </Animated.View>
+      }
+    >
+      <FlatList
+        data={[{ key: 'content' }]}
+        keyExtractor={(item) => item.key}
+        renderItem={() => (
+          <View style={styles.page}>
+            {tools}
+            {listBody}
+          </View>
+        )}
+        contentContainerStyle={{ paddingBottom: tabPad }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      />
+    </InkSheetScreen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  page: {
-    paddingHorizontal: SPACING.lg,
+  heroBody: {
+    marginTop: SPACING.lg,
+    gap: 6,
   },
-  top: {
-    paddingTop: SPACING.md,
-    paddingBottom: SPACING.sm,
-    gap: 10,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
-    gap: SPACING.md,
-  },
-  title: {
+  heroTitle: {
     fontFamily: 'Sora_700Bold',
     fontSize: 28,
-    color: COLORS.ink,
+    color: COLORS.white,
     letterSpacing: -0.8,
   },
-  spent: {
+  heroSub: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 15,
+    color: 'rgba(255,255,255,0.55)',
+  },
+  heroStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 14,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: RADIUS.lg,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  heroStat: {
+    flex: 1,
+  },
+  heroStatValue: {
     fontFamily: 'Sora_700Bold',
-    fontSize: 18,
-    color: COLORS.ink,
-    letterSpacing: -0.3,
+    fontSize: 20,
+    color: COLORS.white,
+    letterSpacing: -0.4,
   },
-  spentUnit: {
+  heroStatLabel: {
     fontFamily: 'DMSans_500Medium',
-    fontSize: 13,
-    color: COLORS.textMuted,
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.5)',
+    marginTop: 2,
   },
-  meta: {
-    ...type.caption,
-    marginTop: -4,
+  heroStatRule: {
+    width: StyleSheet.hairlineWidth,
+    alignSelf: 'stretch',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    marginHorizontal: 14,
+  },
+  page: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.lg,
+    gap: SPACING.md,
+  },
+  tools: {
+    gap: 10,
   },
   search: {
     flexDirection: 'row',
@@ -257,8 +282,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginTop: 4,
+    paddingVertical: 11,
+    ...SHADOW.sm,
   },
   searchInput: {
     flex: 1,
@@ -276,9 +301,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: RADIUS.full,
-    backgroundColor: 'transparent',
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: COLORS.borderStrong,
+    borderColor: COLORS.border,
   },
   chipActive: {
     backgroundColor: COLORS.ink,
@@ -292,10 +317,20 @@ const styles = StyleSheet.create({
   chipTextActive: {
     color: COLORS.white,
   },
+  listPanel: {
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.sm,
+    paddingBottom: 4,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOW.sm,
+  },
   resultCount: {
     ...type.caption,
     fontSize: 12,
-    marginTop: 2,
+    marginBottom: 2,
   },
   rebookBusy: {
     flexDirection: 'row',
@@ -309,8 +344,13 @@ const styles = StyleSheet.create({
     color: COLORS.ink,
   },
   empty: {
-    paddingTop: SPACING.lg,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     gap: 6,
+    ...SHADOW.sm,
   },
   emptyTitle: {
     fontFamily: 'Sora_600SemiBold',
@@ -320,7 +360,7 @@ const styles = StyleSheet.create({
   emptySubtitle: { ...type.caption },
   clearBtn: {
     alignSelf: 'flex-start',
-    marginTop: 10,
+    marginTop: 8,
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: RADIUS.full,
