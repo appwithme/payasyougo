@@ -72,6 +72,19 @@ export async function loginWithGoogle(idToken: string): Promise<AuthResponse> {
   return res;
 }
 
+export async function loginWithGoogleCode(
+  code: string,
+  redirectUri: string
+): Promise<AuthResponse> {
+  const res = await apiRequest<AuthResponse>('/api/auth/google/code', {
+    method: 'POST',
+    auth: false,
+    body: { code, redirectUri },
+  });
+  await setToken(res.token);
+  return res;
+}
+
 export async function fetchMe(): Promise<AuthUser> {
   const res = await apiRequest<{ user: AuthUser }>('/api/auth/me');
   return res.user;

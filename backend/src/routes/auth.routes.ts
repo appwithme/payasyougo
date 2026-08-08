@@ -41,6 +41,18 @@ router.post('/google', async (req, res, next) => {
   }
 });
 
+router.post('/google/code', async (req, res, next) => {
+  try {
+    const result = await auth.loginWithGoogleCode(req.body);
+    res.json(result);
+  } catch (err) {
+    if (err instanceof Error && err.name === 'ZodError') {
+      return next(new AppError('Invalid Google code payload'));
+    }
+    next(err);
+  }
+});
+
 router.get('/me', requireAuth, async (req: AuthRequest, res, next) => {
   try {
     const user = await auth.me(req.user!.sub);
