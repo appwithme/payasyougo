@@ -18,6 +18,7 @@ export interface Driver extends User {
   password?: string;
   vehicle: string;
   rating: number;
+  ratingCount: number;
   walletBalance: number;
   todayEarnings: number;
   totalTrips: number;
@@ -39,6 +40,7 @@ export interface Transaction {
   // Driver perspective
   passengerName?: string;
   passengerId?: string;
+  passengerRating?: number;
 }
 
 export type MoMoProvider = 'MTN' | 'VODAFONE' | 'AIRTELTIGO';
