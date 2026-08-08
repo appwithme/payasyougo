@@ -25,6 +25,7 @@ function formatTxn(tx: {
   status: TransactionStatus;
   paymentRef: string | null;
   provider: string | null;
+  passengerRating: number | null;
   createdAt: Date;
   route: { fromLocation: string; toLocation: string };
   driver: { uniqueCode: string; user: { fullName: string } };
@@ -50,6 +51,7 @@ function formatTxn(tx: {
     driverId: tx.driver.uniqueCode,
     passengerName: tx.passenger.fullName,
     passengerId: tx.passenger.id,
+    passengerRating: tx.passengerRating ?? undefined,
   };
 }
 
@@ -233,4 +235,63 @@ export async function listTransactions(userId: string, role: Role) {
     orderBy: { createdAt: 'desc' },
   });
   return rows.map(formatTxn);
+}
+
+const rateSchema = z.object({
+  stars: z.number().int().min(1).max(5),
+});
+
+/** Passenger rates the driver after a completed trip. Updates live average. */
+export async function rateTransaction(
+  passengerUserId: string,
+  transactionId: string,
+  body: unknown
+) {
+  const { stars } = rateSchema.parse(body);
+
+  const txn = await prisma.transaction.findUnique({
+    where: { id: transactionId },
+    include: { driver: true },
+  });
+  if (!txn) throw new AppError('Trip not found', 404);
+  if (txn.passengerId !== passengerUserId) throw new AppError('Forbidden', 403);
+  if (txn.status !== TransactionStatus.COMPLETED) {
+    throw new AppError('You can only rate completed trips');
+  }
+  if (txn.passengerRating != null) {
+    throw new AppError('This trip was already rated');
+  }
+
+  const previousCount = txn.driver.ratingCount;
+  const previousAvg = txn.driver.rating;
+  const nextCount = previousCount + 1;
+  const nextAvg =
+    previousCount === 0
+      ? stars
+      : Math.round(((previousAvg * previousCount + stars) / nextCount) * 10) / 10;
+
+  const [updatedTxn] = await prisma.$transaction([
+    prisma.transaction.update({
+      where: { id: txn.id },
+      data: {
+        passengerRating: stars,
+        ratedAt: new Date(),
+      },
+      include: includeTxn,
+    }),
+    prisma.driver.update({
+      where: { id: txn.driverId },
+      data: {
+        rating: nextAvg,
+        ratingCount: nextCount,
+      },
+    }),
+  ]);
+
+  return {
+    transaction: formatTxn(updatedTxn),
+    driverRating: nextAvg,
+    ratingCount: nextCount,
+    yourRating: stars,
+  };
 }
