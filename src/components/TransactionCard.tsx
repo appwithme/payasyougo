@@ -59,7 +59,7 @@ const TransactionCard = ({
               {rebooking ? (
                 <ActivityIndicator size="small" color={COLORS.ink} />
               ) : (
-                <Ionicons name="reload" size={16} color={COLORS.ink} />
+                <Ionicons name="reload" size={16} color={COLORS.textMuted} />
               )}
             </TouchableOpacity>
           ) : null}
@@ -121,9 +121,9 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: COLORS.primaryMuted,
+    backgroundColor: COLORS.surfaceAlt,
     borderWidth: 1,
-    borderColor: COLORS.primary,
+    borderColor: COLORS.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
