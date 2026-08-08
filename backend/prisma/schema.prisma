@@ -49,6 +49,7 @@ model Driver {
   updatedAt     DateTime @updatedAt
 
   transactions Transaction[]
+  withdrawals  Withdrawal[]
 }
 
 model Route {
@@ -84,6 +85,25 @@ model Transaction {
   updatedAt       DateTime          @updatedAt
 
   @@index([passengerId, createdAt])
+  @@index([driverId, createdAt])
+  @@index([status])
+}
+
+model Withdrawal {
+  id            String            @id @default(uuid())
+  driverId      String
+  driver        Driver            @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  amount        Decimal           @db.Decimal(12, 2)
+  status        TransactionStatus @default(PENDING)
+  provider      String?
+  momoPhone     String?
+  paystackRef   String?           @unique
+  transferCode  String?
+  recipientCode String?
+  failureReason String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
   @@index([driverId, createdAt])
   @@index([status])
 }
