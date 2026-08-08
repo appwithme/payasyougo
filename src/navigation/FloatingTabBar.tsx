@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Pressable, Platform, LayoutChangeEvent } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Platform, LayoutChangeEvent } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,61 +13,87 @@ import Animated, {
 } from 'react-native-reanimated';
 import { COLORS } from '../theme/colors';
 
-const ROUTE_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
-  HomeTab: 'home-outline',
-  BookTab: 'add-outline',
-  HistoryTab: 'receipt-outline',
-  ProfileTab: 'person-outline',
-  DashboardTab: 'home-outline',
-  TxnTab: 'cash-outline',
-  WalletTab: 'wallet-outline',
+const BAR_H = 70;
+const CIRCLE = 54;
+const CUTOUT = 66;
+const SPRING = { damping: 16, stiffness: 180, mass: 0.85 };
+
+type IconPair = {
+  outline: keyof typeof Ionicons.glyphMap;
+  solid: keyof typeof Ionicons.glyphMap;
+  label: string;
 };
 
-const SPRING = { damping: 18, stiffness: 220, mass: 0.8 };
-const CIRCLE = 48;
+const ROUTE_META: Record<string, IconPair> = {
+  HomeTab: { outline: 'home-outline', solid: 'home', label: 'Home' },
+  BookTab: { outline: 'add-outline', solid: 'add', label: 'Book' },
+  HistoryTab: { outline: 'receipt-outline', solid: 'receipt', label: 'History' },
+  ProfileTab: { outline: 'person-outline', solid: 'person', label: 'Profile' },
+  DashboardTab: { outline: 'home-outline', solid: 'home', label: 'Home' },
+  TxnTab: { outline: 'cash-outline', solid: 'cash', label: 'Pay' },
+  WalletTab: { outline: 'wallet-outline', solid: 'wallet', label: 'Wallet' },
+};
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 function TabSlot({
   focused,
-  iconName,
+  meta,
   onPress,
   onLongPress,
   accessibilityLabel,
   onLayout,
 }: {
   focused: boolean;
-  iconName: keyof typeof Ionicons.glyphMap;
+  meta: IconPair;
   onPress: () => void;
   onLongPress: () => void;
   accessibilityLabel?: string;
   onLayout: (e: LayoutChangeEvent) => void;
 }) {
-  const scale = useSharedValue(1);
+  const press = useSharedValue(1);
+  const labelOpacity = useSharedValue(focused ? 1 : 0);
 
-  const iconStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+  useEffect(() => {
+    labelOpacity.value = withTiming(focused ? 1 : 0, { duration: 220 });
+  }, [focused]);
+
+  const pressStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: press.value }],
+  }));
+
+  const labelStyle = useAnimatedStyle(() => ({
+    opacity: labelOpacity.value,
+    transform: [{ translateY: interpolate(labelOpacity.value, [0, 1], [4, 0]) }],
   }));
 
   return (
     <AnimatedPressable
       accessibilityRole="button"
       accessibilityState={focused ? { selected: true } : {}}
-      accessibilityLabel={accessibilityLabel}
+      accessibilityLabel={accessibilityLabel ?? meta.label}
       onPress={onPress}
       onLongPress={onLongPress}
       onPressIn={() => {
-        scale.value = withSpring(0.88, { damping: 15, stiffness: 400 });
+        press.value = withSpring(0.9, { damping: 14, stiffness: 400 });
       }}
       onPressOut={() => {
-        scale.value = withSpring(1, SPRING);
+        press.value = withSpring(1, SPRING);
       }}
       onLayout={onLayout}
       style={styles.slot}
-      hitSlop={8}
+      hitSlop={6}
     >
-      <Animated.View style={[styles.iconHit, iconStyle]}>
-        <Ionicons name={iconName} size={24} color="#111111" />
+      <Animated.View style={[styles.slotInner, pressStyle]}>
+        {/* Placeholder keeps layout; real active icon lives in the floating circle */}
+        <View style={styles.iconReserve}>
+          {!focused ? (
+            <Ionicons name={meta.outline} size={24} color={COLORS.ink} />
+          ) : null}
+        </View>
+        <Animated.Text style={[styles.label, labelStyle]} numberOfLines={1}>
+          {meta.label}
+        </Animated.Text>
       </Animated.View>
     </AnimatedPressable>
   );
@@ -76,79 +102,93 @@ function TabSlot({
 export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const indicatorX = useSharedValue(0);
-  const indicatorReady = useSharedValue(0);
-  const slotCenters = React.useRef<number[]>([]);
+  const ready = useSharedValue(0);
+  const centers = React.useRef<number[]>([]);
+  const activeMeta = ROUTE_META[state.routes[state.index]?.name] ?? ROUTE_META.HomeTab;
 
-  const moveIndicator = (index: number, animated: boolean) => {
-    const x = slotCenters.current[index];
+  const moveTo = (index: number, animated: boolean) => {
+    const x = centers.current[index];
     if (x == null) return;
-    if (animated && indicatorReady.value) {
+    if (animated && ready.value) {
       indicatorX.value = withSpring(x, SPRING);
     } else {
       indicatorX.value = x;
-      indicatorReady.value = withTiming(1, { duration: 200 });
+      ready.value = withTiming(1, { duration: 180 });
     }
   };
 
   useEffect(() => {
-    moveIndicator(state.index, true);
+    moveTo(state.index, true);
   }, [state.index]);
 
-  const indicatorStyle = useAnimatedStyle(() => ({
-    opacity: indicatorReady.value,
+  const cutoutStyle = useAnimatedStyle(() => ({
+    opacity: ready.value,
+    transform: [{ translateX: indicatorX.value - CUTOUT / 2 }],
+  }));
+
+  const circleStyle = useAnimatedStyle(() => ({
+    opacity: ready.value,
     transform: [
       { translateX: indicatorX.value - CIRCLE / 2 },
-      {
-        scale: interpolate(indicatorReady.value, [0, 1], [0.6, 1]),
-      },
+      { scale: interpolate(ready.value, [0, 1], [0.7, 1]) },
     ],
   }));
 
   return (
     <View
-      style={[styles.wrap, { paddingBottom: Math.max(insets.bottom, 16) }]}
+      style={[styles.wrap, { paddingBottom: Math.max(insets.bottom, 14) }]}
       pointerEvents="box-none"
     >
-      <Animated.View entering={FadeInUp.springify().damping(16).stiffness(140)} style={styles.pill}>
-        <Animated.View style={[styles.indicator, indicatorStyle]} />
+      <Animated.View
+        entering={FadeInUp.springify().damping(15).stiffness(130)}
+        style={styles.shell}
+      >
+        {/* Floating active circle (protrudes above the bar) */}
+        <Animated.View style={[styles.activeCircle, circleStyle]}>
+          <Ionicons name={activeMeta.solid} size={24} color="#FFFFFF" />
+        </Animated.View>
 
-        {state.routes.map((route, index) => {
-          const focused = state.index === index;
-          const { options } = descriptors[route.key];
-          const iconName = ROUTE_ICONS[route.name] ?? 'ellipse-outline';
+        <View style={styles.bar}>
+          {/* Concave cutout — matches page background so the bar appears notched */}
+          <Animated.View style={[styles.cutout, cutoutStyle]} />
 
-          return (
-            <TabSlot
-              key={route.key}
-              focused={focused}
-              iconName={iconName}
-              accessibilityLabel={options.tabBarAccessibilityLabel}
-              onLayout={(e) => {
-                const { x, width } = e.nativeEvent.layout;
-                slotCenters.current[index] = x + width / 2;
-                if (index === state.index) {
-                  moveIndicator(index, false);
-                }
-              }}
-              onPress={() => {
-                const event = navigation.emit({
-                  type: 'tabPress',
-                  target: route.key,
-                  canPreventDefault: true,
-                });
-                if (!focused && !event.defaultPrevented) {
-                  navigation.navigate(route.name, route.params);
-                }
-              }}
-              onLongPress={() => {
-                navigation.emit({
-                  type: 'tabLongPress',
-                  target: route.key,
-                });
-              }}
-            />
-          );
-        })}
+          {state.routes.map((route, index) => {
+            const focused = state.index === index;
+            const { options } = descriptors[route.key];
+            const meta = ROUTE_META[route.name] ?? {
+              outline: 'ellipse-outline' as const,
+              solid: 'ellipse' as const,
+              label: route.name,
+            };
+
+            return (
+              <TabSlot
+                key={route.key}
+                focused={focused}
+                meta={meta}
+                accessibilityLabel={options.tabBarAccessibilityLabel}
+                onLayout={(e) => {
+                  const { x, width } = e.nativeEvent.layout;
+                  centers.current[index] = x + width / 2;
+                  if (index === state.index) moveTo(index, false);
+                }}
+                onPress={() => {
+                  const event = navigation.emit({
+                    type: 'tabPress',
+                    target: route.key,
+                    canPreventDefault: true,
+                  });
+                  if (!focused && !event.defaultPrevented) {
+                    navigation.navigate(route.name, route.params);
+                  }
+                }}
+                onLongPress={() => {
+                  navigation.emit({ type: 'tabLongPress', target: route.key });
+                }}
+              />
+            );
+          })}
+        </View>
       </Animated.View>
     </View>
   );
@@ -167,49 +207,82 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
   },
-  pill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
+  shell: {
+    width: '88%',
+    maxWidth: 400,
+    paddingTop: CIRCLE / 2 + 4,
+  },
+  bar: {
+    height: BAR_H,
     backgroundColor: '#FFFFFF',
-    width: '78%',
-    maxWidth: 340,
-    height: 68,
-    borderRadius: 34,
-    paddingHorizontal: 10,
+    borderRadius: 28,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    paddingBottom: 10,
+    paddingHorizontal: 6,
     ...Platform.select({
       ios: {
-        shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 8 },
+        shadowColor: '#1B2B4B',
+        shadowOffset: { width: 0, height: 10 },
         shadowOpacity: 0.12,
-        shadowRadius: 16,
+        shadowRadius: 20,
       },
-      android: {
-        elevation: 10,
-      },
+      android: { elevation: 12 },
     }),
   },
-  indicator: {
+  cutout: {
     position: 'absolute',
+    top: -(CUTOUT / 2),
     left: 0,
-    top: (68 - CIRCLE) / 2,
+    width: CUTOUT,
+    height: CUTOUT,
+    borderRadius: CUTOUT / 2,
+    backgroundColor: COLORS.background,
+    zIndex: 1,
+  },
+  activeCircle: {
+    position: 'absolute',
+    top: 4,
+    left: 0,
     width: CIRCLE,
     height: CIRCLE,
     borderRadius: CIRCLE / 2,
-    backgroundColor: COLORS.primary,
-    zIndex: 0,
+    backgroundColor: COLORS.ink,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 3,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#1B2B4B',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.25,
+        shadowRadius: 10,
+      },
+      android: { elevation: 8 },
+    }),
   },
   slot: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     height: '100%',
-    zIndex: 1,
+    zIndex: 2,
   },
-  iconHit: {
-    width: CIRCLE,
-    height: CIRCLE,
+  slotInner: {
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 2,
+    paddingBottom: 2,
+  },
+  iconReserve: {
+    height: 28,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  label: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 11,
+    color: COLORS.ink,
+    letterSpacing: 0.1,
   },
 });
