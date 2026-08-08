@@ -24,7 +24,6 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
   const [from, setFrom] = useState<string | null>(null);
   const [to, setTo] = useState<string | null>(null);
   const [openPicker, setOpenPicker] = useState<'from' | 'to' | null>(null);
-  const [locations, setLocations] = useState<string[]>([]);
   const [routes, setRoutes] = useState<RouteInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -33,7 +32,6 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
     (async () => {
       try {
         const data = await fetchRoutes();
-        setLocations(data.locations);
         setRoutes(data.routes);
       } catch (err: any) {
         setError(err?.message || 'Failed to load routes');
@@ -73,10 +71,9 @@ const RouteSelector = ({ onRouteChange }: { onRouteChange: (selection: RouteSele
     onRouteChange({ from: newFrom, to: newTo, route });
   };
 
-  const currentRoute = getRoute(from, to);
-  const fromOptions = Array.from(
-    new Set(routes.map((r) => r.from))
-  ).sort((a, b) => a.localeCompare(b));
+  const fromOptions = Array.from(new Set(routes.map((r) => r.from))).sort((a, b) =>
+    a.localeCompare(b)
+  );
   const toOptions = routes
     .filter((r) => r.from === from)
     .map((r) => r.to)
