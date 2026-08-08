@@ -43,6 +43,7 @@ export type PassengerHomeStackParamList = {
   PassengerProfile: undefined;
   EditProfile: undefined;
   Settings: undefined;
+  NotificationsSettings: undefined;
 };
 
 export type PassengerBookStackParamList = {
@@ -79,4 +80,5 @@ export type DriverDashboardStackParamList = {
   DriverProfile: undefined;
   EditProfile: undefined;
   Settings: undefined;
+  NotificationsSettings: undefined;
 };
