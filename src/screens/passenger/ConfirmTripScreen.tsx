@@ -35,7 +35,7 @@ const PROVIDERS: {
     logo: require('../../../assets/brand/mtn-momo.png'),
   },
   {
-    id: 'VODAFONE',
+    id: 'TELECEL',
     name: 'Telecel Cash',
     logo: require('../../../assets/brand/telecel-cash.png'),
   },
@@ -193,7 +193,7 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
             <View style={styles.securityNote}>
               <Ionicons name="lock-closed-outline" size={14} color={COLORS.textMuted} />
               <Text style={styles.securityText}>
-                Test mode: use 0551234987 (Paystack MTN test number). Live keys will use real MoMo.
+                Test mode: select MTN and use 0551234987. Telecel needs live Paystack keys + a real Telecel number.
               </Text>
             </View>
           </Animated.View>
