@@ -34,12 +34,65 @@ function uniqueDigits(length: number) {
   return raw.slice(-length).padStart(length, '0');
 }
 
+function pick<T extends readonly string[]>(list: T): T[number] {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+const FIRST_NAMES = [
+  'Kwame',
+  'Ama',
+  'Kofi',
+  'Abena',
+  'Yaw',
+  'Akosua',
+  'Kojo',
+  'Adwoa',
+  'Kwesi',
+  'Efua',
+  'Fiifi',
+  'Esi',
+  'Nana',
+  'Akua',
+  'Yaw',
+  'Serwaa',
+] as const;
+
+const LAST_NAMES = [
+  'Mensah',
+  'Owusu',
+  'Boateng',
+  'Asante',
+  'Osei',
+  'Appiah',
+  'Darko',
+  'Agyeman',
+  'Frimpong',
+  'Adjei',
+  'Sarpong',
+  'Ofori',
+  'Amoah',
+  'Nyarko',
+  'Baffoe',
+  'Tetteh',
+] as const;
+
+function randomPerson() {
+  const first = pick(FIRST_NAMES);
+  const last = pick(LAST_NAMES);
+  const slug = `${first}.${last}`.toLowerCase().replace(/\s+/g, '');
+  return {
+    name: `${first} ${last}`,
+    emailLocal: slug,
+  };
+}
+
 export function makePassengerSignupSample() {
   const n = uniqueDigits(7);
+  const person = randomPerson();
   return {
-    name: 'Kofi Mensah',
+    name: person.name,
     phone: `055${n}`,
-    email: `kofi.mensah.${n}@example.com`,
+    email: `${person.emailLocal}.${n}@example.com`,
     password: 'signup123',
   };
 }
@@ -47,15 +100,49 @@ export function makePassengerSignupSample() {
 export function makeDriverSignupSample() {
   const n = uniqueDigits(7);
   const cardDigits = uniqueDigits(9);
+  const person = randomPerson();
+  const vehicle = makeVehicleSignupSample();
   return {
-    name: 'Yaw Boateng',
+    name: person.name,
     phone: `024${n}`,
-    email: `yaw.boateng.${n}@example.com`,
+    email: `${person.emailLocal}.${n}@example.com`,
     password: 'signup123',
     ghanaCard: `GHA-${cardDigits}-${cardDigits.slice(-1)}`,
     license: `NAG-${uniqueDigits(8)}-${uniqueDigits(5)}`,
-    vehicleName: 'Toyota Corolla',
-    vehicleNumber: 'GR 4321-25',
-    vehicleColor: 'Silver',
+    ...vehicle,
+  };
+}
+
+const VEHICLE_NAMES = [
+  'Toyota Corolla',
+  'Hyundai i10',
+  'Honda Civic',
+  'Kia Rio',
+  'Nissan Almera',
+  'Suzuki Swift',
+  'Toyota Yaris',
+  'Volkswagen Polo',
+] as const;
+
+const VEHICLE_COLORS = [
+  'Silver',
+  'White',
+  'Black',
+  'Blue',
+  'Red',
+  'Grey',
+  'Wine',
+  'Gold',
+] as const;
+
+const PLATE_PREFIXES = ['GR', 'ER', 'AS', 'GT', 'WR', 'CR'] as const;
+
+/** Random car details only — does not touch account/ID fields. */
+export function makeVehicleSignupSample() {
+  const plate = `${pick(PLATE_PREFIXES)} ${uniqueDigits(4)}-${uniqueDigits(2)}`;
+  return {
+    vehicleName: pick(VEHICLE_NAMES),
+    vehicleNumber: plate,
+    vehicleColor: pick(VEHICLE_COLORS),
   };
 }
