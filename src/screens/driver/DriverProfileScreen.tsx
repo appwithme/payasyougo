@@ -98,6 +98,26 @@ const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
             onPress={() => navigation.navigate('DriverQr')}
           />
           <View style={styles.rule} />
+          <DetailRow
+            icon="card-outline"
+            label="Ghana Card"
+            value={
+              driver.ghanaCardNumber
+                ? `${driver.ghanaCardNumber}${driver.ghanaCardVerified ? ' · Verified' : ''}`
+                : 'Not on file'
+            }
+          />
+          <View style={styles.rule} />
+          <DetailRow
+            icon="document-text-outline"
+            label="Driver licence"
+            value={
+              driver.licenseNumber
+                ? `${driver.licenseNumber}${driver.licenseVerified ? ' · Verified' : ''}`
+                : 'Not on file'
+            }
+          />
+          <View style={styles.rule} />
           <DetailRow icon="call-outline" label="Phone" value={driver.phone || 'Not set'} />
           <View style={styles.rule} />
           <DetailRow icon="mail-outline" label="Email" value={driver.email || 'Not set'} />
