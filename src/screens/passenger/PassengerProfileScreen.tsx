@@ -203,21 +203,6 @@ const PassengerProfileScreen = ({ navigation }: { navigation: any }) => {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.primaryAction}
-                onPress={() => navigation.navigate('HistoryTab' as never)}
-                activeOpacity={0.85}
-              >
-                <View style={styles.actionIcon}>
-                  <Ionicons name="receipt-outline" size={18} color={COLORS.ink} />
-                </View>
-                <View style={styles.actionCopy}>
-                  <Text style={styles.actionTitle}>Trip history</Text>
-                  <Text style={styles.actionHint}>Routes, receipts, rebook</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
-              </TouchableOpacity>
-
-              <TouchableOpacity
                 style={styles.logoutBtn}
                 onPress={handleLogout}
                 activeOpacity={0.8}
