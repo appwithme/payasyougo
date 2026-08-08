@@ -5,8 +5,13 @@ import { Platform } from 'react-native';
 
 WebBrowser.maybeCompleteAuthSession();
 
-/** Must match Google Console → Authorized redirect URIs */
-export const GOOGLE_REDIRECT_URI = 'https://auth.expo.io/@flowifyhack/payasyougo';
+/**
+ * Use localhost redirect (allowed by Google Web clients).
+ * ASWebAuthenticationSession / Chrome Custom Tabs capture this URL and
+ * return it to the app — works in Expo Go without auth.expo.io.
+ * Must match Google Console → Authorized redirect URIs.
+ */
+export const GOOGLE_REDIRECT_URI = 'https://localhost';
 
 const discovery = {
   authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
@@ -33,36 +38,23 @@ export function isGoogleConfigured(): boolean {
   return !!getGoogleClientIds().webClientId;
 }
 
+function paramsFromUrl(url: string): URLSearchParams {
+  const hash = url.includes('#') ? url.split('#')[1] : '';
+  const query = url.includes('?') ? url.split('?')[1]?.split('#')[0] : '';
+  return new URLSearchParams(hash || query || '');
+}
+
 function parseIdTokenFromUrl(url: string): string | null {
-  try {
-    const parsed = new URL(url.replace('#', '?'));
-    return (
-      parsed.searchParams.get('id_token') ||
-      parsed.searchParams.get('idToken') ||
-      null
-    );
-  } catch {
-    const hash = url.split('#')[1] || '';
-    const query = url.split('?')[1] || '';
-    const params = new URLSearchParams(hash || query);
-    return params.get('id_token');
-  }
+  return paramsFromUrl(url).get('id_token');
 }
 
 function parseCodeFromUrl(url: string): string | null {
-  try {
-    const parsed = new URL(url.replace('#', '?'));
-    return parsed.searchParams.get('code');
-  } catch {
-    const params = new URLSearchParams(url.split('?')[1] || url.split('#')[1] || '');
-    return params.get('code');
-  }
+  return paramsFromUrl(url).get('code');
 }
 
 /**
- * Builds a Google auth request that Expo Go can complete:
- * openAuthSessionAsync closes when Google hits the Expo proxy HTTPS redirect,
- * so we can read id_token/code from the returned URL.
+ * Google sign-in for Expo Go via WebBrowser auth session.
+ * Redirect = https://localhost so the browser session completes with tokens.
  */
 export function useGoogleIdTokenRequest() {
   const ids = getGoogleClientIds();
@@ -71,7 +63,7 @@ export function useGoogleIdTokenRequest() {
   const iosId = ids.iosClientId || webId;
   const androidId = ids.androidClientId || webId;
 
-  const [request, , ] = Google.useAuthRequest({
+  const [request] = Google.useAuthRequest({
     clientId: webId,
     webClientId: webId,
     iosClientId: iosId,
@@ -121,7 +113,7 @@ export function useGoogleIdTokenRequest() {
     return {
       type: 'error',
       message:
-        'Google returned no token. Confirm redirect URI is exactly https://auth.expo.io/@flowifyhack/payasyougo',
+        'Google returned no token. In Google Console, ensure https://localhost is an Authorized redirect URI.',
     };
   };
 

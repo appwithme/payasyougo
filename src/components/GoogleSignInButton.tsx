@@ -36,7 +36,7 @@ export default function GoogleSignInButton({ onError }: Props) {
 
       if (result.type === 'cancel') {
         onError?.(
-          'Sign-in closed before finishing. Stay on the Google page until it redirects back.'
+          'Sign-in closed early. After choosing your Google account, wait for the browser to close by itself.'
         );
         return;
       }
