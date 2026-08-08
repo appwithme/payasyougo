@@ -29,7 +29,14 @@ npx prisma generate
 npm run prisma:seed
 ```
 
-Seed creates UCC routes plus optional QA users (for API testing only — not shown in the app UI).
+Seed creates UCC routes plus QA users:
+
+| Role | Phone | Password | Driver ID |
+|------|-------|----------|-----------|
+| Passenger | `0550000111` | `admin123` | — |
+| Driver | `0240000001` | `driver123` | `DRV001` |
+| Driver | `0200000002` | `driver456` | `DRV002` |
+| Driver | `0240000111` | `admin123` | `DRV100` |
 
 ## 4. Run API
 
