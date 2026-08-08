@@ -176,8 +176,8 @@ function DetailRow({
 
 const styles = StyleSheet.create({
   heroBody: {
-    marginTop: SPACING.sm,
-    gap: SPACING.md,
+    marginTop: SPACING.md,
+    gap: SPACING.lg,
   },
   backText: {
     fontFamily: 'DMSans_700Bold',
@@ -197,41 +197,29 @@ const styles = StyleSheet.create({
   },
   heroName: {
     fontFamily: 'Sora_700Bold',
-    fontSize: 24,
+    fontSize: 28,
     color: COLORS.white,
-    letterSpacing: -0.5,
+    letterSpacing: -0.8,
   },
-  heroRole: {
+  heroMeta: {
     fontFamily: 'DMSans_500Medium',
-    fontSize: 13,
+    fontSize: 14,
     color: 'rgba(255,255,255,0.55)',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
   },
   starsRow: {
     flexDirection: 'row',
     gap: 3,
     marginTop: 4,
   },
-  ratingText: {
-    fontFamily: 'DMSans_500Medium',
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.55)',
-  },
-  idHero: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: RADIUS.lg,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
+  idBlock: {
     gap: 6,
   },
-  idHeroTop: {
+  idTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  idEyebrow: {
+  idLabel: {
     fontFamily: 'DMSans_700Bold',
     fontSize: 11,
     letterSpacing: 1.4,
@@ -254,14 +242,15 @@ const styles = StyleSheet.create({
   },
   idValue: {
     fontFamily: 'Sora_700Bold',
-    fontSize: 30,
+    fontSize: 42,
     color: COLORS.white,
     letterSpacing: 4,
   },
-  idHint: {
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.5)',
+  idMeta: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.55)',
+    marginTop: 2,
   },
   scroll: {
     paddingHorizontal: SPACING.lg,
