@@ -58,6 +58,8 @@ interface AppContextType {
     email: string;
     vehicle: string;
     password: string;
+    ghanaCardNumber: string;
+    licenseNumber: string;
   }) => Promise<{ success: boolean; driver?: Driver; error?: string }>;
   withdrawDriverFunds: (input: {
     amount: number;
@@ -253,6 +255,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     email: string;
     vehicle: string;
     password: string;
+    ghanaCardNumber: string;
+    licenseNumber: string;
   }) => {
     try {
       const { user } = await authService.registerDriver({
@@ -261,6 +265,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         email: input.email,
         password: input.password,
         vehicleInfo: input.vehicle,
+        ghanaCardNumber: input.ghanaCardNumber,
+        licenseNumber: input.licenseNumber,
       });
       applyUser(user);
       return { success: true, driver: user as Driver };
