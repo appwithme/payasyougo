@@ -20,7 +20,7 @@ import Animated, {
 import CustomBrandMark from '../../components/CustomBrandMark';
 import { COLORS } from '../../theme/colors';
 
-const { width: W, height: H } = Dimensions.get('window');
+const { height: H } = Dimensions.get('window');
 
 /** Short identity beat — welcome owns the campus scene + role pick */
 const EXIT_AT = 2800;
@@ -109,9 +109,6 @@ export default function SplashScreen({ onFinish }: Props) {
         style={StyleSheet.absoluteFill}
       />
 
-      <View style={styles.amberWash} />
-      <View style={styles.cornerGlow} />
-
       <View style={styles.stage}>
         <View style={styles.markWrap}>
           <Animated.View pointerEvents="none" style={[styles.ring, ringStyle]} />
@@ -136,24 +133,6 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: COLORS.ink,
-  },
-  amberWash: {
-    position: 'absolute',
-    top: H * 0.2,
-    left: W * 0.5 - 130,
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    backgroundColor: 'rgba(245,184,0,0.12)',
-  },
-  cornerGlow: {
-    position: 'absolute',
-    bottom: -80,
-    right: -60,
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    backgroundColor: 'rgba(245,184,0,0.08)',
   },
   stage: {
     flex: 1,
