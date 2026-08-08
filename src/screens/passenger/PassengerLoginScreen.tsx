@@ -14,6 +14,7 @@ import { useApp } from '../../context/AppContext';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import BrandLogo from '../../components/BrandLogo';
+import GoogleSignInButton from '../../components/GoogleSignInButton';
 import { COLORS, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
 
@@ -86,6 +87,14 @@ const PassengerLoginScreen = ({ navigation }: { navigation: any }) => {
           />
           <Button title="Sign in" onPress={handleLogin} loading={loading} variant="ink" />
 
+          <View style={styles.dividerRow}>
+            <View style={styles.divider} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.divider} />
+          </View>
+
+          <GoogleSignInButton onError={setError} />
+
           <TouchableOpacity
             onPress={() => navigation.navigate('PassengerSignup')}
             style={styles.link}
@@ -127,6 +136,14 @@ const styles = StyleSheet.create({
   },
   errorText: { ...type.caption, color: COLORS.error, flex: 1, fontFamily: 'DMSans_700Bold' },
   form: { gap: 4 },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: SPACING.lg,
+  },
+  divider: { flex: 1, height: 1, backgroundColor: COLORS.border },
+  dividerText: { ...type.caption, color: COLORS.textMuted },
   link: {
     flexDirection: 'row',
     justifyContent: 'center',
