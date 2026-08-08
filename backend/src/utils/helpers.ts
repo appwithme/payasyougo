@@ -28,7 +28,19 @@ export function toPaystackPhone(phone: string): string {
 export function toPaystackProvider(provider: string): 'mtn' | 'vod' | 'atl' {
   const key = provider.toUpperCase();
   if (key === 'MTN') return 'mtn';
-  if (key === 'VODAFONE' || key === 'TELECEL') return 'vod';
+  if (key === 'TELECEL' || key === 'VODAFONE') return 'vod';
   if (key === 'AIRTELTIGO' || key === 'AT' || key === 'ATL') return 'atl';
   throw new Error(`Unsupported MoMo provider: ${provider}`);
 }
+
+/** Canonical label stored on transactions */
+export function normalizeProviderLabel(provider: string): string {
+  const key = provider.toUpperCase();
+  if (key === 'MTN') return 'MTN';
+  if (key === 'TELECEL' || key === 'VODAFONE') return 'TELECEL';
+  if (key === 'AIRTELTIGO' || key === 'AT' || key === 'ATL') return 'AIRTELTIGO';
+  return key;
+}
+
+/** Paystack sandbox MTN MoMo number — only valid with provider mtn */
+export const PAYSTACK_TEST_MTN_NUMBER = '0551234987';
