@@ -8,21 +8,7 @@ import { Driver } from '../types';
 const DriverCard = ({ driver }: { driver: Driver | null }) => {
   if (!driver) return null;
 
-  const renderStars = (rating: number) => {
-    const full = Math.floor(rating);
-    const stars = [];
-    for (let i = 0; i < 5; i++) {
-      stars.push(
-        <Ionicons
-          key={i}
-          name={i < full ? 'star' : 'star-outline'}
-          size={12}
-          color={COLORS.primaryDark}
-        />
-      );
-    }
-    return stars;
-  };
+  const full = Math.floor(driver.rating ?? 0);
 
   return (
     <View style={styles.card}>
@@ -31,18 +17,27 @@ const DriverCard = ({ driver }: { driver: Driver | null }) => {
       </View>
 
       <View style={styles.info}>
-        <Text style={styles.name}>{driver.name}</Text>
-        <Text style={styles.vehicle}>{driver.vehicle}</Text>
-
-        <View style={styles.row}>
-          <View style={styles.starsRow}>{renderStars(driver.rating)}</View>
-          <Text style={styles.rating}>{driver.rating}</Text>
+        <Text style={styles.name} numberOfLines={1}>
+          {driver.name}
+        </Text>
+        <Text style={styles.vehicle} numberOfLines={1}>
+          {driver.vehicle}
+        </Text>
+        <View style={styles.metaRow}>
+          <View style={styles.stars}>
+            {Array.from({ length: 5 }, (_, i) => (
+              <Ionicons
+                key={i}
+                name={i < full ? 'star' : 'star-outline'}
+                size={12}
+                color={COLORS.primaryDark}
+              />
+            ))}
+          </View>
+          <Text style={styles.rating}>{Number(driver.rating).toFixed(1)}</Text>
+          <Text style={styles.metaDot}>·</Text>
+          <Text style={styles.idText}>{driver.id}</Text>
         </View>
-      </View>
-
-      <View style={styles.idBadge}>
-        <Text style={styles.idLabel}>ID</Text>
-        <Text style={styles.idValue}>{driver.id}</Text>
       </View>
     </View>
   );
@@ -57,55 +52,41 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: COLORS.border,
+    gap: SPACING.md,
   },
   avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    width: 48,
+    height: 48,
+    borderRadius: 16,
     backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: SPACING.md,
   },
   avatarText: {
     fontFamily: 'Sora_700Bold',
-    fontSize: 16,
+    fontSize: 18,
     color: COLORS.ink,
   },
-  info: { flex: 1 },
-  name: { ...type.label },
-  vehicle: { ...type.caption, marginTop: 2 },
-  row: {
+  info: { flex: 1, gap: 2 },
+  name: { ...type.label, fontSize: 16 },
+  vehicle: { ...type.caption },
+  metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 4,
     marginTop: 4,
-    gap: 6,
   },
-  starsRow: { flexDirection: 'row', gap: 1 },
+  stars: { flexDirection: 'row', gap: 1, marginRight: 2 },
   rating: {
     ...type.caption,
     color: COLORS.textPrimary,
     fontFamily: 'DMSans_700Bold',
   },
-  idBadge: {
-    backgroundColor: COLORS.surfaceAlt,
-    borderRadius: RADIUS.sm,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  idLabel: {
+  metaDot: { ...type.caption },
+  idText: {
     ...type.caption,
-    fontSize: 10,
-    color: COLORS.textSecondary,
-  },
-  idValue: {
     fontFamily: 'DMSans_700Bold',
-    fontSize: 13,
     color: COLORS.ink,
-    marginTop: 2,
   },
 });
 
