@@ -53,6 +53,8 @@ const TEST_DRIVERS = [
     email: 'kwame.owusu@payasyougo.com',
     uniqueCode: 'DRV001',
     vehicleInfo: 'Toyota Yaris - ER 1234-21',
+    ghanaCardNumber: 'GHA-100000001-1',
+    licenseNumber: 'DL100001',
   },
   {
     phone: '0200000002',
@@ -61,6 +63,8 @@ const TEST_DRIVERS = [
     email: 'ama.asantewaa@payasyougo.com',
     uniqueCode: 'DRV002',
     vehicleInfo: 'Hyundai i10 - GR 5678-22',
+    ghanaCardNumber: 'GHA-200000002-2',
+    licenseNumber: 'DL200002',
   },
   {
     phone: '0240000111',
@@ -69,6 +73,8 @@ const TEST_DRIVERS = [
     email: 'kwame.asiamah@payasyougo.com',
     uniqueCode: 'DRV100',
     vehicleInfo: 'Toyota Corolla - GR 1000-24',
+    ghanaCardNumber: 'GHA-300000003-3',
+    licenseNumber: 'DL300100',
   },
 ] as const;
 
@@ -124,6 +130,10 @@ async function main() {
           create: {
             uniqueCode: account.uniqueCode,
             vehicleInfo: account.vehicleInfo,
+            ghanaCardNumber: account.ghanaCardNumber,
+            ghanaCardVerified: true,
+            licenseNumber: account.licenseNumber,
+            licenseVerified: true,
             rating: 0,
             ratingCount: 0,
           },
@@ -138,6 +148,10 @@ async function main() {
           userId: driverUser.id,
           uniqueCode: account.uniqueCode,
           vehicleInfo: account.vehicleInfo,
+          ghanaCardNumber: account.ghanaCardNumber,
+          ghanaCardVerified: true,
+          licenseNumber: account.licenseNumber,
+          licenseVerified: true,
           rating: 0,
           ratingCount: 0,
         },
@@ -148,6 +162,10 @@ async function main() {
         data: {
           uniqueCode: account.uniqueCode,
           vehicleInfo: account.vehicleInfo,
+          ghanaCardNumber: account.ghanaCardNumber,
+          ghanaCardVerified: true,
+          licenseNumber: account.licenseNumber,
+          licenseVerified: true,
         },
       });
     }
