@@ -12,8 +12,8 @@ import { type } from '../../theme/typography';
 
 const PassengerLoginScreen = ({ navigation }: { navigation: any }) => {
   const { loginPassenger } = useApp();
-  const [phone, setPhone] = useState(QA_PASSENGER.phone);
-  const [password, setPassword] = useState(QA_PASSENGER.password);
+  const [phone, setPhone] = useState<string>(QA_PASSENGER.phone);
+  const [password, setPassword] = useState<string>(QA_PASSENGER.password);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
