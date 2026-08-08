@@ -1,19 +1,10 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  StatusBar,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
-import BrandLogo from '../../components/BrandLogo';
+import AuthSheetScreen from '../../components/AuthSheetScreen';
 import { QA_DRIVER_DEFAULT, QA_DRIVERS } from '../../data/qaAccounts';
 import { COLORS, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
@@ -48,89 +39,14 @@ const DriverLoginScreen = ({ navigation }: { navigation: any }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back}>
-          <Ionicons name="chevron-back" size={22} color={COLORS.ink} />
-        </TouchableOpacity>
-
-        <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
-          <BrandLogo size="sm" />
-          <Text style={styles.title}>Driver portal</Text>
-          <Text style={styles.subtitle}>Track fares, wallet, and daily earnings</Text>
-        </Animated.View>
-
-        {!!error && (
-          <View style={styles.errorBox}>
-            <Ionicons name="alert-circle" size={18} color={COLORS.error} />
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        )}
-
-        <View style={styles.form}>
-          <Input
-            label="Phone number"
-            placeholder="024 XXX XXXX"
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="phone-pad"
-            iconName="call-outline"
-            autoCapitalize="none"
-            autoComplete="tel"
-            textContentType="telephoneNumber"
-            importantForAutofill="yes"
-          />
-          <Input
-            label="Password"
-            placeholder="Your password"
-            value={password}
-            onChangeText={setPassword}
-            iconName="lock-closed-outline"
-            secureTextEntry
-            autoCapitalize="none"
-            autoComplete="password"
-            textContentType="password"
-            importantForAutofill="yes"
-          />
-
-          <View style={styles.autofillRow}>
-            <Text style={styles.autofillLabel}>Autofill</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.autofillChips}
-            >
-              {QA_DRIVERS.map((account) => (
-                <TouchableOpacity
-                  key={account.code}
-                  style={[
-                    styles.chip,
-                    phone === account.phone && styles.chipActive,
-                  ]}
-                  onPress={() => fillAccount(account)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Autofill ${account.label}`}
-                >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      phone === account.phone && styles.chipTextActive,
-                    ]}
-                  >
-                    {account.code}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-
+    <AuthSheetScreen
+      eyebrow="Driver portal"
+      title="Sign in"
+      subtitle="Track fares, wallet, and daily earnings on campus."
+      onBack={() => navigation.goBack()}
+      footer={
+        <>
           <Button title="Sign in" onPress={handleLogin} loading={loading} variant="ink" />
-
           <TouchableOpacity
             onPress={() => navigation.navigate('DriverSignup')}
             style={styles.link}
@@ -138,29 +54,70 @@ const DriverLoginScreen = ({ navigation }: { navigation: any }) => {
             <Text style={styles.linkText}>New driver? </Text>
             <Text style={styles.linkAccent}>Register</Text>
           </TouchableOpacity>
+        </>
+      }
+    >
+      {!!error && (
+        <View style={styles.errorBox}>
+          <Ionicons name="alert-circle" size={18} color={COLORS.error} />
+          <Text style={styles.errorText}>{error}</Text>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      )}
+
+      <Input
+        label="Phone number"
+        placeholder="024 XXX XXXX"
+        value={phone}
+        onChangeText={setPhone}
+        keyboardType="phone-pad"
+        iconName="call-outline"
+        autoCapitalize="none"
+        autoComplete="tel"
+        textContentType="telephoneNumber"
+        importantForAutofill="yes"
+      />
+      <Input
+        label="Password"
+        placeholder="Your password"
+        value={password}
+        onChangeText={setPassword}
+        iconName="lock-closed-outline"
+        secureTextEntry
+        autoCapitalize="none"
+        autoComplete="password"
+        textContentType="password"
+        importantForAutofill="yes"
+      />
+
+      <View style={styles.autofillRow}>
+        <Text style={styles.autofillLabel}>Quick fill</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.autofillChips}
+        >
+          {QA_DRIVERS.map((account) => (
+            <TouchableOpacity
+              key={account.code}
+              style={[styles.chip, phone === account.phone && styles.chipActive]}
+              onPress={() => fillAccount(account)}
+              accessibilityRole="button"
+              accessibilityLabel={`Autofill ${account.label}`}
+            >
+              <Text
+                style={[styles.chipText, phone === account.phone && styles.chipTextActive]}
+              >
+                {account.code}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    </AuthSheetScreen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  scroll: { padding: SPACING.lg, flexGrow: 1 },
-  back: {
-    width: 44,
-    height: 44,
-    borderRadius: RADIUS.md,
-    backgroundColor: COLORS.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    marginBottom: SPACING.lg,
-  },
-  header: { marginBottom: SPACING.lg, gap: SPACING.sm },
-  title: { ...type.title, marginTop: SPACING.sm },
-  subtitle: { ...type.body },
   errorBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -168,15 +125,24 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.errorLight,
     borderRadius: RADIUS.md,
     padding: SPACING.md,
-    marginBottom: SPACING.lg,
   },
-  errorText: { ...type.caption, color: COLORS.error, flex: 1, fontFamily: 'DMSans_700Bold' },
-  form: { gap: 4 },
+  errorText: {
+    ...type.caption,
+    color: COLORS.error,
+    flex: 1,
+    fontFamily: 'DMSans_700Bold',
+  },
   autofillRow: {
-    marginBottom: SPACING.md,
     gap: SPACING.xs,
+    marginTop: SPACING.xs,
   },
-  autofillLabel: { ...type.label, color: COLORS.textMuted },
+  autofillLabel: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 11,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: COLORS.textMuted,
+  },
   autofillChips: { gap: SPACING.sm, paddingVertical: 2 },
   chip: {
     paddingHorizontal: SPACING.md,
@@ -190,15 +156,27 @@ const styles = StyleSheet.create({
     borderColor: COLORS.ink,
     backgroundColor: COLORS.ink,
   },
-  chipText: { ...type.caption, color: COLORS.textPrimary, fontFamily: 'DMSans_700Bold' },
+  chipText: {
+    ...type.caption,
+    color: COLORS.textPrimary,
+    fontFamily: 'DMSans_700Bold',
+  },
   chipTextActive: { color: COLORS.white },
   link: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: SPACING.lg,
+    paddingVertical: SPACING.sm,
   },
-  linkText: { ...type.body },
-  linkAccent: { ...type.bodyBold },
+  linkText: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 15,
+    color: COLORS.textSecondary,
+  },
+  linkAccent: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 15,
+    color: COLORS.ink,
+  },
 });
 
 export default DriverLoginScreen;
