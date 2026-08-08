@@ -1,6 +1,3 @@
-// ============================================================
-// BOOK TRIP SCREEN
-// ============================================================
 import React, { useState } from 'react';
 import {
   View,
@@ -14,8 +11,8 @@ import Header from '../../components/Header';
 import RouteSelector from '../../components/RouteSelector';
 import FareCard from '../../components/FareCard';
 import Button from '../../components/Button';
-import { COLORS, FONT_SIZE, SPACING } from '../../theme/colors';
-
+import { COLORS, SPACING } from '../../theme/colors';
+import { type } from '../../theme/typography';
 import { RouteInfo } from '../../types';
 
 const BookTripScreen = ({ navigation }: { navigation: any }) => {
@@ -34,9 +31,9 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
   const handleContinue = () => {
     if (selectedRoute.route) {
       navigation.navigate('EnterDriverId', {
-        from:  selectedRoute.from,
-        to:    selectedRoute.to,
-        fare:  selectedRoute.route.fare,
+        from: selectedRoute.from,
+        to: selectedRoute.to,
+        fare: selectedRoute.route.fare,
         routeId: selectedRoute.route.id,
       });
     }
@@ -45,17 +42,15 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" />
-      <Header title="Make Payment" onBack={() => navigation.goBack()} transparent />
+      <Header title="Make payment" onBack={() => navigation.goBack()} transparent />
 
       <ScrollView
-        contentContainerStyle={styles.scroll} 
+        contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.label}>Select Your Route</Text>
-        <Text style={styles.sublabel}>
-          Choose your pickup and destination from the available UCC routes
-        </Text>
+        <Text style={styles.label}>Route</Text>
+        <Text style={styles.sublabel}>Choose pickup and drop-off</Text>
 
         <View style={styles.selectorWrapper}>
           <RouteSelector onRouteChange={setSelectedRoute} />
@@ -63,7 +58,7 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
 
         {canContinue && (
           <View style={styles.fareSection}>
-            <Text style={styles.label}>Trip Fare</Text>
+            <Text style={styles.sectionLabel}>Fare</Text>
             <FareCard
               from={selectedRoute.from}
               to={selectedRoute.to}
@@ -80,9 +75,7 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
         />
 
         {!canContinue && (
-          <Text style={styles.tip}>
-            Select a valid route above to see the fare and continue.
-          </Text>
+          <Text style={styles.tip}>Select a route to continue.</Text>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -92,33 +85,22 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   scroll: { padding: SPACING.lg, paddingBottom: 40 },
-  label: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.md,
-    fontWeight: '800',
-  },
-  sublabel: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.sm,
-    lineHeight: 22,
-    marginTop: 4,
-    fontWeight: '500',
-  },
+  label: { ...type.subheading },
+  sublabel: { ...type.caption, marginTop: 4 },
   selectorWrapper: {
     marginTop: SPACING.md,
     marginBottom: SPACING.xl,
   },
   fareSection: {
-    gap: SPACING.md,
+    gap: SPACING.sm,
     marginBottom: SPACING.xl,
   },
+  sectionLabel: { ...type.label },
   btn: { marginTop: SPACING.md },
   tip: {
-    color: COLORS.textMuted,
-    fontSize: FONT_SIZE.xs,
+    ...type.caption,
     textAlign: 'center',
     marginTop: SPACING.md,
-    fontWeight: '500',
   },
 });
 
