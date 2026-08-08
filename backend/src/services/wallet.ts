@@ -59,3 +59,119 @@ export async function markPaymentFailed(transactionId: string, paystackRef?: str
     },
   });
 }
+
+/** Reserve funds by creating a PENDING withdrawal and debiting the wallet atomically. */
+export async function createPendingWithdrawal(opts: {
+  driverId: string;
+  amountGhs: number;
+  provider: string;
+  momoPhone: string;
+  paystackRef: string;
+}) {
+  return prisma.$transaction(async (tx) => {
+    const driver = await tx.driver.findUnique({ where: { id: opts.driverId } });
+    if (!driver) throw new Error('Driver not found');
+
+    const balance = decimalToNumber(driver.walletBalance);
+    if (opts.amountGhs > balance + 0.001) {
+      throw new Error('Insufficient wallet balance');
+    }
+
+    const withdrawal = await tx.withdrawal.create({
+      data: {
+        driverId: opts.driverId,
+        amount: opts.amountGhs,
+        status: TransactionStatus.PENDING,
+        provider: opts.provider,
+        momoPhone: opts.momoPhone,
+        paystackRef: opts.paystackRef,
+      },
+    });
+
+    await tx.driver.update({
+      where: { id: opts.driverId },
+      data: {
+        walletBalance: { decrement: opts.amountGhs },
+      },
+    });
+
+    return withdrawal;
+  });
+}
+
+export async function completeWithdrawal(opts: {
+  withdrawalId: string;
+  paystackRef?: string;
+  transferCode?: string;
+  recipientCode?: string;
+}) {
+  return prisma.$transaction(async (tx) => {
+    const existing = await tx.withdrawal.findUnique({
+      where: { id: opts.withdrawalId },
+    });
+    if (!existing) throw new Error('Withdrawal not found');
+    if (existing.status === TransactionStatus.COMPLETED) return existing;
+    if (existing.status === TransactionStatus.FAILED) {
+      throw new Error('Cannot complete a failed withdrawal');
+    }
+
+    return tx.withdrawal.update({
+      where: { id: opts.withdrawalId },
+      data: {
+        status: TransactionStatus.COMPLETED,
+        ...(opts.paystackRef ? { paystackRef: opts.paystackRef } : {}),
+        ...(opts.transferCode ? { transferCode: opts.transferCode } : {}),
+        ...(opts.recipientCode ? { recipientCode: opts.recipientCode } : {}),
+        failureReason: null,
+      },
+    });
+  });
+}
+
+/** Mark withdrawal failed and refund the reserved wallet amount (idempotent). */
+export async function failAndRefundWithdrawal(opts: {
+  withdrawalId: string;
+  reason?: string;
+  paystackRef?: string;
+  transferCode?: string;
+}) {
+  return prisma.$transaction(async (tx) => {
+    const existing = await tx.withdrawal.findUnique({
+      where: { id: opts.withdrawalId },
+    });
+    if (!existing) throw new Error('Withdrawal not found');
+    if (existing.status === TransactionStatus.FAILED) return existing;
+    if (existing.status === TransactionStatus.COMPLETED) {
+      throw new Error('Cannot fail a completed withdrawal');
+    }
+
+    const updated = await tx.withdrawal.update({
+      where: { id: opts.withdrawalId },
+      data: {
+        status: TransactionStatus.FAILED,
+        failureReason: opts.reason || 'Transfer failed',
+        ...(opts.paystackRef ? { paystackRef: opts.paystackRef } : {}),
+        ...(opts.transferCode ? { transferCode: opts.transferCode } : {}),
+      },
+    });
+
+    await tx.driver.update({
+      where: { id: existing.driverId },
+      data: {
+        walletBalance: { increment: existing.amount },
+      },
+    });
+
+    return updated;
+  });
+}
+
+export async function attachWithdrawalRecipient(
+  withdrawalId: string,
+  recipientCode: string
+) {
+  return prisma.withdrawal.update({
+    where: { id: withdrawalId },
+    data: { recipientCode },
+  });
+}
