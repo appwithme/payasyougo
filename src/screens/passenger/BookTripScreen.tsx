@@ -7,6 +7,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeInDown, FadeInUp, LinearTransition } from 'react-native-reanimated';
 import Header from '../../components/Header';
 import RouteSelector from '../../components/RouteSelector';
 import FareCard from '../../components/FareCard';
@@ -49,34 +50,45 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.label}>Where to?</Text>
-        <Text style={styles.sublabel}>Pick your campus pickup and drop-off</Text>
+        <Animated.View entering={FadeInDown.duration(400)}>
+          <Text style={styles.label}>Where to?</Text>
+          <Text style={styles.sublabel}>Pick your campus pickup and drop-off</Text>
+        </Animated.View>
 
-        <View style={styles.selectorWrapper}>
+        <Animated.View
+          entering={FadeInUp.delay(80).duration(450)}
+          style={styles.selectorWrapper}
+        >
           <RouteSelector onRouteChange={setSelectedRoute} />
-        </View>
+        </Animated.View>
 
         {canContinue && (
-          <View style={styles.fareSection}>
+          <Animated.View
+            entering={FadeInUp.duration(350)}
+            layout={LinearTransition.springify()}
+            style={styles.fareSection}
+          >
             <FareCard
               from={selectedRoute.from}
               to={selectedRoute.to}
               fare={selectedRoute.route!.fare}
             />
-          </View>
+          </Animated.View>
         )}
 
-        <Button
-          title="Continue"
-          variant="ink"
-          onPress={handleContinue}
-          disabled={!canContinue}
-          style={styles.btn}
-        />
+        <Animated.View entering={FadeInUp.delay(140).duration(400)}>
+          <Button
+            title="Continue"
+            variant="ink"
+            onPress={handleContinue}
+            disabled={!canContinue}
+            style={styles.btn}
+          />
 
-        {!canContinue && (
-          <Text style={styles.tip}>Select pickup and drop-off to continue.</Text>
-        )}
+          {!canContinue && (
+            <Text style={styles.tip}>Select pickup and drop-off to continue.</Text>
+          )}
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
