@@ -7,6 +7,7 @@ function mapDriverPublic(driver: {
   uniqueCode: string;
   vehicleInfo: string;
   rating: number;
+  ratingCount: number;
   walletBalance: any;
   todayEarnings: any;
   totalTrips: number;
@@ -20,6 +21,7 @@ function mapDriverPublic(driver: {
     email: driver.user.email || '',
     vehicle: driver.vehicleInfo,
     rating: driver.rating,
+    ratingCount: driver.ratingCount,
     walletBalance: decimalToNumber(driver.walletBalance),
     todayEarnings: decimalToNumber(driver.todayEarnings),
     totalTrips: driver.totalTrips,
