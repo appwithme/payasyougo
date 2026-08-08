@@ -17,12 +17,11 @@ const { width: W, height: H } = Dimensions.get('window');
 /**
  * Custom modern splash — hand-crafted mark, editorial layout.
  * Logo top → name under logo (Taxi Rider hierarchy).
- * ~6s brand dwell with intentional progress.
+ * ~6s brand dwell — no progress bar.
  */
 const T = {
   nameAt: 1100,
   tagAt: 1800,
-  progressAt: 900,
   exitAt: 5600,
   exitDur: 480,
   safety: 6500,
@@ -39,7 +38,6 @@ export default function SplashScreen({ onFinish }: Props) {
   const nameOp = useRef(new Animated.Value(0)).current;
   const nameY = useRef(new Animated.Value(22)).current;
   const tagOp = useRef(new Animated.Value(0)).current;
-  const bar = useRef(new Animated.Value(0)).current;
   const floatY = useRef(new Animated.Value(0)).current;
   const line = useRef(new Animated.Value(0)).current;
 
@@ -124,14 +122,6 @@ export default function SplashScreen({ onFinish }: Props) {
       }).start();
     }, T.tagAt);
 
-    Animated.timing(bar, {
-      toValue: 1,
-      duration: T.exitAt - T.progressAt,
-      delay: T.progressAt,
-      easing: Easing.inOut(Easing.cubic),
-      useNativeDriver: false,
-    }).start();
-
     const exitT = setTimeout(() => {
       Animated.timing(root, {
         toValue: 0,
@@ -152,11 +142,6 @@ export default function SplashScreen({ onFinish }: Props) {
       clearTimeout(safety);
     };
   }, []);
-
-  const barW = bar.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, Math.min(W * 0.36, 150)],
-  });
 
   const lineW = line.interpolate({
     inputRange: [0, 1],
@@ -239,10 +224,6 @@ export default function SplashScreen({ onFinish }: Props) {
             campus rides · digital fares
           </Animated.Text>
         </Animated.View>
-
-        <View style={styles.track}>
-          <Animated.View style={[styles.fill, { width: barW }]} />
-        </View>
       </View>
 
       <Animated.Text style={[styles.footer, { opacity: tagOp }]}>
@@ -343,19 +324,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textSecondary,
     letterSpacing: 0.3,
-  },
-  track: {
-    marginTop: 44,
-    width: Math.min(W * 0.36, 150),
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: 'rgba(27,43,75,0.1)',
-    overflow: 'hidden',
-  },
-  fill: {
-    height: '100%',
-    borderRadius: 2,
-    backgroundColor: COLORS.primary,
   },
   footer: {
     position: 'absolute',
