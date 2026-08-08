@@ -3,6 +3,7 @@
     "name": "PayAsYouGo",
     "slug": "payasyougo",
     "version": "1.0.2",
+    "scheme": "payasyougo",
     "orientation": "portrait",
     "icon": "./assets/app-icon-v4.png",
     "userInterfaceStyle": "light",
