@@ -9,45 +9,53 @@ import {
   StatusBar,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  ImageSourcePropType,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import Button from '../../components/Button';
+import BrandMark from '../../components/BrandMark';
 import { COLORS, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
 
 const { width } = Dimensions.get('window');
-const ONBOARDING_KEY = 'payasyougo_onboarding_done';
 
-const SLIDES = [
+/** Bump version so existing Expo Go installs see onboarding again after redesign */
+export const ONBOARDING_KEY = 'payasyougo_onboarding_v2';
+
+const SLIDES: {
+  key: string;
+  title: string;
+  body: string;
+  image: ImageSourcePropType;
+  icon: keyof typeof Ionicons.glyphMap;
+}[] = [
   {
     key: 'pay',
     title: 'Pay your fare\nin seconds',
-    body: 'Skip the change hunt. Select your campus route and pay drivers with Mobile Money.',
+    body: 'Skip hunting for change. Pick a campus route and pay the driver with Mobile Money.',
     image: require('../../../assets/brand/onboarding-pay.png'),
-    icon: 'flash-outline' as const,
+    icon: 'flash-outline',
   },
   {
     key: 'wallet',
     title: 'Drivers see\nevery cedi',
-    body: 'Wallet balance, today’s earnings, and trip history update the moment a passenger pays.',
+    body: 'Wallet balance and today’s earnings update the moment a passenger confirms payment.',
     image: require('../../../assets/brand/onboarding-wallet.png'),
-    icon: 'wallet-outline' as const,
+    icon: 'wallet-outline',
   },
   {
     key: 'routes',
     title: 'Built for\nUCC routes',
     body: 'Science, Casford, Ayensu, Valco — fixed fares for the routes you actually ride.',
     image: require('../../../assets/brand/onboarding-routes.png'),
-    icon: 'map-outline' as const,
+    icon: 'map-outline',
   },
 ];
 
-type Props = {
-  navigation: any;
-};
+type Props = { navigation: any };
 
 export default function OnboardingScreen({ navigation }: Props) {
   const [index, setIndex] = useState(0);
@@ -60,8 +68,9 @@ export default function OnboardingScreen({ navigation }: Props) {
 
   const next = () => {
     if (index < SLIDES.length - 1) {
-      listRef.current?.scrollToIndex({ index: index + 1, animated: true });
-      setIndex(index + 1);
+      const nextIndex = index + 1;
+      listRef.current?.scrollToIndex({ index: nextIndex, animated: true });
+      setIndex(nextIndex);
     } else {
       finish();
     }
@@ -78,12 +87,7 @@ export default function OnboardingScreen({ navigation }: Props) {
 
       <View style={styles.topBar}>
         <View style={styles.brandRow}>
-          <View style={styles.miniLogo}>
-            <Image
-              source={require('../../../assets/icon.png')}
-              style={styles.miniLogoImg}
-            />
-          </View>
+          <BrandMark size={28} />
           <Text style={styles.brand}>PayAsYouGo</Text>
         </View>
         {index < SLIDES.length - 1 ? (
@@ -106,13 +110,12 @@ export default function OnboardingScreen({ navigation }: Props) {
           <View style={styles.slide}>
             <View style={styles.imageFrame}>
               <Image source={item.image} style={styles.image} resizeMode="cover" />
-              <View style={styles.imageScrim} />
               <View style={styles.iconChip}>
                 <Ionicons name={item.icon} size={18} color={COLORS.ink} />
               </View>
             </View>
 
-            <Animated.View entering={FadeInDown.duration(420)} style={styles.copy}>
+            <Animated.View entering={FadeInDown.duration(400)} style={styles.copy}>
               <Text style={styles.title}>{item.title}</Text>
               <Text style={styles.body}>{item.body}</Text>
             </Animated.View>
@@ -123,10 +126,7 @@ export default function OnboardingScreen({ navigation }: Props) {
       <View style={styles.footer}>
         <View style={styles.dots}>
           {SLIDES.map((s, i) => (
-            <View
-              key={s.key}
-              style={[styles.dot, i === index && styles.dotActive]}
-            />
+            <View key={s.key} style={[styles.dot, i === index && styles.dotActive]} />
           ))}
         </View>
 
@@ -147,13 +147,8 @@ export default function OnboardingScreen({ navigation }: Props) {
   );
 }
 
-export { ONBOARDING_KEY };
-
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
+  root: { flex: 1, backgroundColor: COLORS.background },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -162,13 +157,6 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.sm,
   },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  miniLogo: {
-    width: 32,
-    height: 32,
-    borderRadius: 9,
-    overflow: 'hidden',
-  },
-  miniLogoImg: { width: '100%', height: '100%' },
   brand: { ...type.subheading, fontSize: 16 },
   skip: { minHeight: 40, paddingVertical: 8, paddingHorizontal: 12 },
   skipPlaceholder: { width: 64 },
@@ -187,10 +175,6 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
-  },
-  imageScrim: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255,249,240,0.04)',
   },
   iconChip: {
     position: 'absolute',

@@ -5,7 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   StatusBar,
-  ImageBackground,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,9 +20,11 @@ import Animated, {
   withSequence,
   Easing,
 } from 'react-native-reanimated';
-import BrandLogo from '../../components/BrandLogo';
+import BrandMark from '../../components/BrandMark';
 import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
+
+const { width: W } = Dimensions.get('window');
 
 export default function WelcomeScreen({ navigation }: { navigation: any }) {
   const bob = useSharedValue(0);
@@ -45,29 +47,25 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
   return (
     <View style={styles.root}>
       <StatusBar barStyle="dark-content" />
-      <ImageBackground
-        source={require('../../../assets/brand/onboarding-pay.png')}
+
+      <LinearGradient
+        colors={['#FFF9F0', '#FFE8A8', COLORS.primary]}
+        locations={[0, 0.55, 1]}
         style={styles.hero}
-        imageStyle={styles.heroImage}
       >
-        <LinearGradient
-          colors={['rgba(255,249,240,0.15)', 'rgba(255,249,240,0.55)', COLORS.background]}
-          locations={[0, 0.45, 1]}
-          style={StyleSheet.absoluteFill}
-        />
+        <View style={styles.heroDecor} />
+        <View style={styles.heroDecorSm} />
 
         <SafeAreaView style={styles.heroSafe} edges={['top']}>
           <Animated.View entering={FadeInDown.duration(500)} style={styles.brandBlock}>
             <Animated.View style={bobStyle}>
-              <BrandLogo size="md" />
+              <BrandMark size={86} />
             </Animated.View>
             <Text style={styles.appName}>PayAsYouGo</Text>
-            <Text style={styles.tagline}>
-              Digital fares for UCC campus rides
-            </Text>
+            <Text style={styles.tagline}>Digital fares for UCC campus rides</Text>
           </Animated.View>
         </SafeAreaView>
-      </ImageBackground>
+      </LinearGradient>
 
       <Animated.View entering={FadeInUp.delay(180).duration(480)} style={styles.sheet}>
         <Text style={styles.prompt}>Continue as</Text>
@@ -109,16 +107,30 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
+  root: { flex: 1, backgroundColor: COLORS.background },
   hero: {
     flex: 1.15,
     justifyContent: 'flex-end',
+    overflow: 'hidden',
   },
-  heroImage: {
-    resizeMode: 'cover',
+  heroDecor: {
+    position: 'absolute',
+    top: -40,
+    right: -50,
+    width: W * 0.7,
+    height: W * 0.7,
+    borderRadius: W * 0.35,
+    borderWidth: 1.5,
+    borderColor: 'rgba(26,26,26,0.08)',
+  },
+  heroDecorSm: {
+    position: 'absolute',
+    bottom: 80,
+    left: -30,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: 'rgba(255,255,255,0.25)',
   },
   heroSafe: {
     flex: 1,
@@ -126,19 +138,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingBottom: SPACING.xl,
   },
-  brandBlock: {
-    alignItems: 'flex-start',
-  },
-  appName: {
-    ...type.hero,
-    fontSize: 36,
-    marginTop: SPACING.md,
-  },
-  tagline: {
-    ...type.body,
-    marginTop: 6,
-    maxWidth: 280,
-  },
+  brandBlock: { alignItems: 'flex-start' },
+  appName: { ...type.hero, fontSize: 36, marginTop: SPACING.md },
+  tagline: { ...type.body, marginTop: 6, maxWidth: 280 },
   sheet: {
     backgroundColor: COLORS.surface,
     borderTopLeftRadius: 28,
@@ -175,9 +177,5 @@ const styles = StyleSheet.create({
   roleCopy: { flex: 1 },
   roleTitle: { ...type.subheading },
   roleDesc: { ...type.caption, marginTop: 2 },
-  footer: {
-    ...type.caption,
-    textAlign: 'center',
-    marginTop: SPACING.md,
-  },
+  footer: { ...type.caption, textAlign: 'center', marginTop: SPACING.md },
 });
