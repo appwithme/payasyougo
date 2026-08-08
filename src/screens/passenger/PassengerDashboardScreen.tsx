@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -13,20 +13,22 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
 import TransactionCard from '../../components/TransactionCard';
+import { fetchRoutes } from '../../services/routesService';
 import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
-
-const QUICK_ROUTES = [
-  { from: 'Science', to: 'Casford', fare: 3 },
-  { from: 'Science', to: 'Ayensu', fare: 3 },
-  { from: 'Ayensu', to: 'Science', fare: 3 },
-  { from: 'Ayensu', to: 'Casford', fare: 5 },
-];
+import { RouteInfo } from '../../types';
 
 const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
   const { currentUser, passengerTrips } = useApp();
   const recentTrips = passengerTrips.slice(0, 3);
   const firstName = currentUser?.name?.split(' ')[0] || 'Passenger';
+  const [quickRoutes, setQuickRoutes] = useState<RouteInfo[]>([]);
+
+  useEffect(() => {
+    fetchRoutes()
+      .then((data) => setQuickRoutes(data.routes.slice(0, 4)))
+      .catch(() => setQuickRoutes([]));
+  }, []);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -75,7 +77,7 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick routes</Text>
           <View style={styles.routesGrid}>
-            {QUICK_ROUTES.map((r, i) => (
+            {quickRoutes.map((r, i) => (
               <TouchableOpacity
                 key={`${r.from}-${r.to}`}
                 style={styles.routeCard}

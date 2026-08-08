@@ -116,17 +116,6 @@ const styles = StyleSheet.create({
   header: { marginBottom: SPACING.lg, gap: SPACING.sm },
   title: { ...type.title, marginTop: SPACING.sm },
   subtitle: { ...type.body },
-  hint: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: COLORS.primaryMuted,
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
-    marginBottom: SPACING.lg,
-  },
-  hintText: { ...type.caption, color: COLORS.textSecondary, flex: 1 },
-  hintBold: { fontFamily: 'DMSans_700Bold', color: COLORS.ink },
   errorBox: {
     flexDirection: 'row',
     alignItems: 'center',
