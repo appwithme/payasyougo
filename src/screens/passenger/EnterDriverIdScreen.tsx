@@ -22,7 +22,7 @@ import { type } from '../../theme/typography';
 import { Driver } from '../../types';
 
 const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: any }) => {
-  const { from, to, fare, prefillDriverId } = route.params;
+  const { from, to, fare, routeId, prefillDriverId } = route.params;
 
   const [driverId, setDriverId] = useState('');
   const [foundDriver, setFoundDriver] = useState<Driver | null>(null);
@@ -113,13 +113,29 @@ const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: an
           <Animated.View entering={FadeInDown.delay(60).duration(400)} style={styles.hero}>
             <Text style={styles.title}>Who’s driving?</Text>
             <Text style={styles.subtitle}>
-              Enter the driver ID shown on their profile to send this fare.
+              Scan the driver’s QR code, or type their ID to send this fare.
             </Text>
+          </Animated.View>
+
+          <Animated.View entering={FadeInUp.delay(80).duration(400)}>
+            <Button
+              title="Scan driver QR"
+              variant="ink"
+              onPress={() =>
+                navigation.navigate('ScanDriverQr', {
+                  from,
+                  to,
+                  fare,
+                  routeId,
+                })
+              }
+              icon={<Ionicons name="qr-code-outline" size={18} color={COLORS.white} />}
+            />
           </Animated.View>
 
           <Animated.View entering={FadeInUp.delay(100).duration(400)} style={styles.inputBlock}>
             <Input
-              label="Driver ID"
+              label="Or type driver ID"
               placeholder="DRV001"
               value={driverId}
               onChangeText={handleSearch}
