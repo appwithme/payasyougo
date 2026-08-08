@@ -247,30 +247,10 @@ function DetailRow({
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: COLORS.ink,
-  },
-  hero: {
-    paddingBottom: SPACING.xl + 8,
-  },
-  heroSafe: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.sm,
-  },
-  brand: {
-    fontFamily: 'Sora_700Bold',
-    fontSize: 15,
-    color: COLORS.white,
-    letterSpacing: -0.3,
-  },
-  brandGo: {
-    color: COLORS.primary,
-  },
   heroBody: {
     alignItems: 'center',
-    marginTop: SPACING.lg,
-    gap: 8,
+    marginTop: SPACING.md,
+    gap: 6,
   },
   avatarRing: {
     padding: 4,
@@ -294,77 +274,43 @@ const styles = StyleSheet.create({
   },
   heroName: {
     fontFamily: 'Sora_700Bold',
-    fontSize: 24,
+    fontSize: 28,
     color: COLORS.white,
-    letterSpacing: -0.5,
+    letterSpacing: -0.8,
     maxWidth: '90%',
   },
-  heroRole: {
+  heroMeta: {
     fontFamily: 'DMSans_500Medium',
-    fontSize: 13,
+    fontSize: 14,
     color: 'rgba(255,255,255,0.55)',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
   },
-  editProfileBtn: {
+  heroMetrics: {
     flexDirection: 'row',
+    gap: SPACING.xl,
+    marginTop: SPACING.md,
+  },
+  heroMetric: {
     alignItems: 'center',
-    gap: 6,
-    marginTop: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: COLORS.primary,
+    gap: 4,
   },
-  editProfileText: {
+  metricLabel: {
     fontFamily: 'DMSans_700Bold',
-    fontSize: 13,
-    color: COLORS.ink,
+    fontSize: 11,
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+    color: COLORS.primary,
   },
-
-  sheet: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-    borderTopLeftRadius: RADIUS.xl,
-    borderTopRightRadius: RADIUS.xl,
-    marginTop: -18,
+  metricValue: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 28,
+    color: COLORS.white,
+    letterSpacing: -0.8,
   },
-  sheetInner: { flex: 1 },
   scroll: {
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.lg,
     gap: SPACING.lg,
   },
-
-  stats: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  statTile: {
-    flex: 1,
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    ...SHADOW.sm,
-  },
-  statTileAccent: {
-    backgroundColor: COLORS.primaryMuted,
-    borderColor: 'rgba(245,184,0,0.35)',
-  },
-  statValue: {
-    fontFamily: 'Sora_700Bold',
-    fontSize: 22,
-    color: COLORS.ink,
-    letterSpacing: -0.5,
-  },
-  statLabel: {
-    ...type.caption,
-    marginTop: 4,
-  },
-
   panel: {
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
@@ -418,7 +364,6 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     fontFamily: 'DMSans_500Medium',
   },
-
   actions: {
     gap: 12,
   },
