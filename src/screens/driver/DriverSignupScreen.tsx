@@ -104,6 +104,8 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const [ghanaCard, setGhanaCard] = useState('');
+  const [ghanaFrontUri, setGhanaFrontUri] = useState<string | null>(null);
+  const [ghanaBackUri, setGhanaBackUri] = useState<string | null>(null);
   const [ghanaVerified, setGhanaVerified] = useState(false);
   const [ghanaNormalized, setGhanaNormalized] = useState('');
 
@@ -127,6 +129,8 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
     setPassword(sample.password);
     setConfirmPassword(sample.password);
     setGhanaCard(sample.ghanaCard);
+    setGhanaFrontUri(Image.resolveAssetSource(GHANA_CARD_FRONT)?.uri ?? null);
+    setGhanaBackUri(Image.resolveAssetSource(GHANA_CARD_BACK)?.uri ?? null);
     setGhanaVerified(false);
     setGhanaNormalized('');
     setLicense(sample.license);
@@ -160,6 +164,7 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
   const validateVehicle = () => {
     const e: Record<string, string> = {};
     if (!vehicle.trim()) e.vehicle = 'Vehicle details are required';
+    if (!ghanaFrontUri || !ghanaBackUri) e.form = 'Capture both sides of your Ghana Card first';
     if (!ghanaVerified) e.form = 'Verify your Ghana Card first';
     if (!licenseVerified) e.form = 'Verify your driver licence first';
     setErrors(e);
@@ -177,9 +182,18 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
 
   const handleNext = () => {
     if (step === 0 && !validateAccount()) return;
-    if (step === 1 && !ghanaVerified) {
-      setErrors({ ghanaCard: 'Verify your Ghana Card to continue' });
-      return;
+    if (step === 1) {
+      if (!ghanaFrontUri || !ghanaBackUri) {
+        setErrors({
+          ghanaFront: !ghanaFrontUri ? 'Capture the front of your Ghana Card' : undefined,
+          ghanaBack: !ghanaBackUri ? 'Capture the back of your Ghana Card' : undefined,
+        });
+        return;
+      }
+      if (!ghanaVerified) {
+        setErrors({ ghanaCard: 'Verify your Ghana Card to continue' });
+        return;
+      }
     }
     if (step === 2 && !licenseVerified) {
       setErrors({ license: 'Verify your driver licence to continue' });
@@ -190,8 +204,12 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
   };
 
   const verifyGhanaCard = async () => {
-    if (!ghanaCard.trim()) {
-      setErrors({ ghanaCard: 'Enter your Ghana Card number' });
+    const e: Record<string, string> = {};
+    if (!ghanaFrontUri) e.ghanaFront = 'Capture the front of your Ghana Card';
+    if (!ghanaBackUri) e.ghanaBack = 'Capture the back of your Ghana Card';
+    if (!ghanaCard.trim()) e.ghanaCard = 'Enter the Personal ID Number from your card';
+    if (Object.keys(e).length > 0) {
+      setErrors(e);
       return;
     }
     setVerifying(true);
@@ -345,13 +363,42 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
       return (
         <>
           <View style={styles.infoCard}>
-            <Ionicons name="card-outline" size={20} color={COLORS.ink} />
+            <Ionicons name="camera-outline" size={20} color={COLORS.ink} />
             <Text style={styles.infoText}>
-              Enter your Ghana Card personal ID. Format: GHA-XXXXXXXXX-X
+              Capture clear photos of both sides. Use the examples as a guide for framing.
             </Text>
           </View>
+
+          <IdCaptureSlot
+            label="Ghana Card"
+            side="Front"
+            exampleSource={GHANA_CARD_FRONT}
+            uri={ghanaFrontUri}
+            error={errors.ghanaFront}
+            onChange={(uri) => {
+              setGhanaFrontUri(uri);
+              setGhanaVerified(false);
+              setGhanaNormalized('');
+              clearFieldError('ghanaFront');
+            }}
+          />
+
+          <IdCaptureSlot
+            label="Ghana Card"
+            side="Back"
+            exampleSource={GHANA_CARD_BACK}
+            uri={ghanaBackUri}
+            error={errors.ghanaBack}
+            onChange={(uri) => {
+              setGhanaBackUri(uri);
+              setGhanaVerified(false);
+              setGhanaNormalized('');
+              clearFieldError('ghanaBack');
+            }}
+          />
+
           <Input
-            label="Ghana Card number"
+            label="Personal ID Number"
             placeholder="GHA-123456789-0"
             value={ghanaCard}
             onChangeText={(v) => {
@@ -364,6 +411,7 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
             autoCapitalize="characters"
             error={errors.ghanaCard}
           />
+
           <TouchableOpacity
             style={styles.autofillBtn}
             onPress={fillSignupSample}
@@ -371,12 +419,15 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
             accessibilityLabel="Autofill Ghana Card sample"
           >
             <Ionicons name="flash-outline" size={16} color={COLORS.ink} />
-            <Text style={styles.autofillText}>Autofill sample details</Text>
+            <Text style={styles.autofillText}>Autofill sample card + photos</Text>
           </TouchableOpacity>
+
           {ghanaVerified ? (
             <View style={styles.verifiedBox}>
               <Ionicons name="checkmark-circle" size={18} color={COLORS.success} />
-              <Text style={styles.verifiedText}>Ghana Card verified · {ghanaNormalized}</Text>
+              <Text style={styles.verifiedText}>
+                Ghana Card verified · {ghanaNormalized}
+              </Text>
             </View>
           ) : (
             <Button
