@@ -52,6 +52,7 @@ function mapUser(user: {
     uniqueCode: string;
     vehicleInfo: string;
     rating: number;
+    ratingCount: number;
     walletBalance: any;
     todayEarnings: any;
     totalTrips: number;
@@ -67,6 +68,7 @@ function mapUser(user: {
       email: user.email || '',
       vehicle: user.driver.vehicleInfo,
       rating: user.driver.rating,
+      ratingCount: user.driver.ratingCount,
       walletBalance: decimalToNumber(user.driver.walletBalance),
       todayEarnings: decimalToNumber(user.driver.todayEarnings),
       totalTrips: user.driver.totalTrips,
