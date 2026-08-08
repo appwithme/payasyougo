@@ -40,7 +40,8 @@ model Driver {
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   uniqueCode    String   @unique
   vehicleInfo   String
-  rating        Float    @default(5.0)
+  rating        Float    @default(0)
+  ratingCount   Int      @default(0)
   walletBalance Decimal  @default(0) @db.Decimal(12, 2)
   todayEarnings Decimal  @default(0) @db.Decimal(12, 2)
   totalTrips    Int      @default(0)
@@ -64,21 +65,23 @@ model Route {
 }
 
 model Transaction {
-  id           String            @id @default(uuid())
-  passengerId  String
-  passenger    User              @relation("PassengerTransactions", fields: [passengerId], references: [id])
-  driverId     String
-  driver       Driver            @relation(fields: [driverId], references: [id])
-  routeId      String
-  route        Route             @relation(fields: [routeId], references: [id])
-  amount       Decimal           @db.Decimal(10, 2)
-  status       TransactionStatus @default(PENDING)
-  paymentRef   String?
-  paystackRef  String?           @unique
-  provider     String?
-  momoPhone    String?
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  id              String            @id @default(uuid())
+  passengerId     String
+  passenger       User              @relation("PassengerTransactions", fields: [passengerId], references: [id])
+  driverId        String
+  driver          Driver            @relation(fields: [driverId], references: [id])
+  routeId         String
+  route           Route             @relation(fields: [routeId], references: [id])
+  amount          Decimal           @db.Decimal(10, 2)
+  status          TransactionStatus @default(PENDING)
+  paymentRef      String?
+  paystackRef     String?           @unique
+  provider        String?
+  momoPhone       String?
+  passengerRating Int?
+  ratedAt         DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
   @@index([passengerId, createdAt])
   @@index([driverId, createdAt])
