@@ -80,15 +80,13 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
           <RoleOption
             title="Passenger"
             subtitle="Find a route and pay your driver"
-            icon="person"
-            accent="amber"
+            icon="person-outline"
             onPress={() => go('passenger')}
           />
           <RoleOption
             title="Driver"
             subtitle="Collect fares and track earnings"
             icon="directions-car"
-            accent="ink"
             onPress={() => go('driver')}
           />
 
@@ -103,13 +101,11 @@ function RoleOption({
   title,
   subtitle,
   icon,
-  accent,
   onPress,
 }: {
   title: string;
   subtitle: string;
   icon: keyof typeof MaterialIcons.glyphMap;
-  accent: 'amber' | 'ink';
   onPress: () => void;
 }) {
   const scale = useSharedValue(1);
@@ -128,25 +124,14 @@ function RoleOption({
       }}
     >
       <Animated.View style={[styles.option, pressStyle]}>
-        <View
-          style={[
-            styles.optionIcon,
-            accent === 'amber' ? styles.optionIconAmber : styles.optionIconInk,
-          ]}
-        >
-          <MaterialIcons
-            name={icon}
-            size={22}
-            color={accent === 'amber' ? COLORS.ink : COLORS.primary}
-          />
+        <View style={styles.optionIcon}>
+          <MaterialIcons name={icon} size={24} color={COLORS.ink} />
         </View>
         <View style={styles.optionCopy}>
           <Text style={styles.optionTitle}>{title}</Text>
           <Text style={styles.optionSubtitle}>{subtitle}</Text>
         </View>
-        <View style={styles.optionChevron}>
-          <MaterialIcons name="arrow-forward" size={18} color={COLORS.ink} />
-        </View>
+        <MaterialIcons name="chevron-right" size={24} color={COLORS.textMuted} />
       </Animated.View>
     </Pressable>
   );
@@ -230,17 +215,14 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
   },
   optionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  optionIconAmber: {
-    backgroundColor: COLORS.primary,
-  },
-  optionIconInk: {
-    backgroundColor: COLORS.ink,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   optionCopy: {
     flex: 1,
@@ -257,16 +239,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     color: COLORS.textSecondary,
-  },
-  optionChevron: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: COLORS.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
   },
   footer: {
     marginTop: 10,
