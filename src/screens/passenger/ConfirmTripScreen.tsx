@@ -32,7 +32,7 @@ const PROVIDERS: {
   {
     id: 'MTN',
     name: 'MTN MoMo',
-    logo: require('../../../assets/brand/momo-icon.png'),
+    logo: require('../../../assets/brand/mtn-momo.png'),
   },
   {
     id: 'VODAFONE',
@@ -159,14 +159,14 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
                 return (
                   <TouchableOpacity
                     key={p.id}
-                    style={[styles.providerChip, active && styles.providerChipActive]}
+                    style={[styles.providerTile, active && styles.providerTileActive]}
                     onPress={() => setProvider(p.id)}
                     activeOpacity={0.85}
+                    accessibilityRole="button"
+                    accessibilityLabel={p.name}
+                    accessibilityState={{ selected: active }}
                   >
                     <Image source={p.logo} style={styles.providerLogo} resizeMode="cover" />
-                    <Text style={[styles.providerText, active && styles.providerTextActive]}>
-                      {p.name}
-                    </Text>
                   </TouchableOpacity>
                 );
               })}
@@ -283,37 +283,23 @@ const styles = StyleSheet.create({
 
   providerRow: {
     flexDirection: 'row',
-    gap: SPACING.sm,
+    gap: SPACING.md,
   },
-  providerChip: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    backgroundColor: COLORS.surface,
-    borderWidth: 1.5,
+  providerTile: {
+    width: 72,
+    height: 72,
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 2,
     borderColor: COLORS.border,
-    borderRadius: RADIUS.md,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
+    backgroundColor: COLORS.surface,
   },
-  providerChipActive: {
+  providerTileActive: {
     borderColor: COLORS.ink,
-    backgroundColor: COLORS.surfaceAlt,
   },
   providerLogo: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-  },
-  providerText: {
-    ...type.label,
-    fontSize: 13,
-    color: COLORS.textSecondary,
-  },
-  providerTextActive: {
-    color: COLORS.ink,
+    width: '100%',
+    height: '100%',
   },
 
   securityNote: {
