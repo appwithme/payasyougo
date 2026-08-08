@@ -9,13 +9,17 @@ import React, {
 import * as authService from '../services/authService';
 import { fetchMyWallet } from '../services/driversService';
 import { fetchTransactions } from '../services/transactionsService';
+import {
+  initiateWithdrawal,
+  waitForWithdrawal,
+} from '../services/withdrawalsService';
 import { getToken } from '../services/apiClient';
 import notificationService, {
   DEFAULT_NOTIFICATION_PREFS,
   NotificationPrefs,
   PendingPaymentNotification,
 } from '../services/notificationService';
-import { Passenger, Driver, Transaction } from '../types';
+import { Passenger, Driver, Transaction, MoMoProvider } from '../types';
 
 type Role = 'passenger' | 'driver';
 
@@ -55,7 +59,12 @@ interface AppContextType {
     vehicle: string;
     password: string;
   }) => Promise<{ success: boolean; driver?: Driver; error?: string }>;
-  withdrawDriverFunds: (amount: number) => { success: boolean; error?: string };
+  withdrawDriverFunds: (input: {
+    amount: number;
+    provider: MoMoProvider;
+    momoPhone: string;
+    onStatus?: (msg: string) => void;
+  }) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   updateAvatar: (avatarUrl: string) => Promise<{ success: boolean; error?: string }>;
   updateProfile: (input: {
@@ -260,11 +269,59 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const withdrawDriverFunds = (_amount: number) => {
-    return {
-      success: false,
-      error: 'Withdrawals are not available yet. Coming soon.',
-    };
+  const withdrawDriverFunds = async (input: {
+    amount: number;
+    provider: MoMoProvider;
+    momoPhone: string;
+    onStatus?: (msg: string) => void;
+  }) => {
+    try {
+      input.onStatus?.('Requesting withdrawal…');
+      const started = await initiateWithdrawal({
+        amount: input.amount,
+        provider: input.provider,
+        momoPhone: input.momoPhone,
+      });
+
+      if (started.wallet) {
+        setCurrentUser(started.wallet);
+      }
+
+      if (started.status === 'completed') {
+        input.onStatus?.('Withdrawal sent');
+        await refreshDriverWallet();
+        return { success: true };
+      }
+
+      if (started.status === 'failed') {
+        await refreshDriverWallet();
+        return {
+          success: false,
+          error:
+            started.withdrawal.failureReason ||
+            started.displayText ||
+            'Withdrawal failed',
+        };
+      }
+
+      input.onStatus?.(started.displayText || 'Processing MoMo payout…');
+      const finished = await waitForWithdrawal(started.withdrawalId, {
+        onTick: (status) => {
+          if (status === 'pending') {
+            input.onStatus?.('Waiting for MoMo payout…');
+          }
+        },
+      });
+
+      setCurrentUser(finished.wallet);
+      return { success: true };
+    } catch (err: any) {
+      await refreshDriverWallet();
+      return {
+        success: false,
+        error: err?.message || 'Withdrawal failed',
+      };
+    }
   };
 
   const logout = async () => {
