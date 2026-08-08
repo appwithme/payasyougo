@@ -24,7 +24,7 @@ const PassengerLoginScreen = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!phone.trim()) {
       setError('Please enter your phone number');
       return;
@@ -35,11 +35,9 @@ const PassengerLoginScreen = ({ navigation }: { navigation: any }) => {
     }
     setError('');
     setLoading(true);
-    setTimeout(() => {
-      const result = loginPassenger(phone.trim(), password);
-      setLoading(false);
-      if (!result.success) setError(result.error || 'Invalid credentials');
-    }, 800);
+    const result = await loginPassenger(phone.trim(), password);
+    setLoading(false);
+    if (!result.success) setError(result.error || 'Invalid credentials');
   };
 
   return (
@@ -59,14 +57,6 @@ const PassengerLoginScreen = ({ navigation }: { navigation: any }) => {
           <Text style={styles.title}>Welcome back</Text>
           <Text style={styles.subtitle}>Sign in to pay campus fares with MoMo</Text>
         </Animated.View>
-
-        <View style={styles.hint}>
-          <Ionicons name="key-outline" size={18} color={COLORS.ink} />
-          <Text style={styles.hintText}>
-            Demo · <Text style={styles.hintBold}>0551002000</Text> /{' '}
-            <Text style={styles.hintBold}>pass1234</Text>
-          </Text>
-        </View>
 
         {!!error && (
           <View style={styles.errorBox}>
@@ -126,17 +116,6 @@ const styles = StyleSheet.create({
   header: { marginBottom: SPACING.lg, gap: SPACING.sm },
   title: { ...type.title, marginTop: SPACING.sm },
   subtitle: { ...type.body },
-  hint: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: COLORS.primaryMuted,
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
-    marginBottom: SPACING.lg,
-  },
-  hintText: { ...type.caption, color: COLORS.textSecondary, flex: 1 },
-  hintBold: { fontFamily: 'DMSans_700Bold', color: COLORS.ink },
   errorBox: {
     flexDirection: 'row',
     alignItems: 'center',
