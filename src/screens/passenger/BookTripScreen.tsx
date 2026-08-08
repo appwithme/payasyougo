@@ -15,8 +15,10 @@ import Button from '../../components/Button';
 import { COLORS, SPACING } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { RouteInfo } from '../../types';
+import { useTabBarPadding } from '../../navigation/FloatingTabBar';
 
 const BookTripScreen = ({ navigation }: { navigation: any }) => {
+  const tabPad = useTabBarPadding();
   const [selectedRoute, setSelectedRoute] = useState<{
     from: string | null;
     to: string | null;
@@ -50,7 +52,7 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
       />
 
       <ScrollView
-        contentContainerStyle={styles.scroll}
+        contentContainerStyle={[styles.scroll, { paddingBottom: tabPad }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -100,7 +102,7 @@ const BookTripScreen = ({ navigation }: { navigation: any }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  scroll: { padding: SPACING.lg, paddingBottom: 40 },
+  scroll: { padding: SPACING.lg },
   label: { ...type.heading },
   sublabel: { ...type.body, marginTop: 6 },
   selectorWrapper: {
