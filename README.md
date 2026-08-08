@@ -59,6 +59,51 @@ A mobile transport payment app for **University of Cape Coast (UCC)** — passen
 
 ---
 
+## 📱 Screenshots
+
+Captured from the iOS Simulator. Re-generate anytime with Expo + API running:
+
+```bash
+# Set EXPO_HOST to the IP shown by `npx expo start`
+EXPO_HOST=172.20.10.2 WAIT_SEC=12 ./scripts/capture-screenshots.sh
+```
+
+### Get started
+
+| Onboarding | Welcome | Passenger login | Driver login |
+|:---:|:---:|:---:|:---:|
+| <img src="./docs/screenshots/onboarding.png" width="180" alt="Onboarding" /> | <img src="./docs/screenshots/welcome.png" width="180" alt="Welcome" /> | <img src="./docs/screenshots/passenger-login.png" width="180" alt="Passenger login" /> | <img src="./docs/screenshots/driver-login.png" width="180" alt="Driver login" /> |
+
+| Passenger signup | Driver signup |
+|:---:|:---:|
+| <img src="./docs/screenshots/passenger-signup.png" width="180" alt="Passenger signup" /> | <img src="./docs/screenshots/driver-signup.png" width="180" alt="Driver signup" /> |
+
+### Passenger
+
+| Home | Select route | Link driver | Scan QR |
+|:---:|:---:|:---:|:---:|
+| <img src="./docs/screenshots/passenger-home.png" width="180" alt="Passenger home" /> | <img src="./docs/screenshots/book-trip.png" width="180" alt="Book trip" /> | <img src="./docs/screenshots/enter-driver.png" width="180" alt="Enter driver ID" /> | <img src="./docs/screenshots/scan-qr.png" width="180" alt="Scan driver QR" /> |
+
+| Confirm & pay | Payment success | Trip history | Profile |
+|:---:|:---:|:---:|:---:|
+| <img src="./docs/screenshots/confirm-trip.png" width="180" alt="Confirm payment" /> | <img src="./docs/screenshots/payment-success.png" width="180" alt="Payment success" /> | <img src="./docs/screenshots/trip-history.png" width="180" alt="Trip history" /> | <img src="./docs/screenshots/passenger-profile.png" width="180" alt="Passenger profile" /> |
+
+| Edit profile | Settings | Notifications |
+|:---:|:---:|:---:|
+| <img src="./docs/screenshots/passenger-edit-profile.png" width="180" alt="Edit profile" /> | <img src="./docs/screenshots/passenger-settings.png" width="180" alt="Settings" /> | <img src="./docs/screenshots/passenger-notifications.png" width="180" alt="Notifications" /> |
+
+### Driver
+
+| Dashboard | Payments | Wallet | Profile |
+|:---:|:---:|:---:|:---:|
+| <img src="./docs/screenshots/driver-home.png" width="180" alt="Driver dashboard" /> | <img src="./docs/screenshots/driver-txns.png" width="180" alt="Driver transactions" /> | <img src="./docs/screenshots/driver-wallet.png" width="180" alt="Driver wallet" /> | <img src="./docs/screenshots/driver-profile.png" width="180" alt="Driver profile" /> |
+
+| My QR | Edit profile | Settings | Notifications |
+|:---:|:---:|:---:|:---:|
+| <img src="./docs/screenshots/driver-qr.png" width="180" alt="Driver QR" /> | <img src="./docs/screenshots/driver-edit-profile.png" width="180" alt="Driver edit profile" /> | <img src="./docs/screenshots/driver-settings.png" width="180" alt="Driver settings" /> | <img src="./docs/screenshots/driver-notifications.png" width="180" alt="Driver notifications" /> |
+
+---
+
 ## 🧱 Stack
 
 | Layer | Tech |
@@ -242,7 +287,10 @@ payasyougo/
 │   ├── screens/              # passenger · driver · shared
 │   ├── services/             # API · payments · auth · Google
 │   └── theme/                # colors · typography
-└── 📚 docs/
+├── 📚 docs/
+│   └── screenshots/          # README gallery (see scripts/capture-screenshots.sh)
+├── 🧰 scripts/
+│   └── capture-screenshots.sh
 ```
 
 ---
