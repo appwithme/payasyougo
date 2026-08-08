@@ -65,25 +65,21 @@ const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
           </View>
 
           <TouchableOpacity
-            style={styles.idHero}
+            style={styles.idBlock}
             activeOpacity={0.9}
             onPress={() => navigation.navigate('DriverQr')}
             accessibilityRole="button"
             accessibilityLabel={`Show QR for driver ID ${driver.id}`}
           >
-            <View style={styles.idHeroTop}>
-              <Text style={styles.idEyebrow}>Your driver ID</Text>
-              <TouchableOpacity
-                style={styles.shareChip}
-                onPress={() => navigation.navigate('DriverQr')}
-                activeOpacity={0.85}
-              >
+            <View style={styles.idTop}>
+              <Text style={styles.idLabel}>Driver ID</Text>
+              <View style={styles.qrChip}>
                 <Ionicons name="qr-code-outline" size={14} color={COLORS.ink} />
-                <Text style={styles.shareChipText}>QR</Text>
-              </TouchableOpacity>
+                <Text style={styles.qrChipText}>QR</Text>
+              </View>
             </View>
             <Text style={styles.idValue}>{driver.id}</Text>
-            <Text style={styles.idHint}>Passengers scan your QR or enter this ID</Text>
+            <Text style={styles.idMeta}>Passengers scan your QR or enter this ID</Text>
           </TouchableOpacity>
         </Animated.View>
       }
@@ -204,7 +200,7 @@ const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
 
 const styles = StyleSheet.create({
   heroBody: {
-    marginTop: SPACING.lg,
+    marginTop: SPACING.md,
     gap: SPACING.lg,
   },
   heroRow: {
@@ -234,27 +230,22 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.primary,
   },
-  idHero: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: RADIUS.lg,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
+  idBlock: {
     gap: 6,
   },
-  idHeroTop: {
+  idTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  idEyebrow: {
+  idLabel: {
     fontFamily: 'DMSans_700Bold',
     fontSize: 11,
     letterSpacing: 1.4,
     textTransform: 'uppercase',
     color: COLORS.primary,
   },
-  shareChip: {
+  qrChip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -263,21 +254,22 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 999,
   },
-  shareChipText: {
+  qrChipText: {
     fontFamily: 'DMSans_700Bold',
     fontSize: 12,
     color: COLORS.ink,
   },
   idValue: {
     fontFamily: 'Sora_700Bold',
-    fontSize: 34,
+    fontSize: 42,
     color: COLORS.white,
     letterSpacing: 4,
   },
-  idHint: {
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.5)',
+  idMeta: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.55)',
+    marginTop: 2,
   },
   scroll: {
     paddingHorizontal: SPACING.lg,
