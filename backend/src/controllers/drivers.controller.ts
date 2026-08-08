@@ -11,7 +11,12 @@ function mapDriverPublic(driver: {
   walletBalance: any;
   todayEarnings: any;
   totalTrips: number;
-  user: { fullName: string; phone: string | null; email: string | null };
+  user: {
+    fullName: string;
+    phone: string | null;
+    email: string | null;
+    avatarUrl?: string | null;
+  };
 }) {
   return {
     id: driver.uniqueCode,
@@ -25,6 +30,7 @@ function mapDriverPublic(driver: {
     walletBalance: decimalToNumber(driver.walletBalance),
     todayEarnings: decimalToNumber(driver.todayEarnings),
     totalTrips: driver.totalTrips,
+    avatar: driver.user.avatarUrl || null,
   };
 }
 
@@ -43,5 +49,11 @@ export async function myWallet(userId: string) {
     include: { user: true },
   });
   if (!driver) throw new AppError('Driver profile not found', 404);
-  return mapDriverPublic(driver);
+  return {
+    ...mapDriverPublic(driver),
+    ghanaCardNumber: driver.ghanaCardNumber || undefined,
+    ghanaCardVerified: Boolean(driver.ghanaCardVerified),
+    licenseNumber: driver.licenseNumber || undefined,
+    licenseVerified: Boolean(driver.licenseVerified),
+  };
 }
