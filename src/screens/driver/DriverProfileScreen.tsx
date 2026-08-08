@@ -32,7 +32,6 @@ const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
           style: 'destructive',
           onPress: async () => {
             await logout();
-            navigation.reset({ index: 0, routes: [{ name: 'Welcome' as any }] });
           },
         },
       ]
