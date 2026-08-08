@@ -50,7 +50,6 @@ const DriverCard = ({ driver }: { driver: Driver | null }) => {
             ) : null}
             <Text style={styles.ratingPillText}>{ratingLabel}</Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
         </View>
       </Pressable>
 
