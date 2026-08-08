@@ -35,18 +35,22 @@ model User {
 }
 
 model Driver {
-  id            String   @id @default(uuid())
-  userId        String   @unique
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  uniqueCode    String   @unique
-  vehicleInfo   String
-  rating        Float    @default(0)
-  ratingCount   Int      @default(0)
-  walletBalance Decimal  @default(0) @db.Decimal(12, 2)
-  todayEarnings Decimal  @default(0) @db.Decimal(12, 2)
-  totalTrips    Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                 String    @id @default(uuid())
+  userId             String    @unique
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  uniqueCode         String    @unique
+  vehicleInfo        String
+  ghanaCardNumber    String?   @unique
+  ghanaCardVerified  Boolean   @default(false)
+  licenseNumber      String?   @unique
+  licenseVerified    Boolean   @default(false)
+  rating             Float     @default(0)
+  ratingCount        Int       @default(0)
+  walletBalance      Decimal   @default(0) @db.Decimal(12, 2)
+  todayEarnings      Decimal   @default(0) @db.Decimal(12, 2)
+  totalTrips         Int       @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   transactions Transaction[]
   withdrawals  Withdrawal[]
