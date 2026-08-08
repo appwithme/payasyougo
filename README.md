@@ -2,25 +2,23 @@
 
 A mobile transport payment application for **University of Cape Coast (UCC)** students and commercial drivers. Passengers pay fixed campus route fares digitally via Mobile Money (MoMo); drivers track earnings, wallet balance, and trip history in real time.
 
-> **Status:** Frontend prototype with mock data services. Backend integration (Neon PostgreSQL + Express API) is planned — see [Implementation Plan](./docs/IMPLEMENTATION_PLAN.md).
+> **Status:** Expo app + Express API on Neon PostgreSQL. MoMo payments use **Paystack test** mode. See [backend/README.md](./backend/README.md) to create Neon and run the API.
 
 ---
 
 ## Features
 
 ### Passengers
-- Register and log in (mock OTP on signup)
-- Select predefined campus routes with automatic fare display
-- Enter a driver ID and verify driver details before paying
-- Pay via simulated MoMo (MTN, Vodafone, AirtelTigo)
-- View trip history and profile
+- Register and log in (JWT session)
+- Select campus routes with fares from the API
+- Look up drivers by ID and pay via Paystack test MoMo
+- View trip history persisted in Neon
 
 ### Drivers
 - Register and log in
-- Dashboard with wallet balance, today's earnings, and total trips
-- Real-time in-app payment notifications (simulated)
-- Transaction history and wallet summary
-- Profile management
+- Dashboard with wallet balance, today's earnings, and total trips (from DB)
+- Transaction history
+- Profile with unique driver code
 
 ---
 
@@ -30,10 +28,10 @@ A mobile transport payment application for **University of Cape Coast (UCC)** st
 |-------|------------|
 | Mobile app | React Native, Expo ~54, TypeScript |
 | Navigation | React Navigation (Native Stack + Bottom Tabs) |
-| State | React Context API (`AppProvider`) |
-| Payments (prototype) | Mock MoMo service |
-| Backend (planned) | Node.js, Express, Prisma, Neon PostgreSQL |
-| Payments (planned) | Paystack or Hubtel MoMo API |
+| State | React Context API + SecureStore JWT |
+| API | Node.js, Express, Prisma |
+| Database | Neon PostgreSQL |
+| Payments | Paystack test Mobile Money |
 
 ---
 

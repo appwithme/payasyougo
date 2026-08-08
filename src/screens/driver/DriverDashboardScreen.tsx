@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
@@ -18,9 +19,23 @@ import { COLORS, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
 
 const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
-  const { getDriverData, driverTransactions, pendingNotification, clearNotification } = useApp();
+  const {
+    getDriverData,
+    driverTransactions,
+    pendingNotification,
+    clearNotification,
+    refreshDriverWallet,
+    refreshTrips,
+  } = useApp();
   const driver = getDriverData();
   const recentTxns = driverTransactions.slice(0, 3);
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshDriverWallet();
+      refreshTrips();
+    }, [refreshDriverWallet, refreshTrips])
+  );
 
   if (!driver) return null;
 
