@@ -25,7 +25,7 @@ export async function registerPassenger(input: {
       password: input.password,
     },
   });
-  await setToken(res.token);
+  // Do not auto-login — user signs in from the login screen
   return res;
 }
 
@@ -52,7 +52,7 @@ export async function registerDriver(input: {
       licenseNumber: input.licenseNumber,
     },
   });
-  await setToken(res.token);
+  // Do not auto-login — user signs in from the login screen
   return res;
 }
 
