@@ -16,6 +16,11 @@ const envSchema = z.object({
   GOOGLE_WEB_CLIENT_ID: z.string().optional(),
   GOOGLE_IOS_CLIENT_ID: z.string().optional(),
   GOOGLE_ANDROID_CLIENT_ID: z.string().optional(),
+  /** Force simulated MoMo payouts (also auto-on for sk_test_ keys) */
+  WITHDRAW_DEMO_MODE: z
+    .string()
+    .optional()
+    .transform((v) => v === 'true' || v === '1'),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -26,3 +31,9 @@ if (!parsed.success) {
 }
 
 export const env = parsed.data;
+
+/** Test keys (and optional flag) skip Paystack Transfers — Starter accounts block them. */
+export function isWithdrawDemoMode(): boolean {
+  if (env.WITHDRAW_DEMO_MODE) return true;
+  return env.PAYSTACK_SECRET_KEY.trim().toLowerCase().startsWith('sk_test_');
+}
