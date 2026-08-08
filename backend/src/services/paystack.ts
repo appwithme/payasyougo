@@ -149,6 +149,13 @@ function friendlyTransferError(message: string | undefined, httpStatus: number):
   if (lower.includes('balance') || lower.includes('insufficient')) {
     return 'Payout balance is too low on Paystack. Try again later or contact support.';
   }
+  if (
+    lower.includes('third party payout') ||
+    lower.includes('starter business') ||
+    lower.includes('you cannot initiate')
+  ) {
+    return 'Paystack starter accounts cannot send MoMo payouts. Enable Transfers in Paystack or upgrade the business.';
+  }
   if (lower.includes('otp') || lower.includes('transfer has been queued')) {
     return 'Transfer needs approval in the Paystack dashboard. Disable Transfer OTP for automatic payouts.';
   }
