@@ -22,6 +22,7 @@ export interface Driver extends User {
   walletBalance: number;
   todayEarnings: number;
   totalTrips: number;
+  avatar?: string | null;
   ghanaCardNumber?: string;
   ghanaCardVerified?: boolean;
   licenseNumber?: string;
@@ -30,6 +31,8 @@ export interface Driver extends User {
 
 export interface Transaction {
   id: string;
+  /** Trip fare vs wallet cash-out. Defaults to trip when omitted. */
+  kind?: 'trip' | 'withdrawal';
   amount: number;
   from: string;
   to: string;
