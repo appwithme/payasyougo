@@ -120,7 +120,7 @@ export async function initiatePayment(passengerUserId: string, body: unknown) {
       },
     });
 
-    // Some test charges succeed immediately
+    // MoMo is completed offline — pay_offline / pending means prompt was sent
     if (charge.status === 'success') {
       await completePaymentAndCreditWallet({
         transactionId: txn.id,
@@ -134,11 +134,21 @@ export async function initiatePayment(passengerUserId: string, body: unknown) {
       include: includeTxn,
     });
 
+    const pending =
+      fresh.status === TransactionStatus.PENDING ||
+      charge.status === 'pay_offline' ||
+      charge.status === 'pending' ||
+      charge.status === 'send_otp';
+
     return {
       paymentId: txn.id,
       reference,
       status: fresh.status.toLowerCase(),
-      displayText: charge.display_text || 'Check your phone to approve the MoMo prompt',
+      displayText:
+        charge.display_text ||
+        (pending
+          ? 'Approve the MoMo prompt on your phone'
+          : 'Payment processing'),
       transaction: formatTxn(fresh),
     };
   } catch (err: any) {
