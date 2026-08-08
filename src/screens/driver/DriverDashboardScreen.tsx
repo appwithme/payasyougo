@@ -17,6 +17,7 @@ import TransactionCard from '../../components/TransactionCard';
 import NotificationCard from '../../components/NotificationCard';
 import { COLORS, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
+import { useTabBarPadding } from '../../navigation/FloatingTabBar';
 
 const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
   const {
@@ -27,6 +28,7 @@ const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
     refreshDriverWallet,
     refreshTrips,
   } = useApp();
+  const tabPad = useTabBarPadding();
   const driver = getDriverData();
   const recentTxns = driverTransactions.slice(0, 3);
 
@@ -59,7 +61,10 @@ const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
         </TouchableOpacity>
       </Animated.View>
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: tabPad }]}
+        showsVerticalScrollIndicator={false}
+      >
         {pendingNotification ? (
           <View style={styles.notificationWrap}>
             <NotificationCard
@@ -145,7 +150,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: COLORS.ink,
   },
-  scroll: { padding: SPACING.lg, paddingBottom: 110 },
+  scroll: { padding: SPACING.lg },
   notificationWrap: { marginBottom: SPACING.md },
   walletSection: { marginBottom: SPACING.xl },
   section: { marginBottom: SPACING.xl },
