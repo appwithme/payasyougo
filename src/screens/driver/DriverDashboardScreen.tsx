@@ -31,10 +31,13 @@ const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
   const driver = getDriverData();
   const recentTxns = driverTransactions.slice(0, 3);
   const completedToday = driverTransactions.filter(
-    (t) => t.status === 'completed' && t.date === new Date().toISOString().slice(0, 10)
+    (t) =>
+      t.kind !== 'withdrawal' &&
+      t.status === 'completed' &&
+      t.date === new Date().toISOString().slice(0, 10)
   ).length;
   const firstName = driver?.name?.split(' ')[0] || 'Driver';
-  const avatar = driver && 'avatar' in driver ? (driver as any).avatar : null;
+  const avatar = driver?.avatar ?? null;
 
   useFocusEffect(
     useCallback(() => {
