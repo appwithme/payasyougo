@@ -49,7 +49,7 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
       <StatusBar barStyle="dark-content" />
 
       <LinearGradient
-        colors={['#EAF3FA', '#F5FAFE', '#FFFFFF']}
+        colors={['#EEF3F9', '#F5F8FC', '#FFFFFF']}
         locations={[0, 0.55, 1]}
         style={styles.hero}
       >
@@ -59,7 +59,7 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
         <SafeAreaView style={styles.heroSafe} edges={['top']}>
           <Animated.View entering={FadeInDown.duration(500)} style={styles.brandBlock}>
             <Animated.View style={bobStyle}>
-              <BrandMark size={88} />
+              <BrandMark size={104} variant="pin" />
             </Animated.View>
             <Text style={styles.appName}>
               payasyou<Text style={styles.appNameAccent}>go</Text>
@@ -109,7 +109,7 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#EAF3FA' },
+  root: { flex: 1, backgroundColor: '#EEF3F9' },
   hero: {
     flex: 1.15,
     justifyContent: 'flex-end',

@@ -7,11 +7,10 @@ type Props = {
   size?: 'sm' | 'md' | 'lg';
   showWordmark?: boolean;
   style?: ViewStyle;
-  /** kept for API compat — squircle is always white like ride inspo */
   tone?: 'yellow' | 'ink' | 'plain';
 };
 
-const SIZES = { sm: 40, md: 72, lg: 96 };
+const SIZES = { sm: 44, md: 78, lg: 110 };
 
 export default function BrandLogo({
   size = 'md',
@@ -22,7 +21,7 @@ export default function BrandLogo({
 
   return (
     <View style={[styles.wrap, style]}>
-      <BrandMark size={dim} variant="squircle" />
+      <BrandMark size={dim} variant="pin" />
       {showWordmark ? (
         <View style={styles.wordmark}>
           <Text style={styles.name}>
@@ -46,9 +45,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.8,
     textTransform: 'lowercase',
   },
-  go: {
-    color: COLORS.primaryDark,
-  },
+  go: { color: COLORS.primaryDark },
   tag: {
     fontFamily: 'DMSans_500Medium',
     fontSize: 12,

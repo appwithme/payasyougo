@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,261 +8,182 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-import { MapPin } from '../../components/BrandMark';
+import BrandMark from '../../components/BrandMark';
 import { COLORS } from '../../theme/colors';
 
 const { width: W, height: H } = Dimensions.get('window');
 
-/** First-launch brand intro — researched modern timing (~5.5s) */
-const TIMING = {
-  ambientIn: 400,
-  pinPop: 700,
-  holdMark: 900,
-  slideStart: 1600,
-  lettersStart: 1900,
-  tagStart: 3200,
-  progressStart: 1400,
-  exitAt: 5200,
-  exitDur: 450,
-  totalHold: 5650,
+/**
+ * Taxi Rider–style splash:
+ * logo (pin) centered upper-middle, app name directly underneath.
+ * Moodboard: cool light-blue field, soft white glow, amber brand mark.
+ * Duration ~5.8s so it doesn't feel rushed.
+ */
+const T = {
+  logoIn: 0,
+  nameIn: 900,
+  tagIn: 1600,
+  progressIn: 1200,
+  exitAt: 5400,
+  exitDur: 420,
+  safety: 6200,
 };
-
-const LETTERS = 'payasyougo'.split('');
 
 type Props = { onFinish: () => void };
 
-function PulseRing({
-  delay,
+function SoftBlob({
+  top,
+  left,
   size,
+  color,
+  delay = 0,
 }: {
-  delay: number;
+  top: number;
+  left: number;
   size: number;
+  color: string;
+  delay?: number;
 }) {
-  const scale = useRef(new Animated.Value(0.55)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-
+  const a = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    const loop = Animated.loop(
+    Animated.loop(
       Animated.sequence([
         Animated.delay(delay),
-        Animated.parallel([
-          Animated.timing(scale, {
-            toValue: 1.35,
-            duration: 2200,
-            easing: Easing.out(Easing.cubic),
-            useNativeDriver: true,
-          }),
-          Animated.timing(opacity, {
-            toValue: 0.35,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.timing(opacity, {
-          toValue: 0,
-          duration: 1600,
+        Animated.timing(a, {
+          toValue: 1,
+          duration: 2400,
+          easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
-        Animated.timing(scale, {
-          toValue: 0.55,
-          duration: 0,
+        Animated.timing(a, {
+          toValue: 0,
+          duration: 2400,
+          easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
       ])
-    );
-    loop.start();
-    return () => loop.stop();
+    ).start();
   }, []);
 
   return (
     <Animated.View
       pointerEvents="none"
-      style={[
-        styles.ring,
-        {
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          opacity,
-          transform: [{ scale }],
-        },
-      ]}
+      style={{
+        position: 'absolute',
+        top,
+        left,
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: color,
+        opacity: a.interpolate({ inputRange: [0, 1], outputRange: [0.2, 0.55] }),
+        transform: [
+          {
+            translateY: a.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, -12],
+            }),
+          },
+        ],
+      }}
     />
   );
 }
 
-/**
- * Modern splash choreography (logo reveal best practices):
- * anticipation → mark establish → slide lockup → staggered wordmark
- * → tagline → progress settle → fade out
- */
 export default function SplashScreen({ onFinish }: Props) {
   const rootOpacity = useRef(new Animated.Value(1)).current;
-  const ambient = useRef(new Animated.Value(0)).current;
-  const pinOpacity = useRef(new Animated.Value(0)).current;
-  const pinScale = useRef(new Animated.Value(0.55)).current;
-  const pinY = useRef(new Animated.Value(18)).current;
-  const pinX = useRef(new Animated.Value(0)).current;
-  const cardOpacity = useRef(new Animated.Value(0)).current;
-  const cardScale = useRef(new Animated.Value(0.92)).current;
+  const logoOpacity = useRef(new Animated.Value(0)).current;
+  const logoScale = useRef(new Animated.Value(0.7)).current;
+  const logoY = useRef(new Animated.Value(28)).current;
+  const nameOpacity = useRef(new Animated.Value(0)).current;
+  const nameY = useRef(new Animated.Value(18)).current;
   const tagOpacity = useRef(new Animated.Value(0)).current;
-  const tagY = useRef(new Animated.Value(10)).current;
   const progress = useRef(new Animated.Value(0)).current;
-  const footerOpacity = useRef(new Animated.Value(0)).current;
-
-  const letterAnims = useMemo(
-    () =>
-      LETTERS.map(() => ({
-        opacity: new Animated.Value(0),
-        y: new Animated.Value(14),
-      })),
-    []
-  );
 
   useEffect(() => {
-    // 1) Ambient wash in
-    Animated.timing(ambient, {
-      toValue: 1,
-      duration: TIMING.ambientIn,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start();
-
-    // Soft card appears
-    Animated.sequence([
-      Animated.delay(120),
-      Animated.parallel([
-        Animated.timing(cardOpacity, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.spring(cardScale, {
-          toValue: 1,
-          friction: 8,
-          tension: 60,
-          useNativeDriver: true,
-        }),
-      ]),
+    // 1) Logo drops in from above-center (Taxi Rider hierarchy)
+    Animated.parallel([
+      Animated.timing(logoOpacity, {
+        toValue: 1,
+        duration: 480,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.spring(logoScale, {
+        toValue: 1,
+        friction: 6,
+        tension: 70,
+        useNativeDriver: true,
+      }),
+      Animated.spring(logoY, {
+        toValue: 0,
+        friction: 7,
+        tension: 65,
+        useNativeDriver: true,
+      }),
     ]).start();
 
-    // 2) Pin pops with overshoot settle (establish mark)
-    Animated.sequence([
-      Animated.delay(280),
+    // 2) App name reads under the logo
+    const nameTimer = setTimeout(() => {
       Animated.parallel([
-        Animated.timing(pinOpacity, {
+        Animated.timing(nameOpacity, {
           toValue: 1,
-          duration: 280,
+          duration: 520,
+          easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
-        Animated.spring(pinScale, {
-          toValue: 1,
-          friction: 5,
-          tension: 90,
-          useNativeDriver: true,
-        }),
-        Animated.spring(pinY, {
+        Animated.spring(nameY, {
           toValue: 0,
-          friction: 6,
-          tension: 80,
+          friction: 8,
+          tension: 70,
           useNativeDriver: true,
         }),
-      ]),
-    ]).start();
+      ]).start();
+    }, T.nameIn);
 
-    // Progress bar (feels intentional while brand holds)
+    // 3) Tagline
+    const tagTimer = setTimeout(() => {
+      Animated.timing(tagOpacity, {
+        toValue: 1,
+        duration: 480,
+        useNativeDriver: true,
+      }).start();
+    }, T.tagIn);
+
+    // 4) Loading bar — makes longer dwell feel intentional
     Animated.timing(progress, {
       toValue: 1,
-      duration: TIMING.exitAt - TIMING.progressStart,
-      delay: TIMING.progressStart,
+      duration: T.exitAt - T.progressIn,
+      delay: T.progressIn,
       easing: Easing.inOut(Easing.cubic),
       useNativeDriver: false,
     }).start();
 
-    Animated.timing(footerOpacity, {
-      toValue: 1,
-      duration: 500,
-      delay: 800,
-      useNativeDriver: true,
-    }).start();
-
-    // 3) Pin slides left into lockup
-    const slideTimer = setTimeout(() => {
-      Animated.spring(pinX, {
-        toValue: -78,
-        friction: 9,
-        tension: 55,
-        useNativeDriver: true,
-      }).start();
-    }, TIMING.slideStart);
-
-    // 4) Staggered letter reveal (modern wordmark cascade)
-    const letterTimer = setTimeout(() => {
-      Animated.stagger(
-        55,
-        letterAnims.map((a) =>
-          Animated.parallel([
-            Animated.timing(a.opacity, {
-              toValue: 1,
-              duration: 320,
-              easing: Easing.out(Easing.cubic),
-              useNativeDriver: true,
-            }),
-            Animated.spring(a.y, {
-              toValue: 0,
-              friction: 7,
-              tension: 80,
-              useNativeDriver: true,
-            }),
-          ])
-        )
-      ).start();
-    }, TIMING.lettersStart);
-
-    // 5) Tagline
-    const tagTimer = setTimeout(() => {
-      Animated.parallel([
-        Animated.timing(tagOpacity, {
-          toValue: 1,
-          duration: 480,
-          useNativeDriver: true,
-        }),
-        Animated.timing(tagY, {
-          toValue: 0,
-          duration: 480,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }, TIMING.tagStart);
-
-    // 6) Exit fade
+    // 5) Exit
     const exitTimer = setTimeout(() => {
       Animated.timing(rootOpacity, {
         toValue: 0,
-        duration: TIMING.exitDur,
+        duration: T.exitDur,
         easing: Easing.in(Easing.cubic),
         useNativeDriver: true,
       }).start(({ finished }) => {
         if (finished) onFinish();
       });
-    }, TIMING.exitAt);
+    }, T.exitAt);
 
-    // Safety: never hang forever
-    const safety = setTimeout(() => onFinish(), TIMING.totalHold + 800);
+    const safety = setTimeout(() => onFinish(), T.safety);
 
     return () => {
-      clearTimeout(slideTimer);
-      clearTimeout(letterTimer);
+      clearTimeout(nameTimer);
       clearTimeout(tagTimer);
       clearTimeout(exitTimer);
       clearTimeout(safety);
     };
   }, []);
 
-  const progressWidth = progress.interpolate({
+  const barWidth = progress.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, Math.min(W * 0.42, 180)],
+    outputRange: [0, Math.min(W * 0.38, 160)],
   });
 
   return (
@@ -270,82 +191,53 @@ export default function SplashScreen({ onFinish }: Props) {
       <StatusBar barStyle="dark-content" />
       <View style={styles.bg} />
 
-      <Animated.View style={[styles.glow, { opacity: ambient }]} />
+      {/* moodboard soft shapes */}
+      <SoftBlob top={H * 0.08} left={-40} size={160} color="#FFFFFF" />
+      <SoftBlob
+        top={H * 0.18}
+        left={W * 0.62}
+        size={120}
+        color="rgba(245,184,0,0.22)"
+        delay={200}
+      />
+      <SoftBlob top={H * 0.7} left={W * 0.1} size={100} color="#FFFFFF" delay={400} />
+      <View style={styles.centerGlow} />
 
-      <View style={styles.ringsWrap} pointerEvents="none">
-        <PulseRing delay={0} size={160} />
-        <PulseRing delay={700} size={210} />
-        <PulseRing delay={1400} size={260} />
-      </View>
-
-      <View style={styles.stage}>
+      <View style={styles.column}>
+        {/* LOGO — top */}
         <Animated.View
-          style={[
-            styles.card,
-            {
-              opacity: cardOpacity,
-              transform: [{ scale: cardScale }],
-            },
-          ]}
+          style={{
+            opacity: logoOpacity,
+            transform: [{ translateY: logoY }, { scale: logoScale }],
+          }}
         >
-          <View style={styles.lockup}>
-            <Animated.View
-              style={[
-                styles.pinWrap,
-                {
-                  opacity: pinOpacity,
-                  transform: [
-                    { translateX: pinX },
-                    { translateY: pinY },
-                    { scale: pinScale },
-                  ],
-                },
-              ]}
-            >
-              <MapPin size={52} />
-            </Animated.View>
-
-            <View style={styles.wordRow}>
-              {LETTERS.map((ch, i) => {
-                const isGo = i >= 7;
-                return (
-                  <Animated.Text
-                    key={`${ch}-${i}`}
-                    style={[
-                      styles.letter,
-                      isGo && styles.letterAccent,
-                      {
-                        opacity: letterAnims[i].opacity,
-                        transform: [{ translateY: letterAnims[i].y }],
-                      },
-                    ]}
-                  >
-                    {ch}
-                  </Animated.Text>
-                );
-              })}
-            </View>
-          </View>
+          <BrandMark size={112} variant="pin" />
         </Animated.View>
 
-        <Animated.Text
-          style={[
-            styles.tag,
-            {
-              opacity: tagOpacity,
-              transform: [{ translateY: tagY }],
-            },
-          ]}
+        {/* APP NAME — directly under logo */}
+        <Animated.View
+          style={{
+            opacity: nameOpacity,
+            transform: [{ translateY: nameY }],
+            marginTop: 28,
+            alignItems: 'center',
+          }}
         >
-          campus rides · digital fares
-        </Animated.Text>
+          <Text style={styles.appName}>
+            payasyou
+            <Text style={styles.appNameAccent}>go</Text>
+          </Text>
+          <Animated.Text style={[styles.tagline, { opacity: tagOpacity }]}>
+            campus rides · digital fares
+          </Animated.Text>
+        </Animated.View>
 
         <View style={styles.progressTrack}>
-          <Animated.View style={[styles.progressFill, { width: progressWidth }]} />
+          <Animated.View style={[styles.progressFill, { width: barWidth }]} />
         </View>
       </View>
 
-      <Animated.Text style={[styles.footer, { opacity: footerOpacity }]}>
+      <Animated.Text style={[styles.footer, { opacity: tagOpacity }]}>
         University of Cape Coast
       </Animated.Text>
     </Animated.View>
@@ -355,102 +247,66 @@ export default function SplashScreen({ onFinish }: Props) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#EAF3FA',
+    backgroundColor: '#EEF3F9',
     alignItems: 'center',
     justifyContent: 'center',
   },
   bg: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#EAF3FA',
+    backgroundColor: '#EEF3F9',
   },
-  glow: {
+  centerGlow: {
     position: 'absolute',
-    top: H * 0.18,
-    left: W * 0.5 - 150,
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: 'rgba(255,255,255,0.65)',
+    top: H * 0.22,
+    left: W * 0.5 - 140,
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: 'rgba(255,255,255,0.7)',
   },
-  ringsWrap: {
-    ...StyleSheet.absoluteFillObject,
+  column: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  ring: {
-    position: 'absolute',
-    borderWidth: 1.5,
-    borderColor: COLORS.primary,
-  },
-  stage: {
-    alignItems: 'center',
+    paddingHorizontal: 32,
     zIndex: 2,
-    paddingHorizontal: 24,
+    // push block slightly upper-middle like Taxi Rider mockups
+    marginBottom: H * 0.08,
   },
-  card: {
-    backgroundColor: COLORS.white,
-    borderRadius: 40,
-    paddingVertical: 36,
-    paddingHorizontal: 28,
-    width: Math.min(W * 0.88, 370),
-    alignItems: 'center',
-    shadowColor: '#152033',
-    shadowOffset: { width: 0, height: 18 },
-    shadowOpacity: 0.1,
-    shadowRadius: 32,
-    elevation: 12,
-  },
-  lockup: {
-    height: 78,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pinWrap: {
-    position: 'absolute',
-    zIndex: 3,
-  },
-  wordRow: {
-    position: 'absolute',
-    left: '38%',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  letter: {
+  appName: {
     fontFamily: 'Sora_700Bold',
-    fontSize: 25,
-    color: '#152033',
-    letterSpacing: -1.1,
+    fontSize: 34,
+    color: COLORS.ink,
+    letterSpacing: -1.2,
     textTransform: 'lowercase',
   },
-  letterAccent: {
+  appNameAccent: {
     color: COLORS.primaryDark,
   },
-  tag: {
-    marginTop: 28,
+  tagline: {
+    marginTop: 10,
     fontFamily: 'DMSans_500Medium',
     fontSize: 14,
-    color: '#5A6B7D',
-    letterSpacing: 0.3,
+    color: COLORS.textSecondary,
+    letterSpacing: 0.2,
   },
   progressTrack: {
-    marginTop: 28,
-    width: Math.min(W * 0.42, 180),
+    marginTop: 40,
+    width: Math.min(W * 0.38, 160),
     height: 3,
     borderRadius: 2,
-    backgroundColor: 'rgba(21,32,51,0.1)',
+    backgroundColor: 'rgba(27,43,75,0.1)',
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
     borderRadius: 2,
-    backgroundColor: COLORS.primaryDark,
+    backgroundColor: COLORS.primary,
   },
   footer: {
     position: 'absolute',
     bottom: 48,
     fontFamily: 'DMSans_500Medium',
     fontSize: 12,
-    color: '#7A8B9C',
+    color: COLORS.textMuted,
   },
 });

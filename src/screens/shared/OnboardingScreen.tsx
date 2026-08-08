@@ -23,7 +23,7 @@ import { type } from '../../theme/typography';
 const { width } = Dimensions.get('window');
 
 /** Bump version so existing Expo Go installs see onboarding again after redesign */
-export const ONBOARDING_KEY = 'payasyougo_onboarding_v4';
+export const ONBOARDING_KEY = 'payasyougo_onboarding_v5';
 
 const SLIDES: {
   key: string;
@@ -150,7 +150,7 @@ export default function OnboardingScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#EAF3FA' },
+  root: { flex: 1, backgroundColor: '#EEF3F9' },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',

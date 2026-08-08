@@ -5,43 +5,43 @@ import { COLORS, SHADOW } from '../theme/colors';
 type Props = {
   size?: number;
   style?: ViewStyle;
-  /** white tile like the ride inspo, or bare pin only */
+  /** app-icon tile or bare pin mark */
   variant?: 'squircle' | 'pin';
 };
 
 /**
- * Ride-inspired brand mark:
- * white squircle tile + amber map pin (our accent instead of red).
+ * Taxi Rider–inspired mark:
+ * amber location pin with a dark taxi silhouette inside.
  */
-export default function BrandMark({ size = 72, style, variant = 'squircle' }: Props) {
-  if (variant === 'pin') {
-    return <MapPin size={size} style={style} />;
+export default function BrandMark({ size = 72, style, variant = 'pin' }: Props) {
+  if (variant === 'squircle') {
+    const radius = size * 0.28;
+    return (
+      <View
+        style={[
+          styles.squircle,
+          {
+            width: size,
+            height: size,
+            borderRadius: radius,
+            backgroundColor: '#2A2F36',
+          },
+          SHADOW.md,
+          style,
+        ]}
+      >
+        <MapPin size={size * 0.62} />
+      </View>
+    );
   }
 
-  const radius = size * 0.28;
-  const pinSize = size * 0.52;
-
-  return (
-    <View
-      style={[
-        styles.squircle,
-        {
-          width: size,
-          height: size,
-          borderRadius: radius,
-        },
-        SHADOW.md,
-        style,
-      ]}
-    >
-      <MapPin size={pinSize} />
-    </View>
-  );
+  return <MapPin size={size} style={style} />;
 }
 
-export function MapPin({ size = 40, style }: { size?: number; style?: ViewStyle }) {
-  const head = size * 0.72;
-  const hole = size * 0.22;
+export function MapPin({ size = 88, style }: { size?: number; style?: ViewStyle }) {
+  const head = size * 0.78;
+  const tipH = size * 0.28;
+  const tipW = size * 0.22;
 
   return (
     <View style={[{ width: size, height: size, alignItems: 'center' }, style]}>
@@ -54,26 +54,22 @@ export function MapPin({ size = 40, style }: { size?: number; style?: ViewStyle 
           backgroundColor: COLORS.primary,
           alignItems: 'center',
           justifyContent: 'center',
+          ...SHADOW.sm,
         }}
       >
-        <View
-          style={{
-            width: hole,
-            height: hole,
-            borderRadius: hole / 2,
-            backgroundColor: COLORS.white,
-          }}
-        />
+        {/* taxi silhouette */}
+        <TaxiGlyph size={head * 0.48} />
       </View>
+
       {/* pin tip */}
       <View
         style={{
           width: 0,
           height: 0,
-          marginTop: -size * 0.06,
-          borderLeftWidth: size * 0.18,
-          borderRightWidth: size * 0.18,
-          borderTopWidth: size * 0.28,
+          marginTop: -size * 0.04,
+          borderLeftWidth: tipW,
+          borderRightWidth: tipW,
+          borderTopWidth: tipH,
           borderLeftColor: 'transparent',
           borderRightColor: 'transparent',
           borderTopColor: COLORS.primary,
@@ -83,12 +79,77 @@ export function MapPin({ size = 40, style }: { size?: number; style?: ViewStyle 
   );
 }
 
+function TaxiGlyph({ size }: { size: number }) {
+  const bodyH = size * 0.42;
+  const cabinH = size * 0.28;
+  const wheel = size * 0.16;
+
+  return (
+    <View style={{ width: size, height: size * 0.72, alignItems: 'center', justifyContent: 'flex-end' }}>
+      {/* cabin */}
+      <View
+        style={{
+          width: size * 0.55,
+          height: cabinH,
+          backgroundColor: COLORS.ink,
+          borderTopLeftRadius: size * 0.12,
+          borderTopRightRadius: size * 0.12,
+          marginBottom: -1,
+        }}
+      />
+      {/* body */}
+      <View
+        style={{
+          width: size,
+          height: bodyH,
+          backgroundColor: COLORS.ink,
+          borderRadius: size * 0.1,
+          justifyContent: 'flex-end',
+          paddingBottom: size * 0.04,
+        }}
+      >
+        {/* roof light */}
+        <View
+          style={{
+            position: 'absolute',
+            top: -size * 0.08,
+            alignSelf: 'center',
+            width: size * 0.22,
+            height: size * 0.1,
+            borderRadius: 2,
+            backgroundColor: COLORS.ink,
+          }}
+        />
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: size * 0.12 }}>
+          <View
+            style={{
+              width: wheel,
+              height: wheel,
+              borderRadius: wheel / 2,
+              backgroundColor: COLORS.primary,
+              borderWidth: 2,
+              borderColor: COLORS.ink,
+            }}
+          />
+          <View
+            style={{
+              width: wheel,
+              height: wheel,
+              borderRadius: wheel / 2,
+              backgroundColor: COLORS.primary,
+              borderWidth: 2,
+              borderColor: COLORS.ink,
+            }}
+          />
+        </View>
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   squircle: {
-    backgroundColor: COLORS.white,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(26,26,26,0.06)',
   },
 });
