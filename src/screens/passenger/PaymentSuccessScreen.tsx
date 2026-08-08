@@ -117,9 +117,7 @@ const PaymentSuccessScreen = ({ navigation, route }: { navigation: any; route: a
                   {transaction?.from}
                 </Text>
               </View>
-              <View style={styles.routeArrow}>
-                <Ionicons name="arrow-forward" size={16} color={COLORS.primaryDark} />
-              </View>
+              <Text style={styles.routeSep}>→</Text>
               <View style={[styles.routeCol, styles.routeColEnd]}>
                 <Text style={styles.routeCap}>To</Text>
                 <Text style={[styles.routeVal, styles.routeValEnd]} numberOfLines={2}>
@@ -296,13 +294,12 @@ const styles = StyleSheet.create({
   routeValEnd: {
     textAlign: 'right',
   },
-  routeArrow: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: COLORS.primaryMuted,
-    alignItems: 'center',
-    justifyContent: 'center',
+  routeSep: {
+    fontFamily: 'Sora_600SemiBold',
+    fontSize: 16,
+    color: COLORS.textMuted,
+    marginHorizontal: 4,
+    marginTop: 14,
   },
 
   rateBlock: {
