@@ -14,7 +14,8 @@ import * as authService from '../../services/authService';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import IdCaptureSlot from '../../components/IdCaptureSlot';
-import { makeDriverSignupSample } from '../../data/qaAccounts';
+import AccountCreatedView from '../../components/AccountCreatedView';
+import { makeDriverSignupSample, makeVehicleSignupSample } from '../../data/qaAccounts';
 import { COLORS, FONT_SIZE, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
 
@@ -122,37 +123,49 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
 
   const [verifying, setVerifying] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [created, setCreated] = useState(false);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
 
   const current = STEPS[step];
 
-  const fillSignupSample = () => {
+  const fillAccountSample = () => {
     const sample = makeDriverSignupSample();
     setName(sample.name);
     setPhone(sample.phone);
     setEmail(sample.email);
     setPassword(sample.password);
     setConfirmPassword(sample.password);
+    setErrors({});
+  };
+
+  const fillGhanaSample = () => {
+    const sample = makeDriverSignupSample();
     setGhanaCard(sample.ghanaCard);
-    // Keep live captures empty — examples are reference only
     setGhanaVerified(false);
     setGhanaNormalized('');
+    setErrors({});
+  };
+
+  const fillLicenseSample = () => {
+    const sample = makeDriverSignupSample();
     setLicense(sample.license);
     setLicenseVerified(false);
     setLicenseNormalized('');
-    setVehicleName(sample.vehicleName);
-    setVehicleNumber(sample.vehicleNumber);
-    setVehicleColor(sample.vehicleColor);
     setErrors({});
   };
 
   const fillVehicleSample = () => {
-    setVehicleName('Toyota Corolla');
-    setVehicleNumber('GR 4321-25');
-    setVehicleColor('Silver');
-    clearFieldError('vehicleName');
-    clearFieldError('vehicleNumber');
-    clearFieldError('vehicleColor');
+    const sample = makeVehicleSignupSample();
+    setVehicleName(sample.vehicleName);
+    setVehicleNumber(sample.vehicleNumber);
+    setVehicleColor(sample.vehicleColor);
+    setErrors((prev) => ({
+      ...prev,
+      vehicleName: undefined,
+      vehicleNumber: undefined,
+      vehicleColor: undefined,
+      form: undefined,
+    }));
   };
 
   const clearFieldError = (key: string) => {
@@ -181,10 +194,6 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
     if (!vehicleName.trim()) e.vehicleName = 'Car name is required';
     if (!vehicleNumber.trim()) e.vehicleNumber = 'Plate number is required';
     if (!vehicleColor.trim()) e.vehicleColor = 'Colour is required';
-    if (!ghanaFrontUri || !ghanaBackUri) e.form = 'Capture both sides of your Ghana Card first';
-    if (!ghanaVerified) e.form = 'Verify your Ghana Card first';
-    if (!licenseFrontUri || !licenseBackUri) e.form = 'Capture both sides of your driver licence first';
-    if (!licenseVerified) e.form = 'Verify your driver licence first';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -302,7 +311,9 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
     setLoading(false);
     if (!result.success) {
       setErrors({ form: result.error || 'Failed to sign up.' });
+      return;
     }
+    setCreated(true);
   };
 
   const renderStepBody = (key: StepKey) => {
@@ -380,7 +391,7 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
           />
           <TouchableOpacity
             style={styles.autofillBtn}
-            onPress={fillSignupSample}
+            onPress={fillAccountSample}
             accessibilityRole="button"
             accessibilityLabel="Autofill registration sample"
           >
@@ -446,7 +457,7 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
 
           <TouchableOpacity
             style={styles.autofillBtn}
-            onPress={fillSignupSample}
+            onPress={fillGhanaSample}
             accessibilityRole="button"
             accessibilityLabel="Autofill Ghana Card sample"
           >
@@ -529,7 +540,7 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
 
           <TouchableOpacity
             style={styles.autofillBtn}
-            onPress={fillSignupSample}
+            onPress={fillLicenseSample}
             accessibilityRole="button"
             accessibilityLabel="Autofill licence sample"
           >
@@ -618,6 +629,17 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
       </>
     );
   };
+
+  if (created) {
+    return (
+      <AccountCreatedView
+        role="driver"
+        name={name.trim()}
+        phone={phone.trim()}
+        onGoToLogin={() => navigation.navigate('DriverLogin')}
+      />
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
