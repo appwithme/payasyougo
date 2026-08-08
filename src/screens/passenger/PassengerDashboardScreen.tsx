@@ -17,11 +17,13 @@ import Button from '../../components/Button';
 import UserAvatar from '../../components/UserAvatar';
 import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
+import { useTabBarPadding } from '../../navigation/FloatingTabBar';
 
 const MOMO_ICON = require('../../../assets/brand/momo-icon.png');
 
 const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
   const { currentUser, passengerTrips } = useApp();
+  const tabPad = useTabBarPadding();
   const recentTrips = passengerTrips.slice(0, 3);
   const firstName = currentUser?.name?.split(' ')[0] || 'Passenger';
   const avatar =
@@ -44,7 +46,10 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
         </TouchableOpacity>
       </Animated.View>
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: tabPad }]}
+        showsVerticalScrollIndicator={false}
+      >
         <Animated.View entering={FadeInUp.delay(80).duration(450)} style={styles.payCard}>
           <View style={styles.payCardHeader}>
             <Image source={MOMO_ICON} style={styles.momoIcon} resizeMode="cover" />
@@ -107,7 +112,7 @@ const styles = StyleSheet.create({
   headerTitle: { gap: 4 },
   greeting: { ...type.heading },
   subGreeting: { ...type.caption },
-  scroll: { padding: SPACING.lg, paddingBottom: 110 },
+  scroll: { padding: SPACING.lg },
   payCard: {
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.xl,
