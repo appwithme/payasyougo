@@ -88,7 +88,7 @@ const WalletScreen = ({ navigation }: { navigation: any }) => {
             />
             <Input
               label="Network"
-              placeholder="e.g. MTN, Vodafone, AirtelTigo"
+              placeholder="e.g. MTN, Telecel"
               value={network}
               onChangeText={setNetwork}
               iconName="wifi-outline"
