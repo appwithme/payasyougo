@@ -48,8 +48,8 @@ const TEST_ACCOUNTS = {
   driver: {
     phone: '0240000111',
     password: 'admin123',
-    fullName: 'Admin Driver',
-    email: 'admin.driver@payasyougo.com',
+    fullName: 'Kwame Asiamah',
+    email: 'kwame.asiamah@payasyougo.com',
     uniqueCode: 'DRV100',
     vehicleInfo: 'Toyota Corolla - GR 1000-24',
   },
