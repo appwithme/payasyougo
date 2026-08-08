@@ -173,7 +173,7 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
       hero={
         <Animated.View entering={FadeInDown.delay(60).duration(420)} style={styles.heroBody}>
           <Text style={styles.heroTitle}>Trips</Text>
-          <Text style={styles.heroSub}>
+          <Text style={styles.heroMeta}>
             {passengerTrips.length === 0
               ? 'Fares you pay show up here'
               : `${passengerTrips.length} total · ${completed.length} paid${
@@ -181,15 +181,14 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
                 }`}
           </Text>
           {completed.length > 0 ? (
-            <View style={styles.heroStats}>
-              <View style={styles.heroStat}>
-                <Text style={styles.heroStatValue}>{completed.length}</Text>
-                <Text style={styles.heroStatLabel}>Paid</Text>
+            <View style={styles.heroMetrics}>
+              <View style={styles.heroMetric}>
+                <Text style={styles.metricLabel}>Paid</Text>
+                <Text style={styles.metricValue}>{completed.length}</Text>
               </View>
-              <View style={styles.heroStatRule} />
-              <View style={styles.heroStat}>
-                <Text style={styles.heroStatValue}>GH₵{totalSpent.toFixed(0)}</Text>
-                <Text style={styles.heroStatLabel}>Spent</Text>
+              <View style={styles.heroMetric}>
+                <Text style={styles.metricLabel}>Spent</Text>
+                <Text style={styles.metricValue}>GH₵{totalSpent.toFixed(0)}</Text>
               </View>
             </View>
           ) : null}
@@ -215,8 +214,8 @@ const TripHistoryScreen = ({ navigation }: { navigation: any }) => {
 
 const styles = StyleSheet.create({
   heroBody: {
-    marginTop: SPACING.lg,
-    gap: 6,
+    marginTop: SPACING.md,
+    gap: SPACING.lg,
   },
   heroTitle: {
     fontFamily: 'Sora_700Bold',
@@ -224,40 +223,31 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     letterSpacing: -0.8,
   },
-  heroSub: {
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 15,
-    color: 'rgba(255,255,255,0.55)',
-  },
-  heroStats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 14,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: RADIUS.lg,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  heroStat: {
-    flex: 1,
-  },
-  heroStatValue: {
-    fontFamily: 'Sora_700Bold',
-    fontSize: 20,
-    color: COLORS.white,
-    letterSpacing: -0.4,
-  },
-  heroStatLabel: {
+  heroMeta: {
     fontFamily: 'DMSans_500Medium',
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.5)',
-    marginTop: 2,
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.55)',
+    marginTop: -10,
   },
-  heroStatRule: {
-    width: StyleSheet.hairlineWidth,
-    alignSelf: 'stretch',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    marginHorizontal: 14,
+  heroMetrics: {
+    flexDirection: 'row',
+    gap: SPACING.xl,
+  },
+  heroMetric: {
+    gap: 4,
+  },
+  metricLabel: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 11,
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+    color: COLORS.primary,
+  },
+  metricValue: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 28,
+    color: COLORS.white,
+    letterSpacing: -0.8,
   },
   page: {
     paddingHorizontal: SPACING.lg,
