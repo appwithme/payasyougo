@@ -54,6 +54,8 @@ export function makeDriverSignupSample() {
     password: 'signup123',
     ghanaCard: `GHA-${cardDigits}-${cardDigits.slice(-1)}`,
     license: `NAG-${uniqueDigits(8)}-${uniqueDigits(5)}`,
-    vehicle: 'Toyota Corolla - GR 4321-25',
+    vehicleName: 'Toyota Corolla',
+    vehicleNumber: 'GR 4321-25',
+    vehicleColor: 'Silver',
   };
 }
