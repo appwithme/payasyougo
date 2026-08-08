@@ -25,6 +25,7 @@ model User {
   email        String?
   passwordHash String?
   googleId     String?  @unique
+  avatarUrl    String?
   role         Role
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
