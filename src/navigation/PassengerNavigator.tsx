@@ -1,10 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
 import { PassengerTabParamList, PassengerHomeStackParamList } from '../types/navigation';
-import { COLORS } from '../theme/colors';
+import { FloatingTabBar, floatingTabScreenOptions } from './FloatingTabBar';
 
 import PassengerDashboardScreen from '../screens/passenger/PassengerDashboardScreen';
 import BookTripScreen from '../screens/passenger/BookTripScreen';
@@ -41,102 +39,16 @@ const ProfileStack = () => (
   </Stack.Navigator>
 );
 
-const TabIcon = ({ name, focused, color, label }: { name: any; focused: boolean; color: string; label: string }) => (
-  <View style={styles.tabItem}>
-    <Ionicons name={name} size={22} color={color} />
-    <Text style={[styles.tabLabel, { color, fontWeight: focused ? '800' : '600' }]}>{label}</Text>
-    {focused && <View style={styles.tabActiveBar} />}
-  </View>
-);
-
 const PassengerNavigator = () => (
   <Tab.Navigator
-    screenOptions={{
-      headerShown: false,
-      tabBarStyle: styles.tabBar,
-      tabBarShowLabel: false,
-    }}
+    tabBar={(props) => <FloatingTabBar {...props} />}
+    screenOptions={floatingTabScreenOptions}
   >
-    <Tab.Screen
-      name="HomeTab"
-      component={HomeStack}
-      options={{
-        tabBarIcon: ({ focused, color }) => (
-          <TabIcon name={focused ? 'home' : 'home-outline'} focused={focused} color={color} label="Home" />
-        ),
-        tabBarActiveTintColor: COLORS.textPrimary,
-        tabBarInactiveTintColor: COLORS.textMuted,
-      }}
-    />
-    <Tab.Screen
-      name="BookTab"
-      component={BookTripScreen}
-      options={{
-        tabBarIcon: ({ focused, color }) => (
-          <TabIcon name={focused ? 'add-circle' : 'add-circle-outline'} focused={focused} color={color} label="Book" />
-        ),
-        tabBarActiveTintColor: COLORS.textPrimary,
-        tabBarInactiveTintColor: COLORS.textMuted,
-      }}
-    />
-    <Tab.Screen
-      name="HistoryTab"
-      component={HistoryStack}
-      options={{
-        tabBarIcon: ({ focused, color }) => (
-          <TabIcon name={focused ? 'receipt' : 'receipt-outline'} focused={focused} color={color} label="History" />
-        ),
-        tabBarActiveTintColor: COLORS.textPrimary,
-        tabBarInactiveTintColor: COLORS.textMuted,
-      }}
-    />
-    <Tab.Screen
-      name="ProfileTab"
-      component={ProfileStack}
-      options={{
-        tabBarIcon: ({ focused, color }) => (
-          <TabIcon name={focused ? 'person' : 'person-outline'} focused={focused} color={color} label="Profile" />
-        ),
-        tabBarActiveTintColor: COLORS.textPrimary,
-        tabBarInactiveTintColor: COLORS.textMuted,
-      }}
-    />
+    <Tab.Screen name="HomeTab" component={HomeStack} />
+    <Tab.Screen name="BookTab" component={BookTripScreen} />
+    <Tab.Screen name="HistoryTab" component={HistoryStack} />
+    <Tab.Screen name="ProfileTab" component={ProfileStack} />
   </Tab.Navigator>
 );
-
-const styles = StyleSheet.create({
-  tabBar: {
-    backgroundColor: COLORS.surface,
-    borderTopColor: COLORS.border,
-    borderTopWidth: 1,
-    height: 68,
-    paddingBottom: 8,
-    paddingTop: 8,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-  },
-  tabItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2,
-    position: 'relative',
-  },
-  tabLabel: {
-    fontSize: 10,
-    letterSpacing: 0.2,
-    fontFamily: 'DMSans_500Medium',
-  },
-  tabActiveBar: {
-    position: 'absolute',
-    bottom: -8,
-    width: 20,
-    height: 3,
-    backgroundColor: COLORS.primary,
-    borderRadius: 2,
-  },
-});
 
 export default PassengerNavigator;
