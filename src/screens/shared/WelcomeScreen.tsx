@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,11 +6,12 @@ import {
   Pressable,
   StatusBar,
   Dimensions,
-  ImageBackground,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -23,9 +24,24 @@ import { COLORS } from '../../theme/colors';
 
 const { height: H } = Dimensions.get('window');
 
+const HERO_STILL = require('../../../assets/brand/onboarding-pay.png');
+const HERO_VIDEO = require('../../../assets/brand/onboarding-pay.mp4');
+
 type Role = 'passenger' | 'driver';
 
 export default function WelcomeScreen({ navigation }: { navigation: any }) {
+  const player = useVideoPlayer(HERO_VIDEO, (p) => {
+    p.loop = true;
+    p.muted = true;
+    p.play();
+  });
+
+  useEffect(() => {
+    player.muted = true;
+    player.loop = true;
+    player.play();
+  }, [player]);
+
   const go = (role: Role) => {
     navigation.navigate(role === 'passenger' ? 'PassengerLogin' : 'DriverLogin');
   };
@@ -34,11 +50,17 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
     <View style={styles.root}>
       <StatusBar barStyle="light-content" />
 
-      <ImageBackground
-        source={require('../../../assets/brand/onboarding-pay.png')}
-        style={styles.hero}
-        resizeMode="cover"
-      >
+      <View style={styles.hero}>
+        <Image source={HERO_STILL} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
+        <VideoView
+          player={player}
+          style={StyleSheet.absoluteFillObject}
+          contentFit="cover"
+          nativeControls={false}
+          allowsFullscreen={false}
+          allowsPictureInPicture={false}
+        />
+
         <LinearGradient
           colors={[
             'rgba(18,28,48,0.15)',
@@ -68,7 +90,7 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
             </Text>
           </Animated.View>
         </SafeAreaView>
-      </ImageBackground>
+      </View>
 
       <Animated.View
         entering={FadeInUp.delay(220).duration(520)}
@@ -145,6 +167,7 @@ const styles = StyleSheet.create({
   hero: {
     flex: 1,
     minHeight: H * 0.52,
+    overflow: 'hidden',
   },
   heroSafe: {
     flex: 1,

@@ -51,7 +51,8 @@
         {
           "color": "#15233F"
         }
-      ]
+      ],
+      "expo-video"
     ],
     "extra": {
       "eas": {
