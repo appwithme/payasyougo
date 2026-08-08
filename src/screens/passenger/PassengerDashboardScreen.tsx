@@ -69,7 +69,7 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
           <View style={styles.heroRow}>
             <View style={styles.heroCopy}>
               <Text style={styles.greeting}>Hi, {firstName}</Text>
-              <Text style={styles.subGreeting}>Ready for a campus fare?</Text>
+              <Text style={styles.heroMeta}>Ready for a campus fare?</Text>
             </View>
             <TouchableOpacity
               onPress={() => navigation.navigate('ProfileTab' as never)}
@@ -162,7 +162,8 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
 
 const styles = StyleSheet.create({
   heroBody: {
-    marginTop: SPACING.lg,
+    marginTop: SPACING.md,
+    gap: SPACING.lg,
   },
   heroRow: {
     flexDirection: 'row',
@@ -172,7 +173,7 @@ const styles = StyleSheet.create({
   },
   heroCopy: {
     flex: 1,
-    gap: 4,
+    gap: 6,
   },
   greeting: {
     fontFamily: 'Sora_700Bold',
@@ -180,9 +181,9 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     letterSpacing: -0.8,
   },
-  subGreeting: {
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 15,
+  heroMeta: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 14,
     color: 'rgba(255,255,255,0.55)',
   },
   avatarRing: {
