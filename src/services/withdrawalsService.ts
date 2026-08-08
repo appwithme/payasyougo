@@ -17,6 +17,7 @@ export type WithdrawResult = {
   reference: string;
   status: string;
   displayText?: string;
+  demo?: boolean;
   withdrawal: WithdrawalRecord;
   wallet: Driver;
 };
