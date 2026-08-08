@@ -1,6 +1,3 @@
-// ============================================================
-// PAYMENT SUCCESS SCREEN
-// ============================================================
 import React, { useEffect, useRef } from 'react';
 import {
   View,
@@ -13,13 +10,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Button from '../../components/Button';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import { type } from '../../theme/typography';
 
 const PaymentSuccessScreen = ({ navigation, route }: { navigation: any; route: any }) => {
   const { transaction, driver } = route.params;
-
   const scaleAnim = useRef(new Animated.Value(0)).current;
-  const fadeAnim  = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.sequence([
@@ -37,40 +34,45 @@ const PaymentSuccessScreen = ({ navigation, route }: { navigation: any; route: a
     ]).start();
   }, []);
 
-  const ReceiptRow = ({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) => (
+  const ReceiptRow = ({
+    label,
+    value,
+    highlight = false,
+  }: {
+    label: string;
+    value: string;
+    highlight?: boolean;
+  }) => (
     <View style={styles.receiptRow}>
       <Text style={styles.receiptLabel}>{label}</Text>
-      <Text style={[styles.receiptValue, highlight && styles.receiptHighlight]}>
-        {value}
-      </Text>
+      <Text style={[styles.receiptValue, highlight && styles.receiptHighlight]}>{value}</Text>
     </View>
   );
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+      <StatusBar barStyle="dark-content" />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-
         <View style={styles.successSection}>
           <Animated.View style={[styles.checkCircle, { transform: [{ scale: scaleAnim }] }]}>
-            <Ionicons name="checkmark" size={56} color={COLORS.white} />
+            <Ionicons name="checkmark" size={48} color={COLORS.white} />
           </Animated.View>
 
           <Animated.View style={{ opacity: fadeAnim, alignItems: 'center' }}>
-            <Text style={styles.successTitle}>Payment Successful!</Text>
+            <Text style={styles.successTitle}>Payment sent</Text>
             <Text style={styles.successSubtitle}>
-              Your fare has been sent to {driver?.name ?? 'the driver'}
+              Fare delivered to {driver?.name ?? 'the driver'}
             </Text>
           </Animated.View>
         </View>
 
         <Animated.View style={[styles.receipt, { opacity: fadeAnim }]}>
           <View style={styles.receiptHeader}>
-            <Ionicons name="receipt" size={24} color={COLORS.primaryDark} />
-            <Text style={styles.receiptTitle}>Payment Receipt</Text>
+            <Ionicons name="receipt-outline" size={22} color={COLORS.ink} />
+            <Text style={styles.receiptTitle}>Receipt</Text>
           </View>
 
-          <ReceiptRow label="Transaction ID" value={transaction.id} />
+          <ReceiptRow label="Transaction" value={transaction.id} />
           <View style={styles.divider} />
           <ReceiptRow label="Route" value={`${transaction.from} → ${transaction.to}`} />
           <ReceiptRow label="Driver" value={driver?.name} />
@@ -79,26 +81,23 @@ const PaymentSuccessScreen = ({ navigation, route }: { navigation: any; route: a
           <ReceiptRow label="Time" value={transaction.time} />
           <View style={styles.divider} />
           <ReceiptRow
-            label="Amount Paid"
-            value={`GH₵${transaction.amount}.00`}
+            label="Amount paid"
+            value={`GH₵${Number(transaction.amount).toFixed(2)}`}
             highlight
           />
-          <ReceiptRow label="Status" value="✓ Completed" />
+          <ReceiptRow label="Status" value="Completed" />
         </Animated.View>
 
         <Animated.View style={[styles.buttons, { opacity: fadeAnim }]}>
           <Button
-            title="View Trip History"
+            title="View trip history"
             variant="secondary"
             onPress={() => {
               navigation.popToTop();
               navigation.navigate('TripHistory');
             }}
           />
-          <Button
-            title="Back to Home"
-            onPress={() => navigation.popToTop()}
-          />
+          <Button title="Back to home" variant="ink" onPress={() => navigation.popToTop()} />
         </Animated.View>
       </ScrollView>
     </SafeAreaView>
@@ -108,38 +107,22 @@ const PaymentSuccessScreen = ({ navigation, route }: { navigation: any; route: a
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   scroll: { padding: SPACING.lg, paddingBottom: 40 },
-
   successSection: {
     alignItems: 'center',
     marginVertical: SPACING.xxl,
     gap: SPACING.lg,
   },
   checkCircle: {
-    width: 112,
-    height: 112,
-    borderRadius: 56,
+    width: 96,
+    height: 96,
+    borderRadius: 32,
     backgroundColor: COLORS.success,
     alignItems: 'center',
     justifyContent: 'center',
     ...SHADOW.md,
-    borderWidth: 4,
-    borderColor: COLORS.successLight,
   },
-  successTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 28,
-    fontWeight: '900',
-    textAlign: 'center',
-    letterSpacing: -1,
-  },
-  successSubtitle: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.base,
-    textAlign: 'center',
-    marginTop: SPACING.sm,
-    fontWeight: '500',
-  },
-
+  successTitle: { ...type.title, textAlign: 'center' },
+  successSubtitle: { ...type.body, textAlign: 'center', marginTop: 6 },
   receipt: {
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.xl,
@@ -147,7 +130,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     marginBottom: SPACING.xl,
-    ...SHADOW.md,
   },
   receiptHeader: {
     flexDirection: 'row',
@@ -158,43 +140,29 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  receiptTitle: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.lg,
-    fontWeight: '900',
-  },
+  receiptTitle: { ...type.subheading },
   receiptRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: SPACING.sm,
   },
-  receiptLabel: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: '500',
-  },
+  receiptLabel: { ...type.caption },
   receiptValue: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: '700',
+    ...type.label,
     maxWidth: '60%',
     textAlign: 'right',
   },
   receiptHighlight: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.lg,
-    fontWeight: '900',
+    fontFamily: 'Sora_700Bold',
+    fontSize: 18,
   },
   divider: {
     height: 1,
     backgroundColor: COLORS.border,
     marginVertical: SPACING.sm,
   },
-
-  buttons: {
-    gap: SPACING.md,
-  },
+  buttons: { gap: SPACING.md },
 });
 
 export default PaymentSuccessScreen;

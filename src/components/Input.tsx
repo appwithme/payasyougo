@@ -1,6 +1,3 @@
-// ============================================================
-// INPUT COMPONENT
-// ============================================================
 import React, { useState } from 'react';
 import {
   View,
@@ -8,11 +5,21 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  TextInputProps,
+  ViewStyle,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../theme/colors';
+import { COLORS, SPACING, RADIUS } from '../theme/colors';
+import { type, FONTS } from '../theme/typography';
 
-const Input = ({
+type Props = {
+  label?: string;
+  iconName?: keyof typeof Ionicons.glyphMap;
+  error?: string;
+  style?: ViewStyle;
+} & TextInputProps;
+
+export default function Input({
   label,
   placeholder,
   value,
@@ -26,44 +33,31 @@ const Input = ({
   numberOfLines = 1,
   style,
   autoCapitalize = 'sentences',
-}: {
-  label?: string;
-  placeholder?: string;
-  value: string;
-  onChangeText: (text: string) => void;
-  keyboardType?: any;
-  secureTextEntry?: boolean;
-  iconName?: any;
-  error?: string;
-  editable?: boolean;
-  multiline?: boolean;
-  numberOfLines?: number;
-  style?: any;
-  autoCapitalize?: any;
-}) => {
+  ...rest
+}: Props) {
   const [focused, setFocused] = useState(false);
   const [hideText, setHideText] = useState(secureTextEntry);
 
   return (
     <View style={[styles.wrapper, style]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label ? <Text style={styles.label}>{label}</Text> : null}
 
       <View
         style={[
           styles.container,
           focused && styles.focused,
-          error && styles.errored,
+          !!error && styles.errored,
           !editable && styles.disabled,
         ]}
       >
-        {iconName && (
+        {iconName ? (
           <Ionicons
             name={iconName}
             size={20}
-            color={focused ? COLORS.textPrimary : COLORS.textMuted}
+            color={focused ? COLORS.ink : COLORS.textMuted}
             style={styles.leftIcon}
           />
-        )}
+        ) : null}
 
         <TextInput
           style={[styles.input, multiline && styles.multiline]}
@@ -79,34 +73,28 @@ const Input = ({
           multiline={multiline}
           numberOfLines={numberOfLines}
           autoCapitalize={autoCapitalize}
+          {...rest}
         />
 
-        {secureTextEntry && (
-          <TouchableOpacity onPress={() => setHideText(p => !p)}>
+        {secureTextEntry ? (
+          <TouchableOpacity onPress={() => setHideText((p) => !p)} hitSlop={8}>
             <Ionicons
               name={hideText ? 'eye-off-outline' : 'eye-outline'}
               size={20}
               color={COLORS.textMuted}
             />
           </TouchableOpacity>
-        )}
+        ) : null}
       </View>
 
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  wrapper: {
-    marginBottom: SPACING.md,
-  },
-  label: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: '700',
-    marginBottom: SPACING.xs,
-  },
+  wrapper: { marginBottom: SPACING.md },
+  label: { ...type.label, marginBottom: SPACING.xs },
   container: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -116,41 +104,26 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     paddingHorizontal: SPACING.md,
     minHeight: 56,
-    ...SHADOW.sm,
   },
   focused: {
-    borderColor: COLORS.primary,
-    backgroundColor: COLORS.surface,
-    ...SHADOW.md,
+    borderColor: COLORS.primaryDark,
+    backgroundColor: COLORS.white,
   },
-  errored: {
-    borderColor: COLORS.error,
-  },
-  disabled: {
-    opacity: 0.6,
-    backgroundColor: COLORS.surfaceAlt,
-  },
-  leftIcon: {
-    marginRight: SPACING.sm,
-  },
+  errored: { borderColor: COLORS.error },
+  disabled: { opacity: 0.6, backgroundColor: COLORS.surfaceAlt },
+  leftIcon: { marginRight: SPACING.sm },
   input: {
     flex: 1,
     color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.base,
-    fontWeight: '500',
+    fontSize: 16,
+    fontFamily: FONTS.bodyMedium,
     paddingVertical: SPACING.sm,
   },
-  multiline: {
-    textAlignVertical: 'top',
-    paddingTop: SPACING.sm,
-  },
+  multiline: { textAlignVertical: 'top', paddingTop: SPACING.sm },
   errorText: {
+    ...type.caption,
     color: COLORS.error,
-    fontSize: FONT_SIZE.xs,
     marginTop: SPACING.xs,
     marginLeft: SPACING.xs,
-    fontWeight: '500',
   },
 });
-
-export default Input;

@@ -1,23 +1,26 @@
-// ============================================================
-// TRANSACTION CARD COMPONENT
-// ============================================================
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../theme/colors';
-
 import { Transaction } from '../types';
+import { COLORS, SPACING, RADIUS } from '../theme/colors';
+import { type } from '../theme/typography';
 
-const TransactionCard = ({ item, mode = 'passenger' }: { item: Transaction; mode?: 'passenger' | 'driver' }) => {
+const TransactionCard = ({
+  item,
+  mode = 'passenger',
+}: {
+  item: Transaction;
+  mode?: 'passenger' | 'driver';
+}) => {
   const isPassenger = mode === 'passenger';
 
   return (
     <View style={styles.card}>
       <View style={[styles.icon, isPassenger ? styles.iconPassenger : styles.iconDriver]}>
         <Ionicons
-          name={isPassenger ? 'car-outline' : 'cash-outline'}
+          name={isPassenger ? 'navigate-outline' : 'arrow-down-outline'}
           size={20}
-          color={isPassenger ? COLORS.textPrimary : COLORS.success}
+          color={isPassenger ? COLORS.ink : COLORS.success}
         />
       </View>
 
@@ -26,21 +29,32 @@ const TransactionCard = ({ item, mode = 'passenger' }: { item: Transaction; mode
           {item.from} → {item.to}
         </Text>
         <Text style={styles.meta}>
-          {isPassenger ? `Driver: ${item.driverName}` : `From: ${item.passengerName}`}
+          {isPassenger ? item.driverName : item.passengerName}
         </Text>
         <Text style={styles.datetime}>
-          {item.date}  •  {item.time}
+          {item.date} · {item.time}
         </Text>
       </View>
 
       <View style={styles.right}>
-        <Text style={[styles.amount, isPassenger ? styles.amountDebit : styles.amountCredit]}>
-          {isPassenger ? '-' : '+'}GH₵{item.amount}
+        <Text style={[styles.amount, !isPassenger && styles.amountCredit]}>
+          {isPassenger ? '−' : '+'}GH₵{Number(item.amount).toFixed(2)}
         </Text>
-        <View style={[styles.badge, item.status === 'completed' ? styles.badgeSuccess : styles.badgePending]}>
-          <Text style={styles.badgeText}>{item.status}</Text>
+        <View
+          style={[
+            styles.badge,
+            item.status === 'completed' ? styles.badgeSuccess : styles.badgePending,
+          ]}
+        >
+          <Text
+            style={[
+              styles.badgeText,
+              item.status !== 'completed' && { color: COLORS.warning },
+            ]}
+          >
+            {item.status}
+          </Text>
         </View>
-        <Text style={styles.txnId}>{item.id}</Text>
       </View>
     </View>
   );
@@ -56,76 +70,41 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
     borderWidth: 1,
     borderColor: COLORS.border,
-    ...SHADOW.sm,
   },
   icon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: SPACING.md,
   },
-  iconPassenger: {
-    backgroundColor: COLORS.primaryLight,
-  },
-  iconDriver: {
-    backgroundColor: COLORS.successLight,
-  },
+  iconPassenger: { backgroundColor: COLORS.primaryMuted },
+  iconDriver: { backgroundColor: COLORS.successLight },
   details: { flex: 1 },
-  route: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: '800',
-  },
-  meta: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.xs,
-    marginTop: 4,
-    fontWeight: '500',
-  },
-  datetime: {
-    color: COLORS.textMuted,
-    fontSize: FONT_SIZE.xs,
-    marginTop: 4,
-  },
-  right: {
-    alignItems: 'flex-end',
-    gap: 4,
-  },
+  route: { ...type.label, fontSize: 14 },
+  meta: { ...type.caption, marginTop: 3 },
+  datetime: { ...type.caption, marginTop: 2, fontSize: 11 },
+  right: { alignItems: 'flex-end', gap: 4 },
   amount: {
-    fontSize: FONT_SIZE.base,
-    fontWeight: '800',
+    fontFamily: 'Sora_700Bold',
+    fontSize: 15,
+    color: COLORS.ink,
   },
-  amountDebit: {
-    color: COLORS.textPrimary, // Clean fintech look
-  },
-  amountCredit: {
-    color: COLORS.success,
-  },
+  amountCredit: { color: COLORS.success },
   badge: {
-    borderRadius: RADIUS.full,
-    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: 8,
     paddingVertical: 2,
   },
-  badgeSuccess: {
-    backgroundColor: COLORS.successLight,
-  },
-  badgePending: {
-    backgroundColor: COLORS.warning + '33',
-  },
+  badgeSuccess: { backgroundColor: COLORS.successLight },
+  badgePending: { backgroundColor: 'rgba(196,122,18,0.15)' },
   badgeText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 10,
     color: COLORS.success,
-    fontSize: 10,
-    fontWeight: '800',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  txnId: {
-    color: COLORS.textMuted,
-    fontSize: 10,
-    letterSpacing: 0.5,
-    fontFamily: 'monospace',
+    letterSpacing: 0.4,
   },
 });
 

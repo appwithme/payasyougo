@@ -1,6 +1,3 @@
-// ============================================================
-// PASSENGER LOGIN SCREEN
-// ============================================================
 import React, { useState } from 'react';
 import {
   View,
@@ -12,18 +9,20 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import BrandLogo from '../../components/BrandLogo';
+import { COLORS, SPACING, RADIUS } from '../../theme/colors';
+import { type } from '../../theme/typography';
 
 const PassengerLoginScreen = ({ navigation }: { navigation: any }) => {
   const { loginPassenger } = useApp();
-
-  const [phone, setPhone]       = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleLogin = () => {
     if (!phone.trim()) {
@@ -36,91 +35,73 @@ const PassengerLoginScreen = ({ navigation }: { navigation: any }) => {
     }
     setError('');
     setLoading(true);
-
     setTimeout(() => {
       const result = loginPassenger(phone.trim(), password);
       setLoading(false);
-      if (!result.success) {
-        setError(result.error || 'Invalid credentials');
-      }
-    }, 1000);
+      if (!result.success) setError(result.error || 'Invalid credentials');
+    }, 800);
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+      <StatusBar barStyle="dark-content" />
       <ScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back}>
-          <View style={styles.backIconWrap}>
-            <Ionicons name="chevron-back" size={24} color={COLORS.textPrimary} />
-          </View>
+          <Ionicons name="chevron-back" size={22} color={COLORS.ink} />
         </TouchableOpacity>
 
-        <View style={styles.header}>
-          <View style={styles.icon}>
-            <Ionicons name="person" size={32} color={COLORS.textPrimary} />
-          </View>
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>
-            Sign in with your phone number and password
-          </Text>
-        </View>
+        <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
+          <BrandLogo size="sm" />
+          <Text style={styles.title}>Welcome back</Text>
+          <Text style={styles.subtitle}>Sign in to pay campus fares with MoMo</Text>
+        </Animated.View>
 
         <View style={styles.hint}>
-          <Ionicons name="information-circle" size={24} color={COLORS.primaryDark} />
-          <View style={styles.hintBody}>
-            <Text style={styles.hintTitle}>Demo Credentials</Text>
-            <Text style={styles.hintText}>
-              Phone: <Text style={styles.hintBold}>+233 55 100 2000</Text>{'\n'}
-              Password: <Text style={styles.hintBold}>pass1234</Text>
-            </Text>
-          </View>
+          <Ionicons name="key-outline" size={18} color={COLORS.ink} />
+          <Text style={styles.hintText}>
+            Demo · <Text style={styles.hintBold}>0551002000</Text> /{' '}
+            <Text style={styles.hintBold}>pass1234</Text>
+          </Text>
         </View>
 
         {!!error && (
           <View style={styles.errorBox}>
-            <Ionicons name="alert-circle" size={20} color={COLORS.error} />
+            <Ionicons name="alert-circle" size={18} color={COLORS.error} />
             <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
 
         <View style={styles.form}>
           <Input
-            label="Phone Number"
-            placeholder="+233 XX XXX XXXX"
+            label="Phone number"
+            placeholder="055 XXX XXXX"
             value={phone}
             onChangeText={setPhone}
             keyboardType="phone-pad"
             iconName="call-outline"
             autoCapitalize="none"
           />
-
           <Input
             label="Password"
-            placeholder="Enter your password"
+            placeholder="Your password"
             value={password}
             onChangeText={setPassword}
             iconName="lock-closed-outline"
             secureTextEntry
             autoCapitalize="none"
           />
-
-          <Button
-            title="Login"
-            onPress={handleLogin}
-            loading={loading}
-            style={styles.btn}
-          />
+          <Button title="Sign in" onPress={handleLogin} loading={loading} variant="ink" />
 
           <TouchableOpacity
             onPress={() => navigation.navigate('PassengerSignup')}
             style={styles.link}
           >
-            <Text style={styles.linkText}>Don't have an account? </Text>
-            <Text style={[styles.linkText, styles.linkAccent]}>Sign Up</Text>
+            <Text style={styles.linkText}>New here? </Text>
+            <Text style={styles.linkAccent}>Create account</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -132,74 +113,30 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   scroll: { padding: SPACING.lg, flexGrow: 1 },
   back: {
-    marginBottom: SPACING.lg,
-    alignSelf: 'flex-start',
-  },
-  backIconWrap: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: RADIUS.md,
     backgroundColor: COLORS.surface,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: COLORS.border,
-  },
-  header: {
     marginBottom: SPACING.lg,
   },
-  icon: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: COLORS.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACING.lg,
-    ...SHADOW.md,
-  },
-  title: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.xxl,
-    fontWeight: '900',
-    letterSpacing: -1,
-  },
-  subtitle: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.base,
-    marginTop: SPACING.sm,
-    lineHeight: 24,
-    fontWeight: '500',
-  },
+  header: { marginBottom: SPACING.lg, gap: SPACING.sm },
+  title: { ...type.title, marginTop: SPACING.sm },
+  subtitle: { ...type.body },
   hint: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: COLORS.primaryLight + '33',
-    borderRadius: RADIUS.lg,
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: COLORS.primaryMuted,
+    borderRadius: RADIUS.md,
     padding: SPACING.md,
     marginBottom: SPACING.lg,
-    gap: SPACING.sm,
-    borderWidth: 1,
-    borderColor: COLORS.primaryLight,
   },
-  hintBody: { flex: 1, gap: SPACING.xs },
-  hintTitle: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: '800',
-    marginBottom: 2,
-  },
-  hintText: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.sm,
-    lineHeight: 22,
-    fontWeight: '500',
-  },
-  hintBold: {
-    color: COLORS.textPrimary,
-    fontWeight: '800',
-    fontFamily: 'monospace',
-  },
+  hintText: { ...type.caption, color: COLORS.textSecondary, flex: 1 },
+  hintBold: { fontFamily: 'DMSans_700Bold', color: COLORS.ink },
   errorBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -208,31 +145,16 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     padding: SPACING.md,
     marginBottom: SPACING.lg,
-    borderWidth: 1,
-    borderColor: COLORS.error + '44',
   },
-  errorText: {
-    color: COLORS.error,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: '700',
-    flex: 1,
-  },
-  form: { gap: SPACING.md },
-  btn: { marginTop: SPACING.md },
+  errorText: { ...type.caption, color: COLORS.error, flex: 1, fontFamily: 'DMSans_700Bold' },
+  form: { gap: 4 },
   link: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: SPACING.lg,
   },
-  linkText: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.base,
-    fontWeight: '500',
-  },
-  linkAccent: {
-    color: COLORS.textPrimary,
-    fontWeight: '800',
-  },
+  linkText: { ...type.body },
+  linkAccent: { ...type.bodyBold },
 });
 
 export default PassengerLoginScreen;

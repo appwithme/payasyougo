@@ -4,6 +4,7 @@ import { ViewStyle, TextStyle } from 'react-native';
 export type RootStackParamList = {
   PassengerApp: undefined;
   DriverApp: undefined;
+  Onboarding: undefined;
   Welcome: undefined;
   PassengerSignup: undefined;
   PassengerLogin: undefined;

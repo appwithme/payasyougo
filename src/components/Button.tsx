@@ -1,7 +1,3 @@
-// ============================================================
-// BUTTON COMPONENT
-// Variants: 'primary' | 'secondary' | 'ghost' | 'danger'
-// ============================================================
 import React from 'react';
 import {
   TouchableOpacity,
@@ -9,10 +5,26 @@ import {
   StyleSheet,
   ActivityIndicator,
   View,
+  ViewStyle,
+  TextStyle,
 } from 'react-native';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../theme/colors';
+import { COLORS, SPACING, RADIUS, SHADOW } from '../theme/colors';
+import { type } from '../theme/typography';
 
-const Button = ({
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'ink';
+
+type Props = {
+  title: string;
+  onPress: () => void;
+  variant?: Variant;
+  loading?: boolean;
+  disabled?: boolean;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+  icon?: React.ReactNode;
+};
+
+export default function Button({
   title,
   onPress,
   variant = 'primary',
@@ -21,103 +33,66 @@ const Button = ({
   style,
   textStyle,
   icon,
-}: {
-  title: string;
-  onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
-  loading?: boolean;
-  disabled?: boolean;
-  style?: any;
-  textStyle?: any;
-  icon?: React.ReactNode;
-}) => {
+}: Props) {
   const isDisabled = disabled || loading;
+  const spinnerColor =
+    variant === 'primary' || variant === 'ink' ? COLORS.ink : COLORS.primaryDark;
 
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={isDisabled}
-      activeOpacity={0.82}
-      style={[
-        styles.base,
-        styles[variant],
-        isDisabled && styles.disabled,
-        style,
-      ]}
+      activeOpacity={0.85}
+      style={[styles.base, styles[variant], isDisabled && styles.disabled, style]}
     >
       {loading ? (
-        <ActivityIndicator
-          color={variant === 'primary' ? COLORS.textPrimary : COLORS.primary}
-          size="small"
-        />
+        <ActivityIndicator color={spinnerColor} size="small" />
       ) : (
         <View style={styles.row}>
-          {icon && <View style={styles.iconWrap}>{icon}</View>}
-          <Text style={[styles.baseText, styles[`${variant}Text`], textStyle]}>
+          {icon ? <View style={styles.iconWrap}>{icon}</View> : null}
+          <Text style={[styles.baseText, styles[`${variant}Text` as const], textStyle]}>
             {title}
           </Text>
         </View>
       )}
     </TouchableOpacity>
   );
-};
+}
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: RADIUS.full,
-    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.md,
+    paddingVertical: 16,
     paddingHorizontal: SPACING.xl,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 56,
   },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconWrap: {
-    marginRight: SPACING.sm,
-  },
+  row: { flexDirection: 'row', alignItems: 'center' },
+  iconWrap: { marginRight: SPACING.sm },
 
-  // Variants
   primary: {
     backgroundColor: COLORS.primary,
-    ...SHADOW.md,
+    ...SHADOW.sm,
+  },
+  ink: {
+    backgroundColor: COLORS.ink,
+    ...SHADOW.sm,
   },
   secondary: {
     backgroundColor: COLORS.surface,
     borderWidth: 1.5,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderStrong,
   },
-  ghost: {
-    backgroundColor: 'transparent',
-  },
-  danger: {
-    backgroundColor: COLORS.errorLight,
-  },
+  ghost: { backgroundColor: 'transparent' },
+  danger: { backgroundColor: COLORS.errorLight },
 
-  // Text styles per variant
-  baseText: {
-    fontSize: FONT_SIZE.base,
-    fontWeight: '700',
-    letterSpacing: 0.2,
-  },
-  primaryText: {
-    color: COLORS.textPrimary, // High contrast on Yellow
-  },
-  secondaryText: {
-    color: COLORS.textPrimary,
-  },
-  ghostText: {
-    color: COLORS.textPrimary,
-  },
-  dangerText: {
-    color: COLORS.error,
-  },
+  baseText: { ...type.button },
+  primaryText: { color: COLORS.ink },
+  inkText: { color: COLORS.white },
+  secondaryText: { color: COLORS.ink },
+  ghostText: { color: COLORS.ink },
+  dangerText: { color: COLORS.error },
 
-  disabled: {
-    opacity: 0.5,
-  },
+  disabled: { opacity: 0.45 },
 });
-
-export default Button;

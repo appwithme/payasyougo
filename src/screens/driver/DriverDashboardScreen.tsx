@@ -1,6 +1,3 @@
-// ============================================================
-// DRIVER DASHBOARD SCREEN
-// ============================================================
 import React from 'react';
 import {
   View,
@@ -12,11 +9,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
 import WalletCard from '../../components/WalletCard';
 import TransactionCard from '../../components/TransactionCard';
 import NotificationCard from '../../components/NotificationCard';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import { COLORS, SPACING, RADIUS } from '../../theme/colors';
+import { type } from '../../theme/typography';
 
 const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
   const { getDriverData, driverTransactions, pendingNotification, clearNotification } = useApp();
@@ -27,13 +26,14 @@ const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+      <StatusBar barStyle="dark-content" />
 
-      <View style={styles.header}>
+      <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
         <View style={styles.headerTitle}>
-          <Text style={styles.greeting}>Hello, {driver.name.split(' ')[0]} 👋</Text>
+          <Text style={styles.greeting}>Hi, {driver.name.split(' ')[0]}</Text>
           <View style={styles.idBadge}>
-            <Text style={styles.idLabel}>ID: {driver.id}</Text>
+            <Ionicons name="id-card-outline" size={12} color={COLORS.ink} />
+            <Text style={styles.idLabel}>{driver.id}</Text>
           </View>
         </View>
         <TouchableOpacity
@@ -42,11 +42,10 @@ const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
         >
           <Text style={styles.avatarText}>{driver.name.charAt(0)}</Text>
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Absolute positioned notification for live updates */}
-        {pendingNotification && (
+        {pendingNotification ? (
           <View style={styles.notificationWrap}>
             <NotificationCard
               notification={pendingNotification}
@@ -57,7 +56,7 @@ const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
               }}
             />
           </View>
-        )}
+        ) : null}
 
         <View style={styles.walletSection}>
           <WalletCard
@@ -69,16 +68,16 @@ const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Payments</Text>
+            <Text style={styles.sectionTitle}>Recent payments</Text>
             <TouchableOpacity onPress={() => navigation.navigate('TransactionHistory')}>
-              <Text style={styles.seeAll}>See All</Text>
+              <Text style={styles.seeAll}>See all</Text>
             </TouchableOpacity>
           </View>
 
           {recentTxns.length === 0 ? (
             <View style={styles.empty}>
-              <Ionicons name="cash-outline" size={48} color={COLORS.textMuted} />
-              <Text style={styles.emptyText}>No payments received today.</Text>
+              <Ionicons name="cash-outline" size={40} color={COLORS.textMuted} />
+              <Text style={styles.emptyText}>Waiting for passenger payments.</Text>
             </View>
           ) : (
             recentTxns.map((txn) => (
@@ -101,83 +100,58 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.md,
     paddingBottom: SPACING.md,
   },
-  headerTitle: { gap: 4 },
-  greeting: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.xl,
-    fontWeight: '900',
-    letterSpacing: -0.5,
-  },
+  headerTitle: { gap: 6 },
+  greeting: { ...type.heading },
   idBadge: {
-    backgroundColor: COLORS.surfaceAlt,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: COLORS.primaryMuted,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: RADIUS.sm,
     alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: COLORS.border,
   },
   idLabel: {
-    color: COLORS.textSecondary,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 1,
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 12,
+    color: COLORS.ink,
   },
   avatarBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 16,
     backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    ...SHADOW.sm,
   },
   avatarText: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.md,
-    fontWeight: '800',
+    fontFamily: 'Sora_700Bold',
+    fontSize: 18,
+    color: COLORS.ink,
   },
-
-  scroll: { padding: SPACING.lg, paddingBottom: 100 },
+  scroll: { padding: SPACING.lg, paddingBottom: 110 },
+  notificationWrap: { marginBottom: SPACING.md },
   walletSection: { marginBottom: SPACING.xl },
-  notificationWrap: {
-    marginBottom: SPACING.lg,
-    zIndex: 10,
-  },
-
-  section: {},
+  section: { marginBottom: SPACING.xl },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: SPACING.md,
   },
-  sectionTitle: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.md,
-    fontWeight: '800',
-  },
-  seeAll: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: '700',
-  },
-
+  sectionTitle: { ...type.subheading },
+  seeAll: { ...type.label, color: COLORS.textSecondary },
   empty: {
     alignItems: 'center',
     padding: SPACING.xl,
+    gap: SPACING.sm,
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
     borderColor: COLORS.border,
-    ...SHADOW.sm,
-    gap: SPACING.md,
   },
-  emptyText: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: '500',
-  },
+  emptyText: { ...type.caption, textAlign: 'center' },
 });
 
 export default DriverDashboardScreen;

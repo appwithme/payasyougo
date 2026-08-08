@@ -1,181 +1,183 @@
-// ============================================================
-// WELCOME SCREEN
-// ============================================================
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  Animated,
   TouchableOpacity,
   StatusBar,
+  ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import Animated, {
+  FadeInDown,
+  FadeInUp,
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  withSequence,
+  Easing,
+} from 'react-native-reanimated';
+import BrandLogo from '../../components/BrandLogo';
+import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import { type } from '../../theme/typography';
 
-const WelcomeScreen = ({ navigation }: { navigation: any }) => {
-  const logoAnim = useRef(new Animated.Value(0)).current;
-  const cardAnim = useRef(new Animated.Value(60)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+export default function WelcomeScreen({ navigation }: { navigation: any }) {
+  const bob = useSharedValue(0);
 
   useEffect(() => {
-    Animated.sequence([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
-      Animated.parallel([
-        Animated.spring(logoAnim, { toValue: 1, tension: 50, friction: 7, useNativeDriver: true }),
-        Animated.spring(cardAnim, { toValue: 0, tension: 50, friction: 7, useNativeDriver: true }),
-      ]),
-    ]).start();
+    bob.value = withRepeat(
+      withSequence(
+        withTiming(-6, { duration: 1600, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0, { duration: 1600, easing: Easing.inOut(Easing.sin) })
+      ),
+      -1,
+      false
+    );
   }, []);
 
+  const bobStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: bob.value }],
+  }));
+
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+    <View style={styles.root}>
+      <StatusBar barStyle="dark-content" />
+      <ImageBackground
+        source={require('../../../assets/brand/onboarding-pay.png')}
+        style={styles.hero}
+        imageStyle={styles.heroImage}
+      >
+        <LinearGradient
+          colors={['rgba(255,249,240,0.15)', 'rgba(255,249,240,0.55)', COLORS.background]}
+          locations={[0, 0.45, 1]}
+          style={StyleSheet.absoluteFill}
+        />
 
-      <Animated.View style={[styles.logoSection, { opacity: fadeAnim, transform: [{ scale: logoAnim }] }]}>
-        <View style={styles.logoCircle}>
-          <Ionicons name="bus" size={48} color={COLORS.textPrimary} />
-        </View>
-        <Text style={styles.appName}>PayAsYouGo</Text>
-        <Text style={styles.tagline}>UCC Campus Transport · Fast · Simple · Cashless</Text>
-      </Animated.View>
+        <SafeAreaView style={styles.heroSafe} edges={['top']}>
+          <Animated.View entering={FadeInDown.duration(500)} style={styles.brandBlock}>
+            <Animated.View style={bobStyle}>
+              <BrandLogo size="md" />
+            </Animated.View>
+            <Text style={styles.appName}>PayAsYouGo</Text>
+            <Text style={styles.tagline}>
+              Digital fares for UCC campus rides
+            </Text>
+          </Animated.View>
+        </SafeAreaView>
+      </ImageBackground>
 
-      <Animated.View style={[styles.cards, { transform: [{ translateY: cardAnim }], opacity: fadeAnim }]}>
-        <Text style={styles.prompt}>Select your role</Text>
+      <Animated.View entering={FadeInUp.delay(180).duration(480)} style={styles.sheet}>
+        <Text style={styles.prompt}>Continue as</Text>
 
         <TouchableOpacity
-          style={styles.roleCard}
-          activeOpacity={0.85}
-          onPress={() => navigation.navigate('PassengerSignup')}
+          style={styles.roleRow}
+          activeOpacity={0.88}
+          onPress={() => navigation.navigate('PassengerLogin')}
         >
-          <View style={[styles.roleIcon, { backgroundColor: COLORS.surfaceAlt }]}>
-            <Ionicons name="person" size={28} color={COLORS.textPrimary} />
+          <View style={[styles.roleIcon, { backgroundColor: COLORS.primary }]}>
+            <Ionicons name="person" size={22} color={COLORS.ink} />
           </View>
-          <View style={styles.roleInfo}>
+          <View style={styles.roleCopy}>
             <Text style={styles.roleTitle}>Passenger</Text>
-            <Text style={styles.roleDesc}>Book rides · Pay fare · View history</Text>
+            <Text style={styles.roleDesc}>Book a route and pay with MoMo</Text>
           </View>
-          <View style={styles.arrowIcon}>
-            <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
-          </View>
+          <Ionicons name="arrow-forward" size={18} color={COLORS.textMuted} />
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.roleCard}
-          activeOpacity={0.85}
+          style={styles.roleRow}
+          activeOpacity={0.88}
           onPress={() => navigation.navigate('DriverLogin')}
         >
-          <View style={[styles.roleIcon, { backgroundColor: COLORS.primaryLight + '44' }]}>
-            <Ionicons name="car-sport" size={28} color={COLORS.primaryDark} />
+          <View style={[styles.roleIcon, { backgroundColor: COLORS.ink }]}>
+            <Ionicons name="car-sport" size={22} color={COLORS.primary} />
           </View>
-          <View style={styles.roleInfo}>
+          <View style={styles.roleCopy}>
             <Text style={styles.roleTitle}>Driver</Text>
-            <Text style={styles.roleDesc}>Receive payments · Manage wallet</Text>
+            <Text style={styles.roleDesc}>Collect fares and track earnings</Text>
           </View>
-          <View style={styles.arrowIcon}>
-            <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
-          </View>
+          <Ionicons name="arrow-forward" size={18} color={COLORS.textMuted} />
         </TouchableOpacity>
-      </Animated.View>
 
-      <Text style={styles.footer}>University of Cape Coast · v1.0</Text>
-    </SafeAreaView>
+        <Text style={styles.footer}>University of Cape Coast · v1.0</Text>
+      </Animated.View>
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  hero: {
+    flex: 1.15,
+    justifyContent: 'flex-end',
+  },
+  heroImage: {
+    resizeMode: 'cover',
+  },
+  heroSafe: {
+    flex: 1,
+    justifyContent: 'flex-end',
     paddingHorizontal: SPACING.lg,
-    justifyContent: 'space-between',
-    paddingBottom: SPACING.lg,
+    paddingBottom: SPACING.xl,
   },
-  logoSection: {
-    alignItems: 'center',
-    marginTop: SPACING.xxl,
-  },
-  logoCircle: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    backgroundColor: COLORS.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...SHADOW.md,
-    marginBottom: SPACING.lg,
+  brandBlock: {
+    alignItems: 'flex-start',
   },
   appName: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.hero,
-    fontWeight: '900',
-    letterSpacing: -1.5,
+    ...type.hero,
+    fontSize: 36,
+    marginTop: SPACING.md,
   },
   tagline: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.base,
-    textAlign: 'center',
-    marginTop: SPACING.sm,
-    fontWeight: '500',
-    paddingHorizontal: SPACING.xl,
+    ...type.body,
+    marginTop: 6,
+    maxWidth: 280,
   },
-  cards: {
-    gap: SPACING.md,
+  sheet: {
+    backgroundColor: COLORS.surface,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.xl,
+    gap: SPACING.sm,
+    ...SHADOW.lg,
   },
   prompt: {
-    color: COLORS.textMuted,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: SPACING.sm,
+    ...type.caption,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 1.2,
+    marginBottom: SPACING.xs,
   },
-  roleCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.xl,
-    padding: SPACING.lg,
+  roleRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: SPACING.md,
+    backgroundColor: COLORS.background,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.border,
-    gap: SPACING.md,
-    ...SHADOW.sm,
   },
   roleIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  roleInfo: { flex: 1 },
-  roleTitle: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.lg,
-    fontWeight: '800',
-  },
-  roleDesc: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.sm,
-    marginTop: 4,
-    fontWeight: '500',
-  },
-  arrowIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: COLORS.surfaceAlt,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  roleCopy: { flex: 1 },
+  roleTitle: { ...type.subheading },
+  roleDesc: { ...type.caption, marginTop: 2 },
   footer: {
-    color: COLORS.textMuted,
-    fontSize: FONT_SIZE.xs,
+    ...type.caption,
     textAlign: 'center',
-    fontWeight: '500',
+    marginTop: SPACING.md,
   },
 });
-
-export default WelcomeScreen;

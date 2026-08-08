@@ -1,22 +1,33 @@
-// ============================================================
-// WALLET CARD COMPONENT
-// ============================================================
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../theme/colors';
+import { COLORS, SPACING, RADIUS, SHADOW } from '../theme/colors';
+import { type } from '../theme/typography';
 
-const WalletCard = ({ balance, todayEarnings, totalTrips }: { balance: number; todayEarnings: number; totalTrips: number }) => {
+const WalletCard = ({
+  balance,
+  todayEarnings,
+  totalTrips,
+}: {
+  balance: number;
+  todayEarnings: number;
+  totalTrips: number;
+}) => {
   return (
-    <View style={styles.card}>
-      <View style={styles.circleLg} />
-      <View style={styles.circleSm} />
+    <LinearGradient
+      colors={[COLORS.ink, '#2A2A2A']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.card}
+    >
+      <View style={styles.accentOrb} />
 
       <View style={styles.headerRow}>
         <View style={styles.iconWrap}>
-          <Ionicons name="wallet-outline" size={20} color={COLORS.textPrimary} />
+          <Ionicons name="wallet" size={18} color={COLORS.ink} />
         </View>
-        <Text style={styles.label}>WALLET BALANCE</Text>
+        <Text style={styles.label}>Wallet balance</Text>
       </View>
 
       <Text style={styles.balance}>
@@ -25,7 +36,7 @@ const WalletCard = ({ balance, todayEarnings, totalTrips }: { balance: number; t
 
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
-          <Ionicons name="today-outline" size={16} color={COLORS.textPrimary} />
+          <Ionicons name="sunny-outline" size={16} color={COLORS.primary} />
           <Text style={styles.statLabel}>Today</Text>
           <Text style={styles.statValue}>GH₵{todayEarnings?.toFixed(2) ?? '0.00'}</Text>
         </View>
@@ -33,99 +44,87 @@ const WalletCard = ({ balance, todayEarnings, totalTrips }: { balance: number; t
         <View style={styles.statDivider} />
 
         <View style={styles.statItem}>
-          <Ionicons name="car-outline" size={16} color={COLORS.textPrimary} />
-          <Text style={styles.statLabel}>Total Trips</Text>
+          <Ionicons name="car-outline" size={16} color={COLORS.primary} />
+          <Text style={styles.statLabel}>Total trips</Text>
           <Text style={styles.statValue}>{totalTrips ?? 0}</Text>
         </View>
       </View>
-    </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.primary,
     borderRadius: RADIUS.xl,
     padding: SPACING.xl,
     overflow: 'hidden',
     ...SHADOW.lg,
   },
-  circleLg: {
+  accentOrb: {
     position: 'absolute',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: COLORS.primaryLight,
-    top: -60,
-    right: -60,
-    opacity: 0.8,
-  },
-  circleSm: {
-    position: 'absolute',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: COLORS.primaryDark,
-    bottom: -30,
-    left: 10,
-    opacity: 0.4,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: COLORS.primary,
+    opacity: 0.18,
+    top: -40,
+    right: -30,
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     marginBottom: SPACING.md,
   },
   iconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: COLORS.white,
+    width: 34,
+    height: 34,
+    borderRadius: 11,
+    backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    ...SHADOW.sm,
   },
   label: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.xs,
-    fontWeight: '800',
-    letterSpacing: 1.2,
+    ...type.caption,
+    color: 'rgba(255,255,255,0.7)',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   balance: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.hero,
-    fontWeight: '800',
+    fontFamily: 'Sora_700Bold',
+    fontSize: 40,
+    color: COLORS.white,
     letterSpacing: -1,
     marginBottom: SPACING.xl,
   },
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
+    backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
-    ...SHADOW.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   statItem: {
     flex: 1,
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
   },
   statLabel: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.xs,
-    fontWeight: '600',
+    ...type.caption,
+    color: 'rgba(255,255,255,0.55)',
   },
   statValue: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.base,
-    fontWeight: '800',
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 15,
+    color: COLORS.white,
   },
   statDivider: {
     width: 1,
-    height: 40,
-    backgroundColor: COLORS.border,
-    marginHorizontal: SPACING.md,
+    height: 36,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    marginHorizontal: SPACING.sm,
   },
 });
 

@@ -126,12 +126,13 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     fontSize: 10,
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
+    fontFamily: 'DMSans_500Medium',
   },
   tabActiveBar: {
     position: 'absolute',
     bottom: -8,
-    width: 24,
+    width: 20,
     height: 3,
     backgroundColor: COLORS.primary,
     borderRadius: 2,
