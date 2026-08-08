@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -20,6 +21,7 @@ import { type } from '../../theme/typography';
 import { useTabBarPadding } from '../../navigation/FloatingTabBar';
 import { Transaction } from '../../types';
 
+const PAY_RIDE_ICON = require('../../../assets/brand/pay-ride-icon-clear.png');
 const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
   const { currentUser, passengerTrips } = useApp();
   const tabPad = useTabBarPadding();
@@ -86,11 +88,20 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
         showsVerticalScrollIndicator={false}
       >
         <Animated.View entering={FadeInUp.delay(100).duration(420)} style={styles.payCard}>
-          <Text style={styles.payEyebrow}>MoMo</Text>
-          <Text style={styles.payTitle}>Pay for a ride</Text>
-          <Text style={styles.paySubtitle}>
-            Pick a UCC route and settle with Mobile Money.
-          </Text>
+          <View style={styles.payTop}>
+            <View style={styles.payCopy}>
+              <Text style={styles.payEyebrow}>MoMo</Text>
+              <Text style={styles.payTitle}>Pay for a ride</Text>
+              <Text style={styles.paySubtitle}>
+                Pick a UCC route and settle with Mobile Money.
+              </Text>
+            </View>
+            <Image
+              source={PAY_RIDE_ICON}
+              style={styles.payIcon}
+              resizeMode="contain"
+            />
+          </View>
           <Button
             title="Select route"
             variant="primary"
@@ -188,8 +199,22 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.ink,
     borderRadius: RADIUS.xl,
     padding: SPACING.lg,
-    gap: 6,
+    gap: SPACING.md,
     ...SHADOW.md,
+  },
+  payTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  payCopy: {
+    flex: 1,
+    gap: 6,
+    minWidth: 0,
+  },
+  payIcon: {
+    width: 88,
+    height: 88,
   },
   payEyebrow: {
     fontFamily: 'DMSans_700Bold',
@@ -210,10 +235,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'rgba(255,255,255,0.6)',
     lineHeight: 20,
-    marginBottom: 10,
   },
   payBtn: {
-    marginTop: 4,
+    marginTop: 2,
   },
   stats: {
     flexDirection: 'row',
