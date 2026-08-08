@@ -8,6 +8,7 @@ import DriverDashboardScreen from '../screens/driver/DriverDashboardScreen';
 import TransactionHistoryScreen from '../screens/driver/TransactionHistoryScreen';
 import WalletScreen from '../screens/driver/WalletScreen';
 import DriverProfileScreen from '../screens/driver/DriverProfileScreen';
+import DriverQrScreen from '../screens/driver/DriverQrScreen';
 import EditProfileScreen from '../screens/shared/EditProfileScreen';
 import SettingsScreen from '../screens/shared/SettingsScreen';
 import NotificationsSettingsScreen from '../screens/shared/NotificationsSettingsScreen';
@@ -21,6 +22,7 @@ const DashboardStack = () => (
     <Stack.Screen name="DriverDashboard" component={DriverDashboardScreen} />
     <Stack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
     <Stack.Screen name="DriverProfile" component={DriverProfileScreen} />
+    <Stack.Screen name="DriverQr" component={DriverQrScreen} />
     <Stack.Screen name="EditProfile" component={EditProfileScreen} />
     <Stack.Screen name="Settings" component={SettingsScreen} />
     <Stack.Screen name="NotificationsSettings" component={NotificationsSettingsScreen} />
@@ -30,6 +32,7 @@ const DashboardStack = () => (
 const ProfileStack = () => (
   <ProfileStackNav.Navigator screenOptions={{ headerShown: false }}>
     <ProfileStackNav.Screen name="DriverProfile" component={DriverProfileScreen} />
+    <ProfileStackNav.Screen name="DriverQr" component={DriverQrScreen} />
     <ProfileStackNav.Screen name="EditProfile" component={EditProfileScreen} />
     <ProfileStackNav.Screen name="Settings" component={SettingsScreen} />
     <ProfileStackNav.Screen
