@@ -242,6 +242,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         userRole,
         loginPassenger,
         loginPassengerWithGoogle,
+        loginPassengerWithGoogleCode,
         registerPassenger,
         loginDriver,
         signupDriver,

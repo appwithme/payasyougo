@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useGoogleIdTokenRequest } from '../services/googleAuth';
+import { GOOGLE_REDIRECT_URI, useGoogleIdTokenRequest } from '../services/googleAuth';
 import { useApp } from '../context/AppContext';
 import { COLORS, RADIUS, SPACING } from '../theme/colors';
 import { type } from '../theme/typography';
@@ -11,8 +11,8 @@ type Props = {
 };
 
 export default function GoogleSignInButton({ onError }: Props) {
-  const { loginPassengerWithGoogle } = useApp();
-  const { configured, ready, promptAsync } = useGoogleIdTokenRequest();
+  const { loginPassengerWithGoogle, loginPassengerWithGoogleCode } = useApp();
+  const { configured, ready, promptGoogleAsync } = useGoogleIdTokenRequest();
   const [busy, setBusy] = useState(false);
 
   if (!configured) {
@@ -32,26 +32,30 @@ export default function GoogleSignInButton({ onError }: Props) {
     }
     setBusy(true);
     try {
-      const result = await promptAsync();
-      if (result.type === 'cancel' || result.type === 'dismiss') {
-        onError?.('Google sign-in was cancelled');
-        return;
-      }
-      if (result.type !== 'success') {
+      const result = await promptGoogleAsync();
+
+      if (result.type === 'cancel') {
         onError?.(
-          result.type === 'error'
-            ? result.error?.message || 'Google sign-in failed'
-            : `Google sign-in did not complete (${result.type})`
+          'Sign-in closed before finishing. Stay on the Google page until it redirects back.'
         );
         return;
       }
-      const idToken = result.params.id_token;
-      if (!idToken) {
-        onError?.('Google did not return an ID token. Check redirect URI in Google Console.');
+
+      if (result.type === 'error') {
+        onError?.(result.message);
         return;
       }
-      const auth = await loginPassengerWithGoogle(idToken);
-      if (!auth.success) onError?.(auth.error || 'Google sign-in failed');
+
+      if (result.type === 'success') {
+        const auth = await loginPassengerWithGoogle(result.idToken);
+        if (!auth.success) onError?.(auth.error || 'Google sign-in failed');
+        return;
+      }
+
+      if (result.type === 'success_code') {
+        const auth = await loginPassengerWithGoogleCode(result.code, GOOGLE_REDIRECT_URI);
+        if (!auth.success) onError?.(auth.error || 'Google sign-in failed');
+      }
     } catch (err: any) {
       onError?.(err?.message || 'Google sign-in failed');
     } finally {

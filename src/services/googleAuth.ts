@@ -94,7 +94,6 @@ export function useGoogleIdTokenRequest() {
       return { type: 'error', message: 'Google sign-in is still loading. Try again.' };
     }
 
-    await request.makeAuthUrlAsync(discovery);
     const authUrl = await request.makeAuthUrlAsync(discovery);
     if (!authUrl) {
       return { type: 'error', message: 'Could not start Google sign-in.' };
