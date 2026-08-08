@@ -86,7 +86,13 @@ const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
           </View>
 
           <View style={styles.starsRow}>{renderStars(driver.rating)}</View>
-          <Text style={styles.ratingText}>{driver.rating} out of 5.0</Text>
+          <Text style={styles.ratingText}>
+            {(driver.ratingCount ?? 0) > 0
+              ? `${Number(driver.rating).toFixed(1)} · ${driver.ratingCount} passenger ${
+                  driver.ratingCount === 1 ? 'rating' : 'ratings'
+                }`
+              : 'No passenger ratings yet'}
+          </Text>
         </View>
 
         <View style={styles.driverIdCard}>
