@@ -71,6 +71,15 @@ const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
                 : 'Driver · No passenger ratings yet'}
             </Text>
             <View style={styles.starsRow}>{renderStars(driver.rating)}</View>
+
+            <TouchableOpacity
+              style={styles.editProfileBtn}
+              onPress={() => navigation.navigate('EditProfile')}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="create-outline" size={15} color={COLORS.ink} />
+              <Text style={styles.editProfileText}>Edit profile</Text>
+            </TouchableOpacity>
           </View>
 
           <TouchableOpacity
@@ -106,21 +115,6 @@ const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(160).duration(420)} style={styles.actions}>
-          <TouchableOpacity
-            style={styles.actionRow}
-            onPress={() => navigation.navigate('EditProfile')}
-            activeOpacity={0.85}
-          >
-            <View style={styles.actionIcon}>
-              <Ionicons name="create-outline" size={18} color={COLORS.ink} />
-            </View>
-            <View style={styles.actionCopy}>
-              <Text style={styles.actionTitle}>Edit profile</Text>
-              <Text style={styles.actionHint}>Name and phone</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
-          </TouchableOpacity>
-
           <TouchableOpacity
             style={styles.actionRow}
             onPress={() => navigation.navigate('Settings')}
@@ -210,6 +204,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 3,
     marginTop: 4,
+  },
+  editProfileBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: COLORS.primary,
+  },
+  editProfileText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 13,
+    color: COLORS.ink,
   },
   idBlock: {
     gap: 6,
