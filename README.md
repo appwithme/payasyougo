@@ -124,22 +124,22 @@ Scan the QR with Expo Go (same Wi‑Fi as the API).
 
 ## 💳 Paystack MoMo (important)
 
-Payments use Paystack’s **charge** API. The app collects:
+Payments use Paystack’s **charge** API; driver **withdrawals** use **transfer** to MoMo. The app collects:
 
 | Field | Why |
 |:------|:----|
-| Network (MTN / Telecel) | Maps to Paystack `mtn` / `vod` |
-| MoMo phone number | Where the payment prompt is sent |
+| Network (MTN / Telecel) | Maps to Paystack `mtn` / `vod` (charges) or bank codes `MTN` / `VOD` (payouts) |
+| MoMo phone number | Where the payment prompt is sent, or where the withdrawal is paid out |
 
 Receipt details (route, amount, driver, reference) come from **your database** after Paystack confirms — not from that phone field alone.
 
 ### 🧪 Test mode
 
-With `sk_test_…` keys, **real phone numbers are declined**. Use Paystack’s official test number:
+With `sk_test_…` keys, **real phone numbers are declined**. Use Paystack’s official test number for **both** passenger payments and driver withdrawals:
 
-| Network | Test number | Notes |
-|:--------|:------------|:------|
-| **MTN** | `0551234987` | No PIN / OTP in test |
+| Network | Test number | Used for |
+|:--------|:------------|:---------|
+| **MTN** | `0551234987` | Passenger pay + driver wallet withdraw (prefilled in the app) |
 | **Telecel** | — | Paystack does **not** publish a Telecel/Vodafone sandbox number. Telecel cannot be end-to-end tested on test keys. |
 
 ```text
@@ -149,15 +149,17 @@ since you are doing a test transaction.
 
 ↑ That error means you’re on test keys with a live number — switch to `0551234987` (MTN tile).
 
+Withdrawals also need funds in your **Paystack balance** (from successful test charges). Disable **Transfer OTP** in the Paystack dashboard so payouts aren’t stuck waiting for approval.
+
 ### Going live later
 
 1. Switch to Paystack **live** keys  
-2. Use real passenger MoMo numbers (MTN **or** Telecel Cash)  
+2. Use real passenger / driver MoMo numbers (MTN **or** Telecel Cash)  
 3. Enable Ghana MoMo (GHS) on the Paystack business  
 4. Optionally set a webhook: `POST /api/payments/webhook`  
-   (the app also **polls** payment status, so local testing works without ngrok)
+   (the app also **polls** payment / withdrawal status, so local testing works without ngrok)
 
-In **live / production**, Telecel works the same as MTN: the app sends provider `vod` to Paystack, and the passenger approves on their real Telecel Cash number. No special sandbox workaround is needed once live keys are enabled.
+In **live / production**, Telecel works the same as MTN: the app sends provider `vod` to Paystack, and the user approves on their real Telecel Cash number. No special sandbox workaround is needed once live keys are enabled.
 
 ---
 
