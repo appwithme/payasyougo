@@ -54,7 +54,6 @@ interface AppContextType {
   updateProfile: (input: {
     fullName?: string;
     phone?: string;
-    email?: string;
   }) => Promise<{ success: boolean; error?: string }>;
   refreshTrips: () => Promise<void>;
   refreshDriverWallet: () => Promise<void>;
@@ -247,7 +246,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateProfile = async (input: {
     fullName?: string;
     phone?: string;
-    email?: string;
   }) => {
     try {
       const user = await authService.updateProfile(input);
