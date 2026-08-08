@@ -1,10 +1,20 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
 import Button from './Button';
 import { COLORS, SPACING, RADIUS } from '../theme/colors';
-import { type } from '../theme/typography';
 
 type Props = {
   role: 'driver' | 'passenger';
@@ -14,83 +24,199 @@ type Props = {
 };
 
 export default function AccountCreatedView({ role, name, phone, onGoToLogin }: Props) {
-  const title = role === 'driver' ? 'Driver account created' : 'Account created';
-  const body =
-    role === 'driver'
-      ? 'Your driver account is ready. Sign in with your phone and password to open the portal.'
-      : 'Your passenger account is ready. Sign in with your phone and password to start booking.';
+  const isDriver = role === 'driver';
+  const status = isDriver ? 'Driver account ready' : 'Account ready';
+  const headline = isDriver ? 'You’re set\nto drive' : 'You’re set\nto ride';
+  const sheetLead = isDriver
+    ? 'Sign in to open your portal, track fares, and collect campus payments.'
+    : 'Sign in to book a UCC route and pay your driver with MoMo.';
+
+  const line = useSharedValue(0);
+  useEffect(() => {
+    line.value = withDelay(
+      220,
+      withTiming(1, { duration: 520, easing: Easing.out(Easing.cubic) })
+    );
+  }, [line]);
+
+  const amberLine = useAnimatedStyle(() => ({
+    width: 12 + line.value * 40,
+    opacity: 0.35 + line.value * 0.65,
+  }));
 
   return (
     <View style={styles.root}>
-      <Animated.View entering={ZoomIn.duration(380)} style={styles.iconWrap}>
-        <Ionicons name="checkmark-circle" size={64} color={COLORS.success} />
-      </Animated.View>
+      <StatusBar barStyle="light-content" />
 
-      <Animated.View entering={FadeInDown.delay(80).duration(360)} style={styles.copy}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.body}>{body}</Text>
-      </Animated.View>
+      <LinearGradient
+        colors={['#15233F', COLORS.ink, '#243654']}
+        locations={[0, 0.55, 1]}
+        style={styles.hero}
+      >
+        <SafeAreaView edges={['top']} style={styles.heroSafe}>
+          <Animated.Text entering={FadeIn.duration(400)} style={styles.brand}>
+            payasyou<Text style={styles.brandGo}>go</Text>
+          </Animated.Text>
 
-      {(name || phone) && (
-        <Animated.View entering={FadeInDown.delay(140).duration(360)} style={styles.card}>
-          {!!name && <Text style={styles.cardName}>{name}</Text>}
-          {!!phone && <Text style={styles.cardPhone}>{phone}</Text>}
-        </Animated.View>
-      )}
+          <Animated.View entering={FadeInDown.delay(80).duration(450)} style={styles.heroCopy}>
+            <Text style={styles.heroStatus}>{status}</Text>
+            <Text style={styles.headline}>{headline}</Text>
+            <Animated.View style={[styles.amberRule, amberLine]} />
+            {(name || phone) && (
+              <Text style={styles.heroMeta}>
+                {name ? <Text style={styles.heroName}>{name}</Text> : null}
+                {name && phone ? ' · ' : ''}
+                {phone || ''}
+              </Text>
+            )}
+          </Animated.View>
+        </SafeAreaView>
+      </LinearGradient>
 
-      <Animated.View entering={FadeInDown.delay(200).duration(360)} style={styles.actions}>
-        <Button title="Go to login" variant="ink" onPress={onGoToLogin} />
-      </Animated.View>
+      <View style={styles.sheet}>
+        <SafeAreaView edges={['bottom']} style={styles.sheetInner}>
+          <View style={styles.sheetBody}>
+            <Animated.View entering={FadeInUp.delay(120).duration(400)} style={styles.nextBlock}>
+              <Text style={styles.sectionLabel}>Next step</Text>
+              <Text style={styles.sheetLead}>{sheetLead}</Text>
+            </Animated.View>
+
+            <Animated.View entering={FadeInUp.delay(180).duration(400)} style={styles.checks}>
+              {(isDriver
+                ? ['Ghana Card verified', 'Licence verified', 'Vehicle details saved']
+                : ['Profile saved', 'Phone ready for MoMo', 'Campus routes unlocked']
+              ).map((item) => (
+                <View key={item} style={styles.checkRow}>
+                  <View style={styles.checkIcon}>
+                    <Ionicons name="checkmark" size={14} color={COLORS.ink} />
+                  </View>
+                  <Text style={styles.checkText}>{item}</Text>
+                </View>
+              ))}
+            </Animated.View>
+          </View>
+
+          <Animated.View entering={FadeIn.delay(240).duration(350)} style={styles.footer}>
+            <Button title="Go to login" variant="ink" onPress={onGoToLogin} />
+          </Animated.View>
+        </SafeAreaView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingVertical: SPACING.xl,
-    gap: SPACING.lg,
+    flex: 1,
+    backgroundColor: COLORS.ink,
   },
-  iconWrap: {
-    alignSelf: 'center',
-    width: 104,
-    height: 104,
-    borderRadius: 52,
-    backgroundColor: COLORS.successLight,
-    alignItems: 'center',
-    justifyContent: 'center',
+  hero: {
+    paddingBottom: SPACING.xl,
   },
-  copy: { gap: SPACING.sm, alignItems: 'center' },
-  title: {
-    ...type.title,
-    textAlign: 'center',
+  heroSafe: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.sm,
   },
-  body: {
-    ...type.body,
-    textAlign: 'center',
-    color: COLORS.textSecondary,
-    paddingHorizontal: SPACING.md,
-    lineHeight: 22,
+  brand: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 15,
+    color: COLORS.white,
+    letterSpacing: -0.3,
   },
-  card: {
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    padding: SPACING.lg,
-    gap: 4,
-    alignItems: 'center',
+  brandGo: {
+    color: COLORS.primary,
   },
-  cardName: {
-    ...type.bodyBold,
-    color: COLORS.ink,
+  heroCopy: {
+    marginTop: SPACING.xl,
+    gap: 6,
   },
-  cardPhone: {
-    ...type.caption,
+  heroStatus: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.55)',
+  },
+  headline: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 40,
+    lineHeight: 44,
+    color: COLORS.white,
+    letterSpacing: -1.4,
+    marginTop: 2,
+  },
+  amberRule: {
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: COLORS.primary,
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  heroMeta: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 15,
+    color: 'rgba(255,255,255,0.6)',
+    marginTop: 2,
+  },
+  heroName: {
+    fontFamily: 'DMSans_700Bold',
+    color: COLORS.white,
+  },
+  sheet: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+    borderTopLeftRadius: RADIUS.xl,
+    borderTopRightRadius: RADIUS.xl,
+    marginTop: -4,
+  },
+  sheetInner: {
+    flex: 1,
+  },
+  sheetBody: {
+    flex: 1,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.xl,
+    gap: SPACING.xl,
+  },
+  nextBlock: {
+    gap: SPACING.sm,
+  },
+  sectionLabel: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 11,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
     color: COLORS.textMuted,
   },
-  actions: {
-    marginTop: SPACING.md,
+  sheetLead: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 16,
+    lineHeight: 24,
+    color: COLORS.ink,
+  },
+  checks: {
+    gap: SPACING.md,
+  },
+  checkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  checkIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkText: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 15,
+    color: COLORS.ink,
+    flex: 1,
+  },
+  footer: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.sm,
+    paddingBottom: SPACING.sm,
   },
 });
