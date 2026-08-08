@@ -86,6 +86,19 @@ export type DriverTabParamList = {
   ProfileTab: undefined;
 };
 
+export type DriverWalletStackParamList = {
+  WalletHome: undefined;
+  WithdrawalSuccess: {
+    amount: number;
+    provider: 'MTN' | 'TELECEL';
+    momoPhone: string;
+    reference?: string;
+    demo?: boolean;
+    walletBalance?: number;
+    createdAt?: string;
+  };
+};
+
 export type DriverDashboardStackParamList = {
   DriverDashboard: undefined;
   TransactionHistory: undefined;
