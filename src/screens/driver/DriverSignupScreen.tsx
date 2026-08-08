@@ -116,7 +116,9 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
   const [licenseVerified, setLicenseVerified] = useState(false);
   const [licenseNormalized, setLicenseNormalized] = useState('');
 
-  const [vehicle, setVehicle] = useState('');
+  const [vehicleName, setVehicleName] = useState('');
+  const [vehicleNumber, setVehicleNumber] = useState('');
+  const [vehicleColor, setVehicleColor] = useState('');
 
   const [verifying, setVerifying] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -138,7 +140,9 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
     setLicense(sample.license);
     setLicenseVerified(false);
     setLicenseNormalized('');
-    setVehicle(sample.vehicle);
+    setVehicleName(sample.vehicleName);
+    setVehicleNumber(sample.vehicleNumber);
+    setVehicleColor(sample.vehicleColor);
     setErrors({});
   };
 
@@ -165,7 +169,9 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
 
   const validateVehicle = () => {
     const e: Record<string, string> = {};
-    if (!vehicle.trim()) e.vehicle = 'Vehicle details are required';
+    if (!vehicleName.trim()) e.vehicleName = 'Car name is required';
+    if (!vehicleNumber.trim()) e.vehicleNumber = 'Plate number is required';
+    if (!vehicleColor.trim()) e.vehicleColor = 'Colour is required';
     if (!ghanaFrontUri || !ghanaBackUri) e.form = 'Capture both sides of your Ghana Card first';
     if (!ghanaVerified) e.form = 'Verify your Ghana Card first';
     if (!licenseFrontUri || !licenseBackUri) e.form = 'Capture both sides of your driver licence first';
@@ -273,12 +279,13 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
 
   const handleRegister = async () => {
     if (!validateVehicle()) return;
+    const vehicle = `${vehicleName.trim()} · ${vehicleNumber.trim()} · ${vehicleColor.trim()}`;
     setLoading(true);
     const result = await signupDriver({
       phone: phone.trim(),
       name: name.trim(),
       email: email.trim(),
-      vehicle: vehicle.trim(),
+      vehicle,
       password,
       ghanaCardNumber: ghanaNormalized || ghanaCard.trim(),
       licenseNumber: licenseNormalized || license.trim(),
@@ -557,15 +564,38 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
           </View>
         </View>
         <Input
-          label="Vehicle Info"
-          placeholder="e.g. Toyota Yaris - ER 1234-21"
-          value={vehicle}
+          label="Car name"
+          placeholder="e.g. Toyota Corolla"
+          value={vehicleName}
           onChangeText={(v) => {
-            setVehicle(v);
-            clearFieldError('vehicle');
+            setVehicleName(v);
+            clearFieldError('vehicleName');
           }}
           iconName="car-sport-outline"
-          error={errors.vehicle}
+          error={errors.vehicleName}
+        />
+        <Input
+          label="Plate number"
+          placeholder="e.g. GR 4321-25"
+          value={vehicleNumber}
+          onChangeText={(v) => {
+            setVehicleNumber(v);
+            clearFieldError('vehicleNumber');
+          }}
+          iconName="pricetag-outline"
+          autoCapitalize="characters"
+          error={errors.vehicleNumber}
+        />
+        <Input
+          label="Colour"
+          placeholder="e.g. Silver"
+          value={vehicleColor}
+          onChangeText={(v) => {
+            setVehicleColor(v);
+            clearFieldError('vehicleColor');
+          }}
+          iconName="color-palette-outline"
+          error={errors.vehicleColor}
         />
         <TouchableOpacity
           style={styles.autofillBtn}
