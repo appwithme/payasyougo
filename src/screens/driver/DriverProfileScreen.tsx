@@ -65,31 +65,28 @@ const DriverProfileScreen = ({ navigation }: { navigation: any }) => {
               <UserAvatar name={driver.name} uri={avatar} size={86} radius={28} />
             </View>
             <Text style={styles.heroName}>{driver.name}</Text>
-            <Text style={styles.heroRole}>Driver</Text>
-            <View style={styles.starsRow}>{renderStars(driver.rating)}</View>
-            <Text style={styles.ratingText}>
+            <Text style={styles.heroMeta}>
               {(driver.ratingCount ?? 0) > 0
-                ? `${Number(driver.rating).toFixed(1)} · ${driver.ratingCount} passenger ${
-                    driver.ratingCount === 1 ? 'rating' : 'ratings'
-                  }`
-                : 'No passenger ratings yet'}
+                ? `Driver · ${Number(driver.rating).toFixed(1)} · ${driver.ratingCount} ratings`
+                : 'Driver · No passenger ratings yet'}
             </Text>
+            <View style={styles.starsRow}>{renderStars(driver.rating)}</View>
           </View>
 
           <TouchableOpacity
-            style={styles.idHero}
+            style={styles.idBlock}
             onPress={() => navigation.navigate('DriverQr')}
             activeOpacity={0.9}
           >
-            <View style={styles.idHeroTop}>
-              <Text style={styles.idEyebrow}>Your driver ID</Text>
+            <View style={styles.idTop}>
+              <Text style={styles.idLabel}>Driver ID</Text>
               <View style={styles.qrChip}>
                 <Ionicons name="qr-code-outline" size={14} color={COLORS.ink} />
                 <Text style={styles.qrChipText}>QR</Text>
               </View>
             </View>
             <Text style={styles.idValue}>{driver.id}</Text>
-            <Text style={styles.idHint}>Tap to show QR for passengers</Text>
+            <Text style={styles.idMeta}>Tap to show QR for passengers</Text>
           </TouchableOpacity>
         </Animated.View>
       }
