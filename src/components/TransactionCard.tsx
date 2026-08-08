@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Transaction } from '../types';
 import { COLORS, SPACING } from '../theme/colors';
 
@@ -13,10 +13,12 @@ const TransactionCard = ({
   item,
   mode = 'passenger',
   last = false,
+  onRebook,
 }: {
   item: Transaction;
   mode?: 'passenger' | 'driver';
   last?: boolean;
+  onRebook?: (item: Transaction) => void;
 }) => {
   const isPassenger = mode === 'passenger';
   const person = isPassenger ? item.driverName : item.passengerName;
@@ -35,6 +37,17 @@ const TransactionCard = ({
           {person ? ' · ' : ''}
           {item.date} · {item.time}
         </Text>
+        {isPassenger && onRebook ? (
+          <TouchableOpacity
+            onPress={() => onRebook(item)}
+            hitSlop={8}
+            style={styles.rebookBtn}
+            accessibilityRole="button"
+            accessibilityLabel={`Rebook ${item.from} to ${item.to}`}
+          >
+            <Text style={styles.rebookText}>Rebook</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
 
       <View style={styles.right}>
@@ -55,7 +68,7 @@ const TransactionCard = ({
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingVertical: 14,
     gap: SPACING.md,
   },
@@ -84,9 +97,25 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     lineHeight: 16,
   },
+  rebookBtn: {
+    alignSelf: 'flex-start',
+    marginTop: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    backgroundColor: COLORS.primaryMuted,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+  },
+  rebookText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 12,
+    color: COLORS.ink,
+  },
   right: {
     alignItems: 'flex-end',
     gap: 5,
+    paddingTop: 2,
   },
   amount: {
     fontFamily: 'Sora_700Bold',
