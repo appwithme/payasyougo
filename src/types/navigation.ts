@@ -42,6 +42,26 @@ export type PassengerHomeStackParamList = {
   PassengerProfile: undefined;
 };
 
+export type PassengerBookStackParamList = {
+  BookTrip: undefined;
+  EnterDriverId: {
+    from: string;
+    to: string;
+    fare: number;
+    routeId: string;
+  };
+  ConfirmTrip: {
+    from: string;
+    to: string;
+    fare: number;
+    driver: any;
+  };
+  PaymentSuccess: {
+    transaction: any;
+    driver: any;
+  };
+};
+
 export type DriverTabParamList = {
   DashboardTab: undefined;
   TxnTab: undefined;

@@ -6,6 +6,8 @@ import {
   ScrollView,
   StatusBar,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,7 +17,7 @@ import Input from '../../components/Input';
 import DriverCard from '../../components/DriverCard';
 import Button from '../../components/Button';
 import { lookupDriver } from '../../services/driversService';
-import { COLORS, SPACING } from '../../theme/colors';
+import { COLORS, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { Driver } from '../../types';
 
@@ -29,7 +31,7 @@ const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: an
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleSearch = (text: string) => {
-    const val = text.toUpperCase();
+    const val = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
     setDriverId(val);
     setFoundDriver(null);
     setNotFound(false);
@@ -52,57 +54,91 @@ const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: an
     }, 400);
   };
 
+  const fareLabel = `GH₵${Number(fare).toFixed(2)}`;
+
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <StatusBar barStyle="dark-content" />
-      <Header title="Driver" onBack={() => navigation.goBack()} transparent />
+      <Header title="Link driver" onBack={() => navigation.goBack()} transparent />
 
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        <Animated.View entering={FadeInDown.duration(350)} style={styles.tripSummary}>
-          <Text style={styles.tripRoute}>
-            {from} → {to}
-          </Text>
-          <Text style={styles.tripFare}>GH₵{fare}</Text>
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.delay(60).duration(400)}>
-          <Text style={styles.title}>Enter driver ID</Text>
-          <Text style={styles.subtitle}>
-            Ask your driver for the ID on their profile to link this payment.
-          </Text>
-        </Animated.View>
-
-        <Animated.View entering={FadeInUp.delay(100).duration(400)} style={styles.inputWrap}>
-          <Input
-            label="Driver ID"
-            placeholder="e.g. DRV001"
-            value={driverId}
-            onChangeText={handleSearch}
-            iconName="id-card-outline"
-            autoCapitalize="characters"
-            error={notFound ? 'No driver found with this ID' : ''}
-          />
-          {looking && (
-            <View style={styles.looking}>
-              <ActivityIndicator size="small" color={COLORS.ink} />
-              <Text style={styles.lookingText}>Looking up driver…</Text>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={8}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Animated.View entering={FadeInDown.duration(350)} style={styles.tripCard}>
+            <View style={styles.tripTop}>
+              <Text style={styles.tripLabel}>Your route</Text>
+              <Text style={styles.tripFare}>{fareLabel}</Text>
             </View>
-          )}
-        </Animated.View>
-
-        {foundDriver && (
-          <Animated.View entering={FadeInUp.duration(350)} style={styles.driverSection}>
-            <View style={styles.foundRow}>
-              <Ionicons name="checkmark-circle" size={16} color={COLORS.success} />
-              <Text style={styles.foundLabel}>Driver found</Text>
+            <View style={styles.tripStops}>
+              <View style={styles.stopRow}>
+                <View style={styles.iconWell}>
+                  <Ionicons name="locate-outline" size={14} color={COLORS.textSecondary} />
+                </View>
+                <Text style={styles.stopText} numberOfLines={1}>
+                  {from}
+                </Text>
+              </View>
+              <View style={styles.stopRow}>
+                <View style={styles.iconWell}>
+                  <Ionicons name="flag-outline" size={14} color={COLORS.textSecondary} />
+                </View>
+                <Text style={styles.stopText} numberOfLines={1}>
+                  {to}
+                </Text>
+              </View>
             </View>
-            <DriverCard driver={foundDriver} />
           </Animated.View>
-        )}
 
-        <Animated.View entering={FadeInUp.delay(140).duration(400)}>
+          <Animated.View entering={FadeInDown.delay(60).duration(400)} style={styles.hero}>
+            <Text style={styles.title}>Who’s driving?</Text>
+            <Text style={styles.subtitle}>
+              Enter the driver ID shown on their profile to send this fare.
+            </Text>
+          </Animated.View>
+
+          <Animated.View entering={FadeInUp.delay(100).duration(400)} style={styles.inputBlock}>
+            <Input
+              label="Driver ID"
+              placeholder="DRV001"
+              value={driverId}
+              onChangeText={handleSearch}
+              iconName="id-card-outline"
+              autoCapitalize="characters"
+              autoCorrect={false}
+              error={notFound ? 'No driver found with this ID' : ''}
+            />
+
+            {looking ? (
+              <View style={styles.statusRow}>
+                <ActivityIndicator size="small" color={COLORS.ink} />
+                <Text style={styles.statusText}>Looking up driver…</Text>
+              </View>
+            ) : null}
+
+            {!looking && driverId.length > 0 && driverId.length < 5 ? (
+              <Text style={styles.hint}>Keep typing — IDs are at least 5 characters.</Text>
+            ) : null}
+          </Animated.View>
+
+          {foundDriver ? (
+            <Animated.View entering={FadeInUp.duration(350)} style={styles.driverBlock}>
+              <Text style={styles.sectionLabel}>Paying</Text>
+              <DriverCard driver={foundDriver} />
+            </Animated.View>
+          ) : null}
+        </ScrollView>
+
+        <Animated.View entering={FadeInUp.delay(140).duration(400)} style={styles.footer}>
           <Button
-            title="Continue to payment"
+            title={foundDriver ? `Continue · ${fareLabel}` : 'Continue to payment'}
+            variant="ink"
             onPress={() =>
               navigation.navigate('ConfirmTrip', {
                 from,
@@ -112,54 +148,85 @@ const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: an
               })
             }
             disabled={!foundDriver}
+            icon={
+              foundDriver ? (
+                <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
+              ) : undefined
+            }
           />
         </Animated.View>
-      </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  scroll: { padding: SPACING.lg, paddingBottom: 40 },
-  tripSummary: {
+  flex: { flex: 1 },
+  scroll: {
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.lg,
+    gap: SPACING.lg,
+  },
+
+  tripCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    gap: SPACING.md,
+  },
+  tripTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: SPACING.xl,
-    paddingBottom: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
   },
-  tripRoute: { ...type.bodyBold, flex: 1, marginRight: SPACING.md },
+  tripLabel: { ...type.caption },
   tripFare: {
     fontFamily: 'Sora_700Bold',
     fontSize: 18,
     color: COLORS.ink,
   },
-  title: { ...type.heading },
-  subtitle: {
-    ...type.body,
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.lg,
+  tripStops: { gap: 10 },
+  stopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
-  inputWrap: { marginBottom: SPACING.lg },
-  looking: {
+  iconWell: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: COLORS.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stopText: { ...type.bodyBold, flex: 1 },
+
+  hero: { gap: 6 },
+  title: { ...type.heading },
+  subtitle: { ...type.body },
+
+  inputBlock: { gap: 8 },
+  statusRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginTop: 8,
   },
-  lookingText: { ...type.caption },
-  driverSection: { marginBottom: SPACING.lg, gap: SPACING.sm },
-  foundRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  foundLabel: {
-    ...type.label,
-    color: COLORS.success,
+  statusText: { ...type.caption },
+  hint: { ...type.caption },
+
+  driverBlock: { gap: SPACING.sm },
+  sectionLabel: { ...type.label },
+
+  footer: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.sm,
+    paddingBottom: SPACING.md,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    backgroundColor: COLORS.background,
   },
 });
 

@@ -19,17 +19,7 @@ import PassengerProfileScreen from '../screens/passenger/PassengerProfileScreen'
 const Tab = createBottomTabNavigator<PassengerTabParamList>();
 const HomeStackNav = createNativeStackNavigator<PassengerHomeStackParamList>();
 const BookStackNav = createNativeStackNavigator<PassengerBookStackParamList>();
-const HistoryStackNav = createNativeStackNavigator();
-const ProfileStackNav = createNativeStackNavigator();
-
-const bookingScreens = (
-  <>
-    <BookStackNav.Screen name="BookTrip" component={BookTripScreen} />
-    <BookStackNav.Screen name="EnterDriverId" component={EnterDriverIdScreen} />
-    <BookStackNav.Screen name="ConfirmTrip" component={ConfirmTripScreen} />
-    <BookStackNav.Screen name="PaymentSuccess" component={PaymentSuccessScreen} />
-  </>
-);
+const SimpleStack = createNativeStackNavigator();
 
 const HomeStack = () => (
   <HomeStackNav.Navigator screenOptions={{ headerShown: false }}>
@@ -45,20 +35,23 @@ const HomeStack = () => (
 
 const BookStack = () => (
   <BookStackNav.Navigator screenOptions={{ headerShown: false }}>
-    {bookingScreens}
+    <BookStackNav.Screen name="BookTrip" component={BookTripScreen} />
+    <BookStackNav.Screen name="EnterDriverId" component={EnterDriverIdScreen} />
+    <BookStackNav.Screen name="ConfirmTrip" component={ConfirmTripScreen} />
+    <BookStackNav.Screen name="PaymentSuccess" component={PaymentSuccessScreen} />
   </BookStackNav.Navigator>
 );
 
 const HistoryStack = () => (
-  <HistoryStackNav.Navigator screenOptions={{ headerShown: false }}>
-    <HistoryStackNav.Screen name="TripHistory" component={TripHistoryScreen} />
-  </HistoryStackNav.Navigator>
+  <SimpleStack.Navigator screenOptions={{ headerShown: false }}>
+    <SimpleStack.Screen name="TripHistory" component={TripHistoryScreen} />
+  </SimpleStack.Navigator>
 );
 
 const ProfileStack = () => (
-  <ProfileStackNav.Navigator screenOptions={{ headerShown: false }}>
-    <ProfileStackNav.Screen name="PassengerProfile" component={PassengerProfileScreen} />
-  </ProfileStackNav.Navigator>
+  <SimpleStack.Navigator screenOptions={{ headerShown: false }}>
+    <SimpleStack.Screen name="PassengerProfile" component={PassengerProfileScreen} />
+  </SimpleStack.Navigator>
 );
 
 const PassengerNavigator = () => (
