@@ -23,7 +23,7 @@ import { type } from '../../theme/typography';
 const { width } = Dimensions.get('window');
 
 /** Bump version so existing Expo Go installs see onboarding again after redesign */
-export const ONBOARDING_KEY = 'payasyougo_onboarding_v3';
+export const ONBOARDING_KEY = 'payasyougo_onboarding_v4';
 
 const SLIDES: {
   key: string;

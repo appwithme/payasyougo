@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreenNative from 'expo-splash-screen';
@@ -18,11 +18,12 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppProvider } from './src/context/AppContext';
 import RootNavigator from './src/navigation/RootNavigator';
-import SplashScreen from './src/screens/shared/SplashScreen';
+import AnimatedSplash from './src/screens/shared/SplashScreen';
 import { ONBOARDING_KEY } from './src/screens/shared/OnboardingScreen';
-import { COLORS } from './src/theme/colors';
 
 SplashScreenNative.preventAutoHideAsync().catch(() => undefined);
+
+type BootRoute = 'Onboarding' | 'Welcome';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -33,8 +34,9 @@ export default function App() {
     DMSans_700Bold,
   });
 
-  const [showSplash, setShowSplash] = useState(true);
-  const [initialRoute, setInitialRoute] = useState<'Onboarding' | 'Welcome' | null>(null);
+  const [initialRoute, setInitialRoute] = useState<BootRoute | null>(null);
+  const [phase, setPhase] = useState<'loading' | 'splash' | 'app'>('loading');
+  const nativeHidden = useRef(false);
 
   useEffect(() => {
     (async () => {
@@ -47,26 +49,51 @@ export default function App() {
     })();
   }, []);
 
-  const onLayoutReady = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreenNative.hideAsync();
+  // Move into animated splash once fonts + route preference are ready
+  useEffect(() => {
+    if (fontsLoaded && initialRoute && phase === 'loading') {
+      setPhase('splash');
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, initialRoute, phase]);
 
-  if (!fontsLoaded || !initialRoute) {
-    return <View style={styles.boot} onLayout={onLayoutReady} />;
+  const hideNativeSplash = useCallback(async () => {
+    if (nativeHidden.current) return;
+    nativeHidden.current = true;
+    try {
+      await SplashScreenNative.hideAsync();
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Only hide native splash once our animated splash is on screen
+  useEffect(() => {
+    if (phase === 'splash') {
+      const t = setTimeout(() => {
+        hideNativeSplash();
+      }, 50);
+      return () => clearTimeout(t);
+    }
+  }, [phase, hideNativeSplash]);
+
+  if (phase === 'loading' || !initialRoute) {
+    return <View style={styles.boot} />;
   }
 
-  if (showSplash) {
+  if (phase === 'splash') {
     return (
-      <View style={styles.boot} onLayout={onLayoutReady}>
-        <SplashScreen onFinish={() => setShowSplash(false)} />
+      <View style={styles.boot}>
+        <AnimatedSplash
+          onFinish={() => {
+            setPhase('app');
+          }}
+        />
       </View>
     );
   }
 
   return (
-    <GestureHandlerRootView style={styles.root} onLayout={onLayoutReady}>
+    <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
         <AppProvider>
           <NavigationContainer>
