@@ -1,23 +1,13 @@
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
-import { Platform } from 'react-native';
-
-WebBrowser.maybeCompleteAuthSession();
 
 /**
- * Use localhost redirect (allowed by Google Web clients).
- * ASWebAuthenticationSession / Chrome Custom Tabs capture this URL and
- * return it to the app — works in Expo Go without auth.expo.io.
  * Must match Google Console → Authorized redirect URIs.
+ * WebView intercepts this navigation and reads id_token from the URL.
  */
 export const GOOGLE_REDIRECT_URI = 'https://localhost';
 
 const discovery = {
   authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-  tokenEndpoint: 'https://oauth2.googleapis.com/token',
-  revocationEndpoint: 'https://oauth2.googleapis.com/revoke',
-  userInfoEndpoint: 'https://openidconnect.googleapis.com/v1/userinfo',
 };
 
 function cleanClientId(value?: string | null): string | undefined {
@@ -26,102 +16,68 @@ function cleanClientId(value?: string | null): string | undefined {
   return v;
 }
 
-export function getGoogleClientIds() {
-  return {
-    webClientId: cleanClientId(process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID),
-    iosClientId: cleanClientId(process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID),
-    androidClientId: cleanClientId(process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID),
-  };
+export function getGoogleWebClientId(): string | undefined {
+  return cleanClientId(process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID);
 }
 
 export function isGoogleConfigured(): boolean {
-  return !!getGoogleClientIds().webClientId;
+  return !!getGoogleWebClientId();
 }
 
-function paramsFromUrl(url: string): URLSearchParams {
+function randomNonce(length = 16): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let out = '';
+  for (let i = 0; i < length; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  return out;
+}
+
+/** Build Google OAuth URL (implicit id_token) for embedding in a WebView */
+export function buildGoogleAuthUrl(): string | null {
+  const clientId = getGoogleWebClientId();
+  if (!clientId) return null;
+
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: GOOGLE_REDIRECT_URI,
+    response_type: 'id_token',
+    scope: 'openid profile email',
+    nonce: randomNonce(),
+    prompt: 'select_account',
+  });
+
+  return `${discovery.authorizationEndpoint}?${params.toString()}`;
+}
+
+export function paramsFromUrl(url: string): URLSearchParams {
   const hash = url.includes('#') ? url.split('#')[1] : '';
   const query = url.includes('?') ? url.split('?')[1]?.split('#')[0] : '';
   return new URLSearchParams(hash || query || '');
 }
 
-function parseIdTokenFromUrl(url: string): string | null {
-  return paramsFromUrl(url).get('id_token');
-}
+export function extractGoogleResult(url: string): {
+  idToken?: string;
+  code?: string;
+  error?: string;
+} {
+  if (!url) return {};
+  const isRedirect =
+    url.startsWith(GOOGLE_REDIRECT_URI) ||
+    url.startsWith('http://localhost') ||
+    url.startsWith('https://localhost') ||
+    url.includes('localhost/?') ||
+    url.includes('localhost/#');
 
-function parseCodeFromUrl(url: string): string | null {
-  return paramsFromUrl(url).get('code');
-}
+  if (!isRedirect && !url.includes('id_token') && !url.includes('error=')) {
+    return {};
+  }
 
-/**
- * Google sign-in for Expo Go via WebBrowser auth session.
- * Redirect = https://localhost so the browser session completes with tokens.
- */
-export function useGoogleIdTokenRequest() {
-  const ids = getGoogleClientIds();
-  const configured = isGoogleConfigured();
-  const webId = ids.webClientId;
-  const iosId = ids.iosClientId || webId;
-  const androidId = ids.androidClientId || webId;
-
-  const [request] = Google.useAuthRequest({
-    clientId: webId,
-    webClientId: webId,
-    iosClientId: iosId,
-    androidClientId: androidId,
-    redirectUri: GOOGLE_REDIRECT_URI,
-    responseType: AuthSession.ResponseType.IdToken,
-    scopes: ['openid', 'profile', 'email'],
-    shouldAutoExchangeCode: false,
-    selectAccount: true,
-    usePKCE: false,
-  });
-
-  const promptGoogleAsync = async (): Promise<
-    | { type: 'success'; idToken: string }
-    | { type: 'success_code'; code: string }
-    | { type: 'cancel' }
-    | { type: 'error'; message: string }
-  > => {
-    if (!request || !webId) {
-      return { type: 'error', message: 'Google sign-in is still loading. Try again.' };
-    }
-
-    const authUrl = await request.makeAuthUrlAsync(discovery);
-    if (!authUrl) {
-      return { type: 'error', message: 'Could not start Google sign-in.' };
-    }
-
-    const result = await WebBrowser.openAuthSessionAsync(authUrl, GOOGLE_REDIRECT_URI, {
-      preferEphemeralSession: false,
-      showInRecents: true,
-    });
-
-    if (result.type === 'cancel' || result.type === 'dismiss') {
-      return { type: 'cancel' };
-    }
-
-    if (result.type !== 'success' || !('url' in result) || !result.url) {
-      return { type: 'error', message: 'Google sign-in did not complete.' };
-    }
-
-    const idToken = parseIdTokenFromUrl(result.url);
-    if (idToken) return { type: 'success', idToken };
-
-    const code = parseCodeFromUrl(result.url);
-    if (code) return { type: 'success_code', code };
-
-    return {
-      type: 'error',
-      message:
-        'Google returned no token. In Google Console, ensure https://localhost is an Authorized redirect URI.',
-    };
-  };
-
+  const params = paramsFromUrl(url);
   return {
-    configured,
-    ready: configured && !!request,
-    redirectUri: GOOGLE_REDIRECT_URI,
-    platform: Platform.OS,
-    promptGoogleAsync,
+    idToken: params.get('id_token') || undefined,
+    code: params.get('code') || undefined,
+    error: params.get('error') || undefined,
   };
 }
+
+// Keep AuthSession import used so Metro doesn't tree-shake oddly in some setups
+void AuthSession.ResponseType;
