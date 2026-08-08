@@ -1,20 +1,15 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  StatusBar,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../../context/AppContext';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import GoogleSignInButton from '../../components/GoogleSignInButton';
+import AccountCreatedView from '../../components/AccountCreatedView';
+import AuthSheetScreen from '../../components/AuthSheetScreen';
 import { makePassengerSignupSample } from '../../data/qaAccounts';
-import { COLORS, FONT_SIZE, SPACING, RADIUS } from '../../theme/colors';
+import { COLORS, SPACING, RADIUS } from '../../theme/colors';
+import { type } from '../../theme/typography';
 
 const PassengerSignupScreen = ({ navigation }: { navigation: any }) => {
   const { registerPassenger } = useApp();
@@ -25,6 +20,7 @@ const PassengerSignupScreen = ({ navigation }: { navigation: any }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [created, setCreated] = useState(false);
   const [errors, setErrors] = useState<{
     name?: string;
     phone?: string;
@@ -66,152 +62,135 @@ const PassengerSignupScreen = ({ navigation }: { navigation: any }) => {
     setLoading(false);
     if (!result.success) {
       setErrors({ form: result.error || 'Failed to create account.' });
+      return;
     }
+    setCreated(true);
   };
 
+  if (created) {
+    return (
+      <AccountCreatedView
+        role="passenger"
+        name={name.trim()}
+        phone={phone.trim()}
+        onGoToLogin={() => navigation.navigate('PassengerLogin')}
+      />
+    );
+  }
+
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back}>
-          <View style={styles.backIconWrap}>
-            <Ionicons name="chevron-back" size={24} color={COLORS.textPrimary} />
-          </View>
-        </TouchableOpacity>
-
-        <View style={styles.header}>
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Enter your details to get started</Text>
-        </View>
-
-        {!!errors?.form && (
-          <View style={styles.errorBox}>
-            <Ionicons name="alert-circle" size={18} color={COLORS.error} />
-            <Text style={styles.errorText}>{errors.form}</Text>
-          </View>
-        )}
-
-        <View style={styles.form}>
-          <Input
-            label="Full Name"
-            placeholder="e.g. Kofi Mensah"
-            value={name}
-            onChangeText={setName}
-            iconName="person-outline"
-            error={errors?.name}
-            autoComplete="name"
-            textContentType="name"
+    <AuthSheetScreen
+      eyebrow="Passenger"
+      title="Create account"
+      subtitle="Enter your details to start paying campus fares."
+      onBack={() => navigation.goBack()}
+      footer={
+        <>
+          <Button
+            title="Create account"
+            onPress={handleRegister}
+            loading={loading}
+            variant="ink"
           />
-          <Input
-            label="Phone Number"
-            placeholder="055 XXX XXXX"
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="phone-pad"
-            iconName="call-outline"
-            error={errors?.phone}
-            autoCapitalize="none"
-            autoComplete="tel"
-            textContentType="telephoneNumber"
-          />
-          <Input
-            label="Email (optional)"
-            placeholder="your@email.com"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            iconName="mail-outline"
-            autoCapitalize="none"
-            autoComplete="email"
-            textContentType="emailAddress"
-          />
-          <Input
-            label="Password"
-            placeholder="Create a password (min. 6 chars)"
-            value={password}
-            onChangeText={setPassword}
-            iconName="lock-closed-outline"
-            secureTextEntry
-            autoCapitalize="none"
-            error={errors?.password}
-            autoComplete="new-password"
-            textContentType="newPassword"
-          />
-          <Input
-            label="Confirm Password"
-            placeholder="Re-enter your password"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            iconName="lock-closed-outline"
-            secureTextEntry
-            autoCapitalize="none"
-            error={errors?.confirmPassword}
-            autoComplete="new-password"
-            textContentType="newPassword"
-          />
-
-          <TouchableOpacity
-            style={styles.autofillBtn}
-            onPress={fillSignupSample}
-            accessibilityRole="button"
-            accessibilityLabel="Autofill registration sample"
-          >
-            <Ionicons name="flash-outline" size={16} color={COLORS.textPrimary} />
-            <Text style={styles.autofillText}>Autofill sample details</Text>
-          </TouchableOpacity>
-
-          <Button title="Create Account" onPress={handleRegister} loading={loading} style={styles.btn} />
-
-          <View style={styles.dividerRow}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.divider} />
-          </View>
-
-          <GoogleSignInButton
-            onError={(msg) => setErrors((prev) => ({ ...prev, form: msg }))}
-          />
-
           <TouchableOpacity
             onPress={() => navigation.navigate('PassengerLogin')}
-            style={styles.loginLink}
+            style={styles.link}
           >
-            <Text style={styles.loginLinkText}>Already have an account? </Text>
-            <Text style={[styles.loginLinkText, styles.linkAccent]}>Login</Text>
+            <Text style={styles.linkText}>Already have an account? </Text>
+            <Text style={styles.linkAccent}>Login</Text>
           </TouchableOpacity>
+        </>
+      }
+    >
+      {!!errors?.form && (
+        <View style={styles.errorBox}>
+          <Ionicons name="alert-circle" size={18} color={COLORS.error} />
+          <Text style={styles.errorText}>{errors.form}</Text>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      )}
+
+      <Input
+        label="Full name"
+        placeholder="e.g. Kofi Mensah"
+        value={name}
+        onChangeText={setName}
+        iconName="person-outline"
+        error={errors?.name}
+        autoComplete="name"
+        textContentType="name"
+      />
+      <Input
+        label="Phone number"
+        placeholder="055 XXX XXXX"
+        value={phone}
+        onChangeText={setPhone}
+        keyboardType="phone-pad"
+        iconName="call-outline"
+        error={errors?.phone}
+        autoCapitalize="none"
+        autoComplete="tel"
+        textContentType="telephoneNumber"
+      />
+      <Input
+        label="Email (optional)"
+        placeholder="your@email.com"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        iconName="mail-outline"
+        autoCapitalize="none"
+        autoComplete="email"
+        textContentType="emailAddress"
+      />
+      <Input
+        label="Password"
+        placeholder="Create a password (min. 6 chars)"
+        value={password}
+        onChangeText={setPassword}
+        iconName="lock-closed-outline"
+        secureTextEntry
+        autoCapitalize="none"
+        error={errors?.password}
+        autoComplete="new-password"
+        textContentType="newPassword"
+      />
+      <Input
+        label="Confirm password"
+        placeholder="Re-enter your password"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        iconName="lock-closed-outline"
+        secureTextEntry
+        autoCapitalize="none"
+        error={errors?.confirmPassword}
+        autoComplete="new-password"
+        textContentType="newPassword"
+      />
+
+      <TouchableOpacity
+        style={styles.autofillBtn}
+        onPress={fillSignupSample}
+        accessibilityRole="button"
+        accessibilityLabel="Autofill registration sample"
+      >
+        <Ionicons name="flash-outline" size={16} color={COLORS.ink} />
+        <Text style={styles.autofillText}>Autofill sample details</Text>
+      </TouchableOpacity>
+
+      <View style={styles.dividerRow}>
+        <View style={styles.divider} />
+        <Text style={styles.dividerText}>or</Text>
+        <View style={styles.divider} />
+      </View>
+
+      <GoogleSignInButton
+        onError={(msg) => setErrors((prev) => ({ ...prev, form: msg }))}
+      />
+    </AuthSheetScreen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  scroll: { padding: SPACING.lg, flexGrow: 1 },
-  back: { marginBottom: SPACING.lg, alignSelf: 'flex-start' },
-  backIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: COLORS.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  header: { marginBottom: SPACING.xl },
-  title: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.xxl,
-    fontWeight: '900',
-    letterSpacing: -1,
-  },
-  subtitle: {
-    color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.base,
-    marginTop: SPACING.sm,
-    fontWeight: '500',
-  },
   errorBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -219,48 +198,47 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.errorLight,
     borderRadius: RADIUS.md,
     padding: SPACING.md,
-    marginBottom: SPACING.lg,
   },
-  errorText: { color: COLORS.error, flex: 1, fontWeight: '700', fontSize: FONT_SIZE.sm },
-  form: { gap: SPACING.md },
+  errorText: {
+    ...type.caption,
+    color: COLORS.error,
+    flex: 1,
+    fontFamily: 'DMSans_700Bold',
+  },
   autofillBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: SPACING.xs,
-    marginTop: -SPACING.xs,
+    paddingVertical: SPACING.xs,
   },
   autofillText: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: '700',
+    ...type.caption,
+    color: COLORS.ink,
+    fontFamily: 'DMSans_700Bold',
   },
-  btn: { marginTop: SPACING.md },
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    marginTop: SPACING.md,
+    marginTop: SPACING.sm,
   },
   divider: { flex: 1, height: 1, backgroundColor: COLORS.border },
-  dividerText: {
-    color: COLORS.textMuted,
-    fontSize: FONT_SIZE.sm,
-    fontWeight: '600',
-  },
-  loginLink: {
+  dividerText: { ...type.caption, color: COLORS.textMuted },
+  link: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: SPACING.lg,
+    paddingVertical: SPACING.sm,
   },
-  loginLinkText: {
+  linkText: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 15,
     color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.base,
-    fontWeight: '500',
   },
   linkAccent: {
-    color: COLORS.textPrimary,
-    fontWeight: '800',
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 15,
+    color: COLORS.ink,
   },
 });
 
