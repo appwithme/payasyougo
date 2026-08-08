@@ -18,9 +18,11 @@ import WalletCard from '../../components/WalletCard';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import { useTabBarPadding } from '../../navigation/FloatingTabBar';
 
 const WalletScreen = ({ navigation }: { navigation: any }) => {
   const { getDriverData, withdrawDriverFunds } = useApp();
+  const tabPad = useTabBarPadding();
   const driver = getDriverData();
 
   const [withdrawAmount, setWithdrawAmount] = useState('');
@@ -41,7 +43,7 @@ const WalletScreen = ({ navigation }: { navigation: any }) => {
       <Header title="Wallet" onBack={() => navigation.goBack()} />
 
       <ScrollView
-        contentContainerStyle={styles.scroll}
+        contentContainerStyle={[styles.scroll, { paddingBottom: tabPad }]}
         showsVerticalScrollIndicator={false}
       >
         <WalletCard
@@ -116,7 +118,7 @@ const WalletScreen = ({ navigation }: { navigation: any }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  scroll: { padding: SPACING.lg, gap: SPACING.xl, paddingBottom: 100 },
+  scroll: { padding: SPACING.lg, gap: SPACING.xl },
 
   section: { gap: SPACING.md },
   sectionTitle: {
