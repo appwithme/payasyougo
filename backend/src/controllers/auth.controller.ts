@@ -160,7 +160,7 @@ export async function loginWithGoogleCode(body: unknown) {
       client_secret: clientSecret,
       redirect_uri: input.redirectUri,
       grant_type: 'authorization_code',
-    }),
+    }).toString(),
   });
 
   const tokenJson: any = await tokenRes.json();
