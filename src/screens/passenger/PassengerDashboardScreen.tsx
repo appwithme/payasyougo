@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,9 +16,11 @@ import { useApp } from '../../context/AppContext';
 import TransactionCard from '../../components/TransactionCard';
 import Button from '../../components/Button';
 import UserAvatar from '../../components/UserAvatar';
+import { fetchFare } from '../../services/routesService';
 import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { useTabBarPadding } from '../../navigation/FloatingTabBar';
+import { Transaction } from '../../types';
 
 const MOMO_ICON = require('../../../assets/brand/momo-icon.png');
 
@@ -28,6 +31,32 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
   const firstName = currentUser?.name?.split(' ')[0] || 'Passenger';
   const avatar =
     currentUser && 'avatar' in currentUser ? currentUser.avatar : null;
+  const [rebookingId, setRebookingId] = useState<string | null>(null);
+
+  const handleRebook = async (trip: Transaction) => {
+    if (rebookingId) return;
+    setRebookingId(trip.id);
+    try {
+      const route = await fetchFare(trip.from, trip.to);
+      navigation.navigate('BookTab', {
+        screen: 'EnterDriverId',
+        params: {
+          from: route.from,
+          to: route.to,
+          fare: route.fare,
+          routeId: route.id,
+          prefillDriverId: trip.driverId,
+        },
+      });
+    } catch (err: any) {
+      Alert.alert(
+        'Couldn’t rebook',
+        err?.message || 'Pick this route again from Book.'
+      );
+    } finally {
+      setRebookingId(null);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -94,18 +123,19 @@ const PassengerDashboardScreen = ({ navigation }: { navigation: any }) => {
             </View>
           ) : (
             <View style={styles.tripList}>
-              {recentTrips.map((trip, i) => (
-                <Animated.View
-                  key={trip.id}
-                  entering={FadeInUp.delay(200 + i * 50).duration(380)}
-                >
+              {            recentTrips.map((trip, i) => (
+              <Animated.View
+                key={trip.id}
+                entering={FadeInUp.delay(200 + i * 50).duration(380)}
+              >
                   <TransactionCard
                     item={trip}
                     mode="passenger"
                     last={i === recentTrips.length - 1}
+                    onRebook={handleRebook}
                   />
-                </Animated.View>
-              ))}
+              </Animated.View>
+            ))}
             </View>
           )}
         </Animated.View>
