@@ -13,6 +13,7 @@ import { useApp } from '../../context/AppContext';
 import * as authService from '../../services/authService';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
+import { makeDriverSignupSample } from '../../data/qaAccounts';
 import { COLORS, FONT_SIZE, SPACING, RADIUS } from '../../theme/colors';
 import { type } from '../../theme/typography';
 
@@ -112,6 +113,23 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
 
   const current = STEPS[step];
+
+  const fillSignupSample = () => {
+    const sample = makeDriverSignupSample();
+    setName(sample.name);
+    setPhone(sample.phone);
+    setEmail(sample.email);
+    setPassword(sample.password);
+    setConfirmPassword(sample.password);
+    setGhanaCard(sample.ghanaCard);
+    setGhanaVerified(false);
+    setGhanaNormalized('');
+    setLicense(sample.license);
+    setLicenseVerified(false);
+    setLicenseNormalized('');
+    setVehicle(sample.vehicle);
+    setErrors({});
+  };
 
   const clearFieldError = (key: string) => {
     if (errors[key] || errors.form) {
@@ -246,6 +264,8 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
             }}
             iconName="person-outline"
             error={errors.name}
+            autoComplete="name"
+            textContentType="name"
           />
           <Input
             label="Phone Number"
@@ -259,6 +279,8 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
             iconName="call-outline"
             error={errors.phone}
             autoCapitalize="none"
+            autoComplete="tel"
+            textContentType="telephoneNumber"
           />
           <Input
             label="Email Address"
@@ -268,6 +290,8 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
             keyboardType="email-address"
             iconName="mail-outline"
             autoCapitalize="none"
+            autoComplete="email"
+            textContentType="emailAddress"
           />
           <Input
             label="Password"
@@ -281,6 +305,8 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
             secureTextEntry
             autoCapitalize="none"
             error={errors.password}
+            autoComplete="new-password"
+            textContentType="newPassword"
           />
           <Input
             label="Confirm Password"
@@ -294,7 +320,18 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
             secureTextEntry
             autoCapitalize="none"
             error={errors.confirmPassword}
+            autoComplete="new-password"
+            textContentType="newPassword"
           />
+          <TouchableOpacity
+            style={styles.autofillBtn}
+            onPress={fillSignupSample}
+            accessibilityRole="button"
+            accessibilityLabel="Autofill registration sample"
+          >
+            <Ionicons name="flash-outline" size={16} color={COLORS.ink} />
+            <Text style={styles.autofillText}>Autofill sample details</Text>
+          </TouchableOpacity>
         </>
       );
     }
@@ -322,6 +359,15 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
             autoCapitalize="characters"
             error={errors.ghanaCard}
           />
+          <TouchableOpacity
+            style={styles.autofillBtn}
+            onPress={fillSignupSample}
+            accessibilityRole="button"
+            accessibilityLabel="Autofill Ghana Card sample"
+          >
+            <Ionicons name="flash-outline" size={16} color={COLORS.ink} />
+            <Text style={styles.autofillText}>Autofill sample details</Text>
+          </TouchableOpacity>
           {ghanaVerified ? (
             <View style={styles.verifiedBox}>
               <Ionicons name="checkmark-circle" size={18} color={COLORS.success} />
@@ -363,6 +409,15 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
             autoCapitalize="characters"
             error={errors.license}
           />
+          <TouchableOpacity
+            style={styles.autofillBtn}
+            onPress={fillSignupSample}
+            accessibilityRole="button"
+            accessibilityLabel="Autofill licence sample"
+          >
+            <Ionicons name="flash-outline" size={16} color={COLORS.ink} />
+            <Text style={styles.autofillText}>Autofill sample details</Text>
+          </TouchableOpacity>
           {licenseVerified ? (
             <View style={styles.verifiedBox}>
               <Ionicons name="checkmark-circle" size={18} color={COLORS.success} />
@@ -409,6 +464,15 @@ const DriverSignupScreen = ({ navigation }: { navigation: any }) => {
           iconName="car-sport-outline"
           error={errors.vehicle}
         />
+        <TouchableOpacity
+          style={styles.autofillBtn}
+          onPress={fillSignupSample}
+          accessibilityRole="button"
+          accessibilityLabel="Autofill vehicle sample"
+        >
+          <Ionicons name="flash-outline" size={16} color={COLORS.ink} />
+          <Text style={styles.autofillText}>Autofill sample details</Text>
+        </TouchableOpacity>
       </>
     );
   };
@@ -566,6 +630,17 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZE.sm,
   },
   form: { gap: SPACING.md },
+  autofillBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: SPACING.xs,
+  },
+  autofillText: {
+    ...type.caption,
+    color: COLORS.ink,
+    fontFamily: 'DMSans_700Bold',
+  },
   infoCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
