@@ -26,6 +26,11 @@ const googleSchema = z.object({
   idToken: z.string().min(10),
 });
 
+const googleCodeSchema = z.object({
+  code: z.string().min(5),
+  redirectUri: z.string().url(),
+});
+
 function mapUser(user: {
   id: string;
   fullName: string;
@@ -134,7 +139,44 @@ export async function login(body: unknown) {
 export async function loginWithGoogle(body: unknown) {
   const input = googleSchema.parse(body);
   const profile = await verifyGoogleIdToken(input.idToken);
+  return finishGooglePassengerLogin(profile);
+}
 
+/** Exchange auth code (Web client + secret) then sign in */
+export async function loginWithGoogleCode(body: unknown) {
+  const input = googleCodeSchema.parse(body);
+  const clientId = process.env.GOOGLE_WEB_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  if (!clientId || !clientSecret || clientId.includes('replace')) {
+    throw new AppError('Google client secret is not configured on the API', 503);
+  }
+
+  const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      code: input.code,
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: input.redirectUri,
+      grant_type: 'authorization_code',
+    }),
+  });
+
+  const tokenJson: any = await tokenRes.json();
+  if (!tokenRes.ok || !tokenJson.id_token) {
+    throw new AppError(tokenJson?.error_description || 'Google code exchange failed', 401);
+  }
+
+  const profile = await verifyGoogleIdToken(tokenJson.id_token);
+  return finishGooglePassengerLogin(profile);
+}
+
+async function finishGooglePassengerLogin(profile: {
+  sub: string;
+  email?: string;
+  name?: string;
+}) {
   let user = await prisma.user.findFirst({
     where: {
       OR: [
