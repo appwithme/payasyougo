@@ -3,12 +3,18 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 import * as authService from '../services/authService';
 import { fetchMyWallet } from '../services/driversService';
 import { fetchTransactions } from '../services/transactionsService';
 import { getToken } from '../services/apiClient';
+import notificationService, {
+  DEFAULT_NOTIFICATION_PREFS,
+  NotificationPrefs,
+  PendingPaymentNotification,
+} from '../services/notificationService';
 import { Passenger, Driver, Transaction } from '../types';
 
 type Role = 'passenger' | 'driver';
@@ -18,7 +24,8 @@ interface AppContextType {
   userRole: Role | null;
   passengerTrips: Transaction[];
   driverTransactions: Transaction[];
-  pendingNotification: any | null;
+  pendingNotification: PendingPaymentNotification | null;
+  notificationPrefs: NotificationPrefs;
   bootstrapping: boolean;
   loginPassenger: (
     phone: string,
@@ -55,6 +62,8 @@ interface AppContextType {
     fullName?: string;
     phone?: string;
   }) => Promise<{ success: boolean; error?: string }>;
+  updateNotificationPrefs: (prefs: NotificationPrefs) => Promise<void>;
+  notifyTripPaid: (trip: Pick<Transaction, 'from' | 'to' | 'amount'>) => Promise<void>;
   refreshTrips: () => Promise<void>;
   refreshDriverWallet: () => Promise<void>;
   clearNotification: () => void;
@@ -68,8 +77,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [userRole, setUserRole] = useState<Role | null>(null);
   const [passengerTrips, setPassengerTrips] = useState<Transaction[]>([]);
   const [driverTransactions, setDriverTransactions] = useState<Transaction[]>([]);
-  const [pendingNotification, setPendingNotification] = useState<any | null>(null);
+  const [pendingNotification, setPendingNotification] =
+    useState<PendingPaymentNotification | null>(null);
+  const [notificationPrefs, setNotificationPrefs] = useState<NotificationPrefs>(
+    DEFAULT_NOTIFICATION_PREFS
+  );
   const [bootstrapping, setBootstrapping] = useState(true);
+  const prefsRef = useRef(notificationPrefs);
+  prefsRef.current = notificationPrefs;
 
   const applyUser = useCallback((user: authService.AuthUser) => {
     setCurrentUser(user);
@@ -80,12 +95,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!userRole) return;
     try {
       const list = await fetchTransactions();
-      if (userRole === 'passenger') setPassengerTrips(list);
-      else setDriverTransactions(list);
+      if (userRole === 'passenger') {
+        setPassengerTrips(list);
+        return;
+      }
+
+      setDriverTransactions(list);
+
+      const userId = currentUser?.id;
+      if (!userId) return;
+
+      const fresh = await notificationService.detectNewDriverPayments(userId, list);
+      if (fresh.length === 0) return;
+
+      const latest = fresh[0];
+      setPendingNotification(latest);
+      await notificationService.notifyDriverPaymentReceived(prefsRef.current, latest);
+      await fetchMyWallet()
+        .then((wallet) => setCurrentUser(wallet))
+        .catch(() => undefined);
     } catch {
       // keep previous list
     }
-  }, [userRole]);
+  }, [userRole, currentUser?.id]);
 
   const refreshDriverWallet = useCallback(async () => {
     if (userRole !== 'driver') return;
@@ -100,6 +132,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     (async () => {
       try {
+        const prefs = await notificationService.loadNotificationPrefs();
+        setNotificationPrefs(prefs);
         const token = await getToken();
         if (!token) return;
         const user = await authService.fetchMe();
@@ -118,6 +152,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (userRole === 'driver') refreshDriverWallet();
     }
   }, [userRole, refreshTrips, refreshDriverWallet]);
+
+  // Poll for driver payment alerts while signed in
+  useEffect(() => {
+    if (userRole !== 'driver') return;
+    const id = setInterval(() => {
+      refreshTrips();
+    }, 12000);
+    return () => clearInterval(id);
+  }, [userRole, refreshTrips]);
 
   const loginPassenger = async (phone: string, password: string) => {
     try {
@@ -265,6 +308,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const updateNotificationPrefs = async (prefs: NotificationPrefs) => {
+    setNotificationPrefs(prefs);
+    await notificationService.saveNotificationPrefs(prefs);
+  };
+
+  const notifyTripPaid = async (trip: Pick<Transaction, 'from' | 'to' | 'amount'>) => {
+    await notificationService.notifyPassengerTripPaid(prefsRef.current, trip);
+  };
+
   const clearNotification = () => setPendingNotification(null);
 
   const getDriverData = (): Driver | null => {
@@ -287,11 +339,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         logout,
         updateAvatar,
         updateProfile,
+        updateNotificationPrefs,
+        notifyTripPaid,
         passengerTrips,
         driverTransactions,
         refreshTrips,
         refreshDriverWallet,
         pendingNotification,
+        notificationPrefs,
         clearNotification,
         getDriverData,
         bootstrapping,
