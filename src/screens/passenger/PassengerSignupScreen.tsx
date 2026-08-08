@@ -1,6 +1,3 @@
-// ============================================================
-// PASSENGER SIGNUP SCREEN
-// ============================================================
 import React, { useState } from 'react';
 import {
   View,
@@ -15,24 +12,28 @@ import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../../context/AppContext';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../../theme/colors';
+import { COLORS, FONT_SIZE, SPACING, RADIUS } from '../../theme/colors';
 
 const PassengerSignupScreen = ({ navigation }: { navigation: any }) => {
-  const { loginPassenger } = useApp();
+  const { registerPassenger } = useApp();
 
-  const [step, setStep] = useState(1);
-  const [name, setName]       = useState('');
-  const [phone, setPhone]     = useState('');
-  const [email, setEmail]     = useState('');
-  const [password, setPassword]         = useState('');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [otp, setOtp]         = useState('');
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors]   = useState<{ name?: string; phone?: string; password?: string; confirmPassword?: string; otp?: string }>();
+  const [errors, setErrors] = useState<{
+    name?: string;
+    phone?: string;
+    password?: string;
+    confirmPassword?: string;
+    form?: string;
+  }>();
 
-  const validateStep1 = () => {
-    const e: { name?: string; phone?: string; password?: string; confirmPassword?: string } = {};
-    if (!name.trim())  e.name  = 'Full name is required';
+  const handleRegister = async () => {
+    const e: typeof errors = {};
+    if (!name.trim()) e.name = 'Full name is required';
     if (!phone.trim()) e.phone = 'Phone number is required';
     else if (!/^\+?\d{9,13}$/.test(phone.replace(/\s/g, '')))
       e.phone = 'Enter a valid phone number';
@@ -41,40 +42,25 @@ const PassengerSignupScreen = ({ navigation }: { navigation: any }) => {
     if (!confirmPassword.trim()) e.confirmPassword = 'Please confirm your password';
     else if (password !== confirmPassword) e.confirmPassword = 'Passwords do not match';
     setErrors(e);
-    return Object.keys(e).length === 0;
-  };
+    if (Object.keys(e).length > 0) return;
 
-  const handleSendOtp = () => {
-    if (!validateStep1()) return;
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setStep(2);
-    }, 1200);
-  };
-
-  const handleVerifyOtp = () => {
-    if (otp.length < 4) {
-      setErrors({ otp: 'Enter the 4-digit code sent to your phone' });
-      return;
+    const result = await registerPassenger({
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email.trim(),
+      password,
+    });
+    setLoading(false);
+    if (!result.success) {
+      setErrors({ form: result.error || 'Failed to create account.' });
     }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      const result = loginPassenger(phone, password, name, email);
-      if (!result.success) {
-        setErrors({ otp: result.error || 'Failed to create account.' });
-      }
-    }, 800);
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back}>
           <View style={styles.backIconWrap}>
             <Ionicons name="chevron-back" size={24} color={COLORS.textPrimary} />
@@ -82,123 +68,76 @@ const PassengerSignupScreen = ({ navigation }: { navigation: any }) => {
         </TouchableOpacity>
 
         <View style={styles.header}>
-          <View style={styles.stepIndicator}>
-            <View style={[styles.stepDot, step >= 1 && styles.stepActive]} />
-            <View style={[styles.stepLine, step >= 2 && styles.stepLineActive]} />
-            <View style={[styles.stepDot, step >= 2 && styles.stepActive]} />
-          </View>
-          <Text style={styles.title}>
-            {step === 1 ? 'Create Account' : 'Verify Phone'}
-          </Text>
-          <Text style={styles.subtitle}>
-            {step === 1
-              ? 'Enter your details to get started'
-              : `We sent a code to ${phone}`}
-          </Text>
+          <Text style={styles.title}>Create Account</Text>
+          <Text style={styles.subtitle}>Enter your details to get started</Text>
         </View>
 
-        {step === 1 && (
-          <View style={styles.form}>
-            <Input
-              label="Full Name"
-              placeholder="e.g. Kofi Mensah"
-              value={name}
-              onChangeText={setName}
-              iconName="person-outline"
-              error={errors?.name}
-            />
-            <Input
-              label="Phone Number"
-              placeholder="+233 XXXXXXXXX"
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-              iconName="call-outline"
-              error={errors?.phone}
-              autoCapitalize="none"
-            />
-            <Input
-              label="Email (optional)"
-              placeholder="your@email.com"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              iconName="mail-outline"
-              autoCapitalize="none"
-            />
-            <Input
-              label="Password"
-              placeholder="Create a password (min. 6 chars)"
-              value={password}
-              onChangeText={setPassword}
-              iconName="lock-closed-outline"
-              secureTextEntry
-              autoCapitalize="none"
-              error={errors?.password}
-            />
-            <Input
-              label="Confirm Password"
-              placeholder="Re-enter your password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              iconName="lock-closed-outline"
-              secureTextEntry
-              autoCapitalize="none"
-              error={errors?.confirmPassword}
-            />
-
-            <Button
-              title="Send Verification Code"
-              onPress={handleSendOtp}
-              loading={loading}
-              style={styles.btn}
-            />
-
-            <TouchableOpacity
-              onPress={() => navigation.navigate('PassengerLogin')}
-              style={styles.loginLink}
-            >
-              <Text style={styles.loginLinkText}>Already have an account? </Text>
-              <Text style={[styles.loginLinkText, styles.linkAccent]}>Login</Text>
-            </TouchableOpacity>
+        {!!errors?.form && (
+          <View style={styles.errorBox}>
+            <Ionicons name="alert-circle" size={18} color={COLORS.error} />
+            <Text style={styles.errorText}>{errors.form}</Text>
           </View>
         )}
 
-        {step === 2 && (
-          <View style={styles.form}>
-            <View style={styles.otpHint}>
-              <View style={styles.otpIconWrap}>
-                <Ionicons name="shield-checkmark" size={28} color={COLORS.primaryDark} />
-              </View>
-              <Text style={styles.otpHintText}>
-                Demo mode: Enter any 4 digits to verify
-              </Text>
-            </View>
+        <View style={styles.form}>
+          <Input
+            label="Full Name"
+            placeholder="e.g. Kofi Mensah"
+            value={name}
+            onChangeText={setName}
+            iconName="person-outline"
+            error={errors?.name}
+          />
+          <Input
+            label="Phone Number"
+            placeholder="055 XXX XXXX"
+            value={phone}
+            onChangeText={setPhone}
+            keyboardType="phone-pad"
+            iconName="call-outline"
+            error={errors?.phone}
+            autoCapitalize="none"
+          />
+          <Input
+            label="Email (optional)"
+            placeholder="your@email.com"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            iconName="mail-outline"
+            autoCapitalize="none"
+          />
+          <Input
+            label="Password"
+            placeholder="Create a password (min. 6 chars)"
+            value={password}
+            onChangeText={setPassword}
+            iconName="lock-closed-outline"
+            secureTextEntry
+            autoCapitalize="none"
+            error={errors?.password}
+          />
+          <Input
+            label="Confirm Password"
+            placeholder="Re-enter your password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            iconName="lock-closed-outline"
+            secureTextEntry
+            autoCapitalize="none"
+            error={errors?.confirmPassword}
+          />
 
-            <Input
-              label="Verification Code"
-              placeholder="_ _ _ _"
-              value={otp}
-              onChangeText={setOtp}
-              keyboardType="number-pad"
-              iconName="keypad-outline"
-              error={errors?.otp}
-            />
+          <Button title="Create Account" onPress={handleRegister} loading={loading} style={styles.btn} />
 
-            <Button
-              title="Verify & Create Account"
-              onPress={handleVerifyOtp}
-              loading={loading}
-              style={styles.btn}
-            />
-
-            <TouchableOpacity onPress={() => setStep(1)} style={styles.loginLink}>
-              <Text style={[styles.loginLinkText, styles.linkAccent]}>
-                ← Change phone number
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
+          <TouchableOpacity
+            onPress={() => navigation.navigate('PassengerLogin')}
+            style={styles.loginLink}
+          >
+            <Text style={styles.loginLinkText}>Already have an account? </Text>
+            <Text style={[styles.loginLinkText, styles.linkAccent]}>Login</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -207,10 +146,7 @@ const PassengerSignupScreen = ({ navigation }: { navigation: any }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   scroll: { padding: SPACING.lg, flexGrow: 1 },
-  back: {
-    marginBottom: SPACING.lg,
-    alignSelf: 'flex-start',
-  },
+  back: { marginBottom: SPACING.lg, alignSelf: 'flex-start' },
   backIconWrap: {
     width: 44,
     height: 44,
@@ -222,33 +158,6 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
   },
   header: { marginBottom: SPACING.xl },
-  stepIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.lg,
-  },
-  stepDot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: COLORS.surfaceAlt,
-    borderWidth: 2,
-    borderColor: COLORS.border,
-  },
-  stepActive: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primaryDark,
-  },
-  stepLine: {
-    flex: 1,
-    height: 3,
-    backgroundColor: COLORS.border,
-    marginHorizontal: SPACING.sm,
-    borderRadius: 2,
-  },
-  stepLineActive: {
-    backgroundColor: COLORS.primary,
-  },
   title: {
     color: COLORS.textPrimary,
     fontSize: FONT_SIZE.xxl,
@@ -261,33 +170,18 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
     fontWeight: '500',
   },
+  errorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    backgroundColor: COLORS.errorLight,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.lg,
+  },
+  errorText: { color: COLORS.error, flex: 1, fontWeight: '700', fontSize: FONT_SIZE.sm },
   form: { gap: SPACING.md },
   btn: { marginTop: SPACING.md },
-  otpHint: {
-    backgroundColor: COLORS.primaryLight + '33',
-    borderRadius: RADIUS.lg,
-    padding: SPACING.lg,
-    alignItems: 'center',
-    gap: SPACING.md,
-    marginBottom: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.primaryLight,
-  },
-  otpIconWrap: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: COLORS.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...SHADOW.sm,
-  },
-  otpHintText: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.sm,
-    textAlign: 'center',
-    fontWeight: '700',
-  },
   loginLink: {
     flexDirection: 'row',
     justifyContent: 'center',

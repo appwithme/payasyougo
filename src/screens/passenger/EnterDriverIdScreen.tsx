@@ -1,23 +1,20 @@
-// ============================================================
-// ENTER DRIVER ID SCREEN
-// ============================================================
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { MOCK_DRIVERS } from '../../data/mockData';
 import Header from '../../components/Header';
 import Input from '../../components/Input';
 import DriverCard from '../../components/DriverCard';
 import Button from '../../components/Button';
+import { lookupDriver } from '../../services/driversService';
 import { COLORS, FONT_SIZE, SPACING, RADIUS, SHADOW } from '../../theme/colors';
-
 import { Driver } from '../../types';
 
 const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: any }) => {
@@ -25,14 +22,32 @@ const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: an
 
   const [driverId, setDriverId] = useState('');
   const [foundDriver, setFoundDriver] = useState<Driver | null>(null);
-  const [notFound, setNotFound]       = useState(false);
+  const [notFound, setNotFound] = useState(false);
+  const [looking, setLooking] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleSearch = (text: string) => {
     const val = text.toUpperCase();
     setDriverId(val);
-    const driver = MOCK_DRIVERS.find(d => d.id === val);
-    setFoundDriver(driver || null);
-    setNotFound(val.length >= 5 && !driver);
+    setFoundDriver(null);
+    setNotFound(false);
+
+    if (timer.current) clearTimeout(timer.current);
+    if (val.length < 5) return;
+
+    timer.current = setTimeout(async () => {
+      setLooking(true);
+      try {
+        const driver = await lookupDriver(val);
+        setFoundDriver(driver);
+        setNotFound(false);
+      } catch {
+        setFoundDriver(null);
+        setNotFound(true);
+      } finally {
+        setLooking(false);
+      }
+    }, 400);
   };
 
   return (
@@ -40,10 +55,7 @@ const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: an
       <StatusBar barStyle="dark-content" />
       <Header title="Driver Details" onBack={() => navigation.goBack()} transparent />
 
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.tripSummary}>
           <Ionicons name="map" size={20} color={COLORS.primaryDark} />
           <Text style={styles.tripSummaryText}>
@@ -56,16 +68,8 @@ const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: an
 
         <Text style={styles.title}>Enter Driver ID</Text>
         <Text style={styles.subtitle}>
-          Ask your driver for their unique ID (e.g. DRV001) to link the payment.
+          Ask your driver for their unique ID (shown on their profile) to link the payment.
         </Text>
-
-        <View style={styles.hint}>
-          <Ionicons name="bulb" size={20} color={COLORS.primaryDark} />
-          <Text style={styles.hintText}>
-            Demo IDs: <Text style={styles.hintCode}>DRV001</Text> (Kwame) ·{' '}
-            <Text style={styles.hintCode}>DRV002</Text> (Ama)
-          </Text>
-        </View>
 
         <View style={styles.inputWrap}>
           <Input
@@ -77,6 +81,12 @@ const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: an
             autoCapitalize="characters"
             error={notFound ? 'No driver found with this ID' : ''}
           />
+          {looking && (
+            <View style={styles.looking}>
+              <ActivityIndicator size="small" color={COLORS.ink} />
+              <Text style={styles.lookingText}>Looking up driver…</Text>
+            </View>
+          )}
         </View>
 
         {foundDriver && (
@@ -99,7 +109,6 @@ const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: an
             })
           }
           disabled={!foundDriver}
-          style={styles.btn}
         />
       </ScrollView>
     </SafeAreaView>
@@ -109,17 +118,16 @@ const EnterDriverIdScreen = ({ navigation, route }: { navigation: any; route: an
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   scroll: { padding: SPACING.lg, paddingBottom: 40 },
-
   tripSummary: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.md,
     backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
+    borderRadius: RADIUS.md,
     padding: SPACING.md,
     marginBottom: SPACING.xl,
     borderWidth: 1,
     borderColor: COLORS.border,
+    gap: SPACING.sm,
     ...SHADOW.sm,
   },
   tripSummaryText: {
@@ -129,69 +137,39 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   fareBadge: {
-    backgroundColor: COLORS.primaryLight,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
-    borderRadius: RADIUS.full,
+    backgroundColor: COLORS.primaryMuted,
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
-  fareText: {
-    color: COLORS.textPrimary,
-    fontWeight: '800',
-    fontSize: FONT_SIZE.sm,
-  },
-
+  fareText: { color: COLORS.ink, fontWeight: '800', fontSize: FONT_SIZE.sm },
   title: {
     color: COLORS.textPrimary,
     fontSize: FONT_SIZE.xl,
     fontWeight: '900',
-    marginBottom: SPACING.xs,
+    letterSpacing: -0.5,
   },
   subtitle: {
     color: COLORS.textSecondary,
-    fontSize: FONT_SIZE.sm,
-    lineHeight: 22,
-    fontWeight: '500',
+    fontSize: FONT_SIZE.base,
+    marginTop: SPACING.sm,
     marginBottom: SPACING.lg,
+    lineHeight: 22,
   },
-
-  hint: {
+  inputWrap: { marginBottom: SPACING.lg },
+  looking: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.primaryLight + '33',
-    borderRadius: RADIUS.lg,
-    padding: SPACING.md,
-    gap: SPACING.sm,
-    marginBottom: SPACING.xl,
-    borderWidth: 1,
-    borderColor: COLORS.primaryLight,
+    gap: 8,
+    marginTop: 8,
   },
-  hintText: {
-    color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.sm,
-    flex: 1,
-    lineHeight: 20,
-    fontWeight: '500',
-  },
-  hintCode: {
-    fontWeight: '800',
-    fontFamily: 'monospace',
-  },
-
-  inputWrap: {
-    marginBottom: SPACING.lg,
-  },
-
-  driverSection: {
-    marginBottom: SPACING.xl,
-    gap: SPACING.sm,
-  },
+  lookingText: { color: COLORS.textMuted, fontSize: FONT_SIZE.sm },
+  driverSection: { marginBottom: SPACING.lg, gap: SPACING.sm },
   foundLabel: {
     color: COLORS.success,
+    fontWeight: '700',
     fontSize: FONT_SIZE.sm,
-    fontWeight: '800',
   },
-
-  btn: { marginTop: SPACING.sm },
 });
 
 export default EnterDriverIdScreen;

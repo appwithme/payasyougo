@@ -23,7 +23,7 @@ import { MoMoProvider } from '../../types';
 
 const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any }) => {
   const { from, to, fare, driver } = route.params;
-  const { currentUser, finalizePaymentTransaction } = useApp();
+  const { currentUser, refreshTrips } = useApp();
 
   // MoMo State
   const [provider, setProvider] = useState<MoMoProvider>('MTN');
@@ -52,43 +52,30 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
     setLoadingStep(`Authorizing on ${provider}...`);
 
     try {
-      // 1. Initiate MoMo Payment via our abstracted service
+      // Paystack test MoMo via API — persists PENDING → COMPLETED in Neon
       const paymentResult = await paymentService.processMoMoPayment({
         provider,
         phone: momoPhone,
         amount: fare,
+        driverCode: driver.id,
+        from,
+        to,
+        onStatus: setLoadingStep,
       });
 
-      if (!paymentResult.success) {
+      if (!paymentResult.success || !paymentResult.transaction) {
         setError(paymentResult.error || 'Payment failed.');
         setLoading(false);
         return;
       }
 
-      setLoadingStep('Finalizing transaction...');
-
-      // 2. Finalize local state/ledger
-      const result = finalizePaymentTransaction({
-        driverId: driver.id,
-        passengerId: currentUser.id,
-        passengerName: currentUser.name,
-        from,
-        to,
-        fare,
-        paymentRef: paymentResult.transactionRef,
-        provider,
-      });
-
+      await refreshTrips();
       setLoading(false);
 
-      if (result.success) {
-        navigation.navigate('PaymentSuccess', {
-          transaction: result.transaction,
-          driver: result.driver,
-        });
-      } else {
-        setError(result.error || 'Failed to update local transaction ledger.');
-      }
+      navigation.navigate('PaymentSuccess', {
+        transaction: paymentResult.transaction,
+        driver,
+      });
     } catch (err: any) {
       setLoading(false);
       setError(err?.message || 'An unexpected error occurred.');
