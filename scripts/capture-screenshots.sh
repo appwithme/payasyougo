@@ -9,7 +9,7 @@ mkdir -p "$OUT"
 
 EXPO_HOST="${EXPO_HOST:-172.20.10.2}"
 EXPO_PORT="${EXPO_PORT:-8081}"
-WAIT_SEC="${WAIT_SEC:-5}"
+WAIT_SEC="${WAIT_SEC:-12}"
 
 SHOTS=(
   onboarding

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
@@ -23,6 +23,9 @@ type Props = {
 
 const RootNavigator = ({ initialRouteName = 'Welcome' }: Props) => {
   const { userRole, bootstrapping } = useApp();
+  /** Once someone has signed in this session, logout should never reopen onboarding. */
+  const hasAuthenticated = useRef(false);
+  if (userRole) hasAuthenticated.current = true;
 
   if (bootstrapping) {
     return (
@@ -32,15 +35,18 @@ const RootNavigator = ({ initialRouteName = 'Welcome' }: Props) => {
     );
   }
 
-  // Always pick an initial route that exists for the current auth branch
+  // Cold start: App picks Onboarding vs Welcome from AsyncStorage.
+  // After logout: always Welcome — onboarding is first-launch only.
   const resolvedInitial: keyof RootStackParamList =
     userRole === 'passenger'
       ? 'PassengerApp'
       : userRole === 'driver'
         ? 'DriverApp'
-        : initialRouteName === 'PassengerApp' || initialRouteName === 'DriverApp'
+        : hasAuthenticated.current
           ? 'Welcome'
-          : initialRouteName;
+          : initialRouteName === 'PassengerApp' || initialRouteName === 'DriverApp'
+            ? 'Welcome'
+            : initialRouteName;
 
   return (
     <Stack.Navigator
