@@ -4,18 +4,18 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  StatusBar,
   TouchableOpacity,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
-import WalletCard from '../../components/WalletCard';
 import TransactionCard from '../../components/TransactionCard';
-import NotificationCard from '../../components/NotificationCard';
-import { COLORS, SPACING, RADIUS } from '../../theme/colors';
+import UserAvatar from '../../components/UserAvatar';
+import InkSheetScreen from '../../components/InkSheetScreen';
+import Button from '../../components/Button';
+import { COLORS, SPACING, RADIUS, SHADOW } from '../../theme/colors';
 import { type } from '../../theme/typography';
 import { useTabBarPadding } from '../../navigation/FloatingTabBar';
 
@@ -31,6 +31,11 @@ const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
   const tabPad = useTabBarPadding();
   const driver = getDriverData();
   const recentTxns = driverTransactions.slice(0, 3);
+  const completedToday = driverTransactions.filter(
+    (t) => t.status === 'completed' && t.date === new Date().toISOString().slice(0, 10)
+  ).length;
+  const firstName = driver?.name?.split(' ')[0] || 'Driver';
+  const avatar = driver && 'avatar' in driver ? (driver as any).avatar : null;
 
   useFocusEffect(
     useCallback(() => {
@@ -42,141 +47,450 @@ const DriverDashboardScreen = ({ navigation }: { navigation: any }) => {
   if (!driver) return null;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="dark-content" />
-
-      <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
-        <View style={styles.headerTitle}>
-          <Text style={styles.greeting}>Hi, {driver.name.split(' ')[0]}</Text>
-          <View style={styles.idBadge}>
-            <Ionicons name="id-card-outline" size={12} color={COLORS.ink} />
-            <Text style={styles.idLabel}>{driver.id}</Text>
+    <InkSheetScreen
+      hero={
+        <Animated.View entering={FadeInDown.delay(60).duration(420)} style={styles.heroBody}>
+          <View style={styles.heroRow}>
+            <View style={styles.heroCopy}>
+              <Text style={styles.greeting}>Hi, {firstName}</Text>
+              <Text style={styles.subGreeting}>Collect campus MoMo fares</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('DriverProfile')}
+              activeOpacity={0.85}
+            >
+              <View style={styles.avatarRing}>
+                <UserAvatar name={driver.name} uri={avatar} size={48} radius={16} />
+              </View>
+            </TouchableOpacity>
           </View>
-        </View>
-        <TouchableOpacity
-          style={styles.avatarBtn}
-          onPress={() => navigation.navigate('DriverProfile')}
-        >
-          <Text style={styles.avatarText}>{driver.name.charAt(0)}</Text>
-        </TouchableOpacity>
-      </Animated.View>
 
+          <TouchableOpacity
+            style={styles.idHero}
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate('DriverQr')}
+            accessibilityRole="button"
+            accessibilityLabel={`Show QR for driver ID ${driver.id}`}
+          >
+            <View style={styles.idHeroTop}>
+              <Text style={styles.idEyebrow}>Your driver ID</Text>
+              <TouchableOpacity
+                style={styles.shareChip}
+                onPress={() => navigation.navigate('DriverQr')}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="qr-code-outline" size={14} color={COLORS.ink} />
+                <Text style={styles.shareChipText}>QR</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.idValue}>{driver.id}</Text>
+            <Text style={styles.idHint}>Passengers scan your QR or enter this ID</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      }
+      heroBottom={SPACING.lg}
+    >
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: tabPad }]}
         showsVerticalScrollIndicator={false}
       >
         {pendingNotification ? (
-          <View style={styles.notificationWrap}>
-            <NotificationCard
-              notification={pendingNotification}
-              onDismiss={clearNotification}
-              onViewDetails={() => {
-                clearNotification();
-                navigation.navigate('TransactionHistory');
-              }}
-            />
-          </View>
+          <Animated.View entering={FadeInUp.duration(350)} style={styles.notificationWrap}>
+            <View style={styles.liveBanner}>
+              <View style={styles.liveDot} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.liveTitle}>Payment received</Text>
+                <Text style={styles.liveBody}>
+                  {pendingNotification.passengerName} · {pendingNotification.from} →{' '}
+                  {pendingNotification.to} · +GH₵
+                  {Number(pendingNotification.amount).toFixed(2)}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  clearNotification();
+                  navigation.navigate('TransactionHistory');
+                }}
+                hitSlop={8}
+              >
+                <Ionicons name="chevron-forward" size={18} color={COLORS.ink} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={clearNotification} hitSlop={8}>
+                <Ionicons name="close" size={18} color={COLORS.textMuted} />
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
         ) : null}
 
-        <View style={styles.walletSection}>
-          <WalletCard
-            balance={driver.walletBalance}
-            todayEarnings={driver.todayEarnings}
-            totalTrips={driver.totalTrips}
-          />
-        </View>
+        <Animated.View entering={FadeInUp.delay(80).duration(420)}>
+          <LinearGradient
+            colors={[COLORS.ink, '#2A3F63']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.walletCard}
+          >
+            <View style={styles.walletOrb} />
+            <View style={styles.walletHeader}>
+              <View style={styles.walletIcon}>
+                <Ionicons name="wallet" size={16} color={COLORS.ink} />
+              </View>
+              <Text style={styles.walletLabel}>Wallet balance</Text>
+            </View>
+            <Text style={styles.walletBalance}>
+              GH₵{Number(driver.walletBalance || 0).toFixed(2)}
+            </Text>
+            <TouchableOpacity
+              style={styles.walletLink}
+              onPress={() => navigation.navigate('WalletTab')}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.walletLinkText}>Open wallet</Text>
+              <Ionicons name="arrow-forward" size={14} color={COLORS.primary} />
+            </TouchableOpacity>
+          </LinearGradient>
+        </Animated.View>
 
-        <View style={styles.section}>
+        <Animated.View entering={FadeInUp.delay(140).duration(420)} style={styles.stats}>
+          <View style={[styles.statTile, styles.statAccent]}>
+            <Text style={styles.statValue}>
+              GH₵{Number(driver.todayEarnings || 0).toFixed(0)}
+            </Text>
+            <Text style={styles.statLabel}>Today</Text>
+          </View>
+          <View style={styles.statTile}>
+            <Text style={styles.statValue}>{completedToday || 0}</Text>
+            <Text style={styles.statLabel}>Trips today</Text>
+          </View>
+          <View style={styles.statTile}>
+            <Text style={styles.statValue}>{driver.totalTrips ?? 0}</Text>
+            <Text style={styles.statLabel}>All trips</Text>
+          </View>
+        </Animated.View>
+
+        <Animated.View entering={FadeInUp.delay(180).duration(420)} style={styles.tipCard}>
+          <View style={styles.tipIcon}>
+            <Ionicons name="qr-code-outline" size={18} color={COLORS.ink} />
+          </View>
+              <View style={styles.tipCopy}>
+                <Text style={styles.tipTitle}>Show your QR at pickup</Text>
+                <Text style={styles.tipBody}>
+                  Passengers scan your code or type {driver.id} to pay with MoMo.
+                </Text>
+              </View>
+              <Button
+                title="QR"
+                variant="secondary"
+                onPress={() => navigation.navigate('DriverQr')}
+                style={styles.tipBtn}
+                textStyle={styles.tipBtnText}
+              />
+            </Animated.View>
+
+        <Animated.View entering={FadeInUp.delay(220).duration(420)} style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent payments</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('TransactionHistory')}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('TransactionHistory')}
+              hitSlop={8}
+            >
               <Text style={styles.seeAll}>See all</Text>
             </TouchableOpacity>
           </View>
 
-          {recentTxns.length === 0 ? (
-            <View style={styles.empty}>
-              <Ionicons name="cash-outline" size={40} color={COLORS.textMuted} />
-              <Text style={styles.emptyText}>Waiting for passenger payments.</Text>
-            </View>
-          ) : (
-            recentTxns.map((txn, i) => (
-              <TransactionCard
-                key={txn.id}
-                item={txn}
-                mode="driver"
-                last={i === recentTxns.length - 1}
-              />
-            ))
-          )}
-        </View>
+          <View style={styles.listPanel}>
+            {recentTxns.length === 0 ? (
+              <View style={styles.empty}>
+                <Text style={styles.emptyTitle}>No payments yet</Text>
+                <Text style={styles.emptyText}>
+                  When a passenger pays your ID, it shows up here.
+                </Text>
+              </View>
+            ) : (
+              recentTxns.map((txn, i) => (
+                <TransactionCard
+                  key={txn.id}
+                  item={txn}
+                  mode="driver"
+                  last={i === recentTxns.length - 1}
+                />
+              ))
+            )}
+          </View>
+        </Animated.View>
       </ScrollView>
-    </SafeAreaView>
+    </InkSheetScreen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  header: {
+  heroBody: {
+    marginTop: SPACING.lg,
+    gap: SPACING.lg,
+  },
+  heroRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.md,
-    paddingBottom: SPACING.md,
+    gap: 14,
   },
-  headerTitle: { gap: 6 },
-  greeting: { ...type.heading },
-  idBadge: {
+  heroCopy: {
+    flex: 1,
+    gap: 4,
+  },
+  greeting: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 28,
+    color: COLORS.white,
+    letterSpacing: -0.8,
+  },
+  subGreeting: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 15,
+    color: 'rgba(255,255,255,0.55)',
+  },
+  avatarRing: {
+    padding: 3,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+  },
+  idHero: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    gap: 6,
+  },
+  idHeroTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  idEyebrow: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 11,
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+    color: COLORS.primary,
+  },
+  shareChip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: COLORS.primaryMuted,
+    backgroundColor: COLORS.primary,
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: RADIUS.sm,
-    alignSelf: 'flex-start',
+    paddingVertical: 5,
+    borderRadius: 999,
   },
-  idLabel: {
+  shareChipText: {
     fontFamily: 'DMSans_700Bold',
     fontSize: 12,
     color: COLORS.ink,
   },
-  avatarBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
+  idValue: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 34,
+    color: COLORS.white,
+    letterSpacing: 4,
+  },
+  idHint: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.5)',
+  },
+  scroll: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.lg,
+    gap: SPACING.lg,
+  },
+  notificationWrap: {},
+  liveBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: COLORS.successLight,
+    borderRadius: RADIUS.lg,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(47,158,106,0.35)',
+  },
+  liveDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.success,
+  },
+  liveTitle: {
+    fontFamily: 'Sora_600SemiBold',
+    fontSize: 14,
+    color: COLORS.ink,
+  },
+  liveBody: {
+    ...type.caption,
+    marginTop: 2,
+  },
+  walletCard: {
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    overflow: 'hidden',
+    ...SHADOW.md,
+    gap: 8,
+  },
+  walletOrb: {
+    position: 'absolute',
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: COLORS.primary,
+    opacity: 0.16,
+    top: -36,
+    right: -24,
+  },
+  walletHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  walletIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: {
+  walletLabel: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 11,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    color: 'rgba(255,255,255,0.65)',
+  },
+  walletBalance: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 36,
+    color: COLORS.white,
+    letterSpacing: -1,
+  },
+  walletLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    marginTop: 4,
+  },
+  walletLinkText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 13,
+    color: COLORS.primary,
+  },
+  stats: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  statTile: {
+    flex: 1,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOW.sm,
+  },
+  statAccent: {
+    backgroundColor: COLORS.primaryMuted,
+    borderColor: 'rgba(245,184,0,0.35)',
+  },
+  statValue: {
     fontFamily: 'Sora_700Bold',
     fontSize: 18,
     color: COLORS.ink,
+    letterSpacing: -0.4,
   },
-  scroll: { padding: SPACING.lg },
-  notificationWrap: { marginBottom: SPACING.md },
-  walletSection: { marginBottom: SPACING.xl },
-  section: { marginBottom: SPACING.xl },
+  statLabel: {
+    ...type.caption,
+    marginTop: 4,
+    fontSize: 11,
+  },
+  tipCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOW.sm,
+  },
+  tipIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    backgroundColor: COLORS.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tipCopy: {
+    flex: 1,
+    gap: 2,
+    minWidth: 0,
+  },
+  tipTitle: {
+    fontFamily: 'Sora_600SemiBold',
+    fontSize: 14,
+    color: COLORS.ink,
+  },
+  tipBody: {
+    ...type.caption,
+    fontSize: 12,
+  },
+  tipBtn: {
+    minHeight: 40,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+  },
+  tipBtnText: {
+    fontSize: 13,
+  },
+  section: {
+    gap: 10,
+  },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SPACING.md,
   },
-  sectionTitle: { ...type.subheading },
-  seeAll: { ...type.label, color: COLORS.textSecondary },
-  empty: {
-    alignItems: 'center',
-    padding: SPACING.xl,
-    gap: SPACING.sm,
+  sectionTitle: {
+    fontFamily: 'Sora_600SemiBold',
+    fontSize: 17,
+    color: COLORS.ink,
+  },
+  seeAll: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 13,
+    color: COLORS.ink,
+  },
+  listPanel: {
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
+    paddingHorizontal: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.border,
+    ...SHADOW.sm,
   },
-  emptyText: { ...type.caption, textAlign: 'center' },
+  empty: {
+    paddingVertical: SPACING.lg,
+    gap: 4,
+  },
+  emptyTitle: {
+    fontFamily: 'Sora_600SemiBold',
+    fontSize: 15,
+    color: COLORS.ink,
+  },
+  emptyText: { ...type.caption },
 });
 
 export default DriverDashboardScreen;
