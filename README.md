@@ -61,46 +61,41 @@ A mobile transport payment app for **University of Cape Coast (UCC)** — passen
 
 ## 📱 Screenshots
 
-Captured from the iOS Simulator. Re-generate anytime with Expo + API running:
-
-```bash
-# Set EXPO_HOST to the IP shown by `npx expo start`
-EXPO_HOST=172.20.10.2 WAIT_SEC=12 ./scripts/capture-screenshots.sh
-```
+Captured from the iOS Simulator.
 
 ### Get started
 
 | Onboarding | Welcome | Passenger login | Driver login |
 |:---:|:---:|:---:|:---:|
-| <img src="./docs/screenshots/onboarding.png" width="180" alt="Onboarding" /> | <img src="./docs/screenshots/welcome.png" width="180" alt="Welcome" /> | <img src="./docs/screenshots/passenger-login.png" width="180" alt="Passenger login" /> | <img src="./docs/screenshots/driver-login.png" width="180" alt="Driver login" /> |
+| <img src="./assets/screenshots/onboarding.png" width="180" alt="Onboarding" /> | <img src="./assets/screenshots/welcome.png" width="180" alt="Welcome" /> | <img src="./assets/screenshots/passenger-login.png" width="180" alt="Passenger login" /> | <img src="./assets/screenshots/driver-login.png" width="180" alt="Driver login" /> |
 
 | Passenger signup | Driver signup |
 |:---:|:---:|
-| <img src="./docs/screenshots/passenger-signup.png" width="180" alt="Passenger signup" /> | <img src="./docs/screenshots/driver-signup.png" width="180" alt="Driver signup" /> |
+| <img src="./assets/screenshots/passenger-signup.png" width="180" alt="Passenger signup" /> | <img src="./assets/screenshots/driver-signup.png" width="180" alt="Driver signup" /> |
 
 ### Passenger
 
 | Home | Select route | Link driver | Scan QR |
 |:---:|:---:|:---:|:---:|
-| <img src="./docs/screenshots/passenger-home.png" width="180" alt="Passenger home" /> | <img src="./docs/screenshots/book-trip.png" width="180" alt="Book trip" /> | <img src="./docs/screenshots/enter-driver.png" width="180" alt="Enter driver ID" /> | <img src="./docs/screenshots/scan-qr.png" width="180" alt="Scan driver QR" /> |
+| <img src="./assets/screenshots/passenger-home.png" width="180" alt="Passenger home" /> | <img src="./assets/screenshots/book-trip.png" width="180" alt="Book trip" /> | <img src="./assets/screenshots/enter-driver.png" width="180" alt="Enter driver ID" /> | <img src="./assets/screenshots/scan-qr.png" width="180" alt="Scan driver QR" /> |
 
 | Confirm & pay | Payment success | Trip history | Profile |
 |:---:|:---:|:---:|:---:|
-| <img src="./docs/screenshots/confirm-trip.png" width="180" alt="Confirm payment" /> | <img src="./docs/screenshots/payment-success.png" width="180" alt="Payment success" /> | <img src="./docs/screenshots/trip-history.png" width="180" alt="Trip history" /> | <img src="./docs/screenshots/passenger-profile.png" width="180" alt="Passenger profile" /> |
+| <img src="./assets/screenshots/confirm-trip.png" width="180" alt="Confirm payment" /> | <img src="./assets/screenshots/payment-success.png" width="180" alt="Payment success" /> | <img src="./assets/screenshots/trip-history.png" width="180" alt="Trip history" /> | <img src="./assets/screenshots/passenger-profile.png" width="180" alt="Passenger profile" /> |
 
 | Edit profile | Settings | Notifications |
 |:---:|:---:|:---:|
-| <img src="./docs/screenshots/passenger-edit-profile.png" width="180" alt="Edit profile" /> | <img src="./docs/screenshots/passenger-settings.png" width="180" alt="Settings" /> | <img src="./docs/screenshots/passenger-notifications.png" width="180" alt="Notifications" /> |
+| <img src="./assets/screenshots/passenger-edit-profile.png" width="180" alt="Edit profile" /> | <img src="./assets/screenshots/passenger-settings.png" width="180" alt="Settings" /> | <img src="./assets/screenshots/passenger-notifications.png" width="180" alt="Notifications" /> |
 
 ### Driver
 
 | Dashboard | Payments | Wallet | Profile |
 |:---:|:---:|:---:|:---:|
-| <img src="./docs/screenshots/driver-home.png" width="180" alt="Driver dashboard" /> | <img src="./docs/screenshots/driver-txns.png" width="180" alt="Driver transactions" /> | <img src="./docs/screenshots/driver-wallet.png" width="180" alt="Driver wallet" /> | <img src="./docs/screenshots/driver-profile.png" width="180" alt="Driver profile" /> |
+| <img src="./assets/screenshots/driver-home.png" width="180" alt="Driver dashboard" /> | <img src="./assets/screenshots/driver-txns.png" width="180" alt="Driver transactions" /> | <img src="./assets/screenshots/driver-wallet.png" width="180" alt="Driver wallet" /> | <img src="./assets/screenshots/driver-profile.png" width="180" alt="Driver profile" /> |
 
 | My QR | Edit profile | Settings | Notifications |
 |:---:|:---:|:---:|:---:|
-| <img src="./docs/screenshots/driver-qr.png" width="180" alt="Driver QR" /> | <img src="./docs/screenshots/driver-edit-profile.png" width="180" alt="Driver edit profile" /> | <img src="./docs/screenshots/driver-settings.png" width="180" alt="Driver settings" /> | <img src="./docs/screenshots/driver-notifications.png" width="180" alt="Driver notifications" /> |
+| <img src="./assets/screenshots/driver-qr.png" width="180" alt="Driver QR" /> | <img src="./assets/screenshots/driver-edit-profile.png" width="180" alt="Driver edit profile" /> | <img src="./assets/screenshots/driver-settings.png" width="180" alt="Driver settings" /> | <img src="./assets/screenshots/driver-notifications.png" width="180" alt="Driver notifications" /> |
 
 ---
 
@@ -160,7 +155,6 @@ Root `.env` (from `.env.example`):
 
 ```env
 EXPO_PUBLIC_API_URL=http://YOUR_LAN_IP:4000
-EXPO_PUBLIC_MOCK_MODE=false
 
 # Optional — passenger Google sign-in (Web client ID is enough for Expo)
 EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=
@@ -277,6 +271,7 @@ payasyougo/
 ├── 📱 App.tsx / app.json
 ├── 🖼️ assets/brand/          # logo, welcome video, MoMo & Telecel marks
 ├── 🖼️ assets/id/             # Ghana Card / licence example images
+├── 🖼️ assets/screenshots/    # README gallery
 ├── 🖥️ backend/
 │   ├── prisma/               # schema · migrations · seed
 │   └── src/                  # Express · Paystack · auth
@@ -287,10 +282,6 @@ payasyougo/
 │   ├── screens/              # passenger · driver · shared
 │   ├── services/             # API · payments · auth · Google
 │   └── theme/                # colors · typography
-├── 📚 docs/
-│   └── screenshots/          # README gallery (see scripts/capture-screenshots.sh)
-├── 🧰 scripts/
-│   └── capture-screenshots.sh
 ```
 
 ---
@@ -298,23 +289,6 @@ payasyougo/
 ## 🗺️ Campus routes
 
 Fares live in Neon (seeded). Stops include Science, Casford, Ayensu, Valco, Amissah Arthur, KNH, and more — **bidirectional** pairs where configured.
-
-Full reference → [docs/ROUTES.md](./docs/ROUTES.md)
-
----
-
-## 📚 Docs
-
-| Doc | About |
-|:----|:------|
-| [Overview](./docs/OVERVIEW.md) | Background & scope |
-| [Architecture](./docs/ARCHITECTURE.md) | System design |
-| [Data Models](./docs/DATA_MODELS.md) | Users, trips, routes |
-| [Navigation](./docs/NAVIGATION.md) | Screen flows |
-| [Backend](./docs/BACKEND.md) | API design |
-| [Environment](./docs/ENVIRONMENT.md) | Env vars |
-| [Deployment](./docs/DEPLOYMENT.md) | Ship checklist |
-| [User Manual](./docs/USER_MANUAL.md) | How to use the app |
 
 ---
 
