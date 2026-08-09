@@ -76,7 +76,6 @@ In the app root `.env`:
 
 ```
 EXPO_PUBLIC_API_URL=http://YOUR_LAN_IP:4000
-EXPO_PUBLIC_MOCK_MODE=false
 ```
 
 Use your Mac’s LAN IP (not `localhost`) when testing on a physical phone via Expo Go.
