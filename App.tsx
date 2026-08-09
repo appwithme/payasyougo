@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Linking } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreenNative from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -24,27 +24,13 @@ import { AppProvider } from './src/context/AppContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import AnimatedSplash from './src/screens/shared/SplashScreen';
 import { ONBOARDING_KEY } from './src/screens/shared/OnboardingScreen';
-import {
-  enableShotMode,
-  isShotMode,
-  setPendingShot,
-} from './src/dev/shotTour';
-import { useShotTour } from './src/dev/useShotTour';
 
 SplashScreenNative.preventAutoHideAsync().catch(() => undefined);
 
 type BootRoute = 'Onboarding' | 'Welcome';
 
-function parseShotId(url: string | null): string | null {
-  if (!url) return null;
-  const match =
-    url.match(/[?&/]shot[/:=]([^/&#?]+)/i) || url.match(/shot\/([^/&#?]+)/i);
-  return match?.[1] ? decodeURIComponent(match[1]) : null;
-}
-
 function AppShell({ initialRoute }: { initialRoute: BootRoute }) {
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
-  useShotTour(navigationRef);
 
   const linking = {
     prefixes: [ExpoLinking.createURL('/'), 'payasyougo://', 'exp://'],
@@ -102,26 +88,6 @@ function AppShell({ initialRoute }: { initialRoute: BootRoute }) {
         },
       },
     },
-    async getInitialURL() {
-      const url = await Linking.getInitialURL();
-      const shot = parseShotId(url);
-      if (shot) {
-        enableShotMode();
-        setPendingShot(shot);
-      }
-      return url;
-    },
-    subscribe(listener: (url: string) => void) {
-      const sub = Linking.addEventListener('url', ({ url }) => {
-        const shot = parseShotId(url);
-        if (shot) {
-          enableShotMode();
-          setPendingShot(shot);
-        }
-        listener(url);
-      });
-      return () => sub.remove();
-    },
   };
 
   return (
@@ -148,15 +114,6 @@ export default function App() {
   useEffect(() => {
     (async () => {
       try {
-        const url = await Linking.getInitialURL();
-        const shot = parseShotId(url);
-        if (shot) {
-          enableShotMode();
-          setPendingShot(shot);
-          await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
-          setInitialRoute('Welcome');
-          return;
-        }
         const done = await AsyncStorage.getItem(ONBOARDING_KEY);
         setInitialRoute(done === 'true' ? 'Welcome' : 'Onboarding');
       } catch {
@@ -167,7 +124,7 @@ export default function App() {
 
   useEffect(() => {
     if (fontsLoaded && initialRoute && phase === 'loading') {
-      setPhase(isShotMode() ? 'app' : 'splash');
+      setPhase('splash');
     }
   }, [fontsLoaded, initialRoute, phase]);
 
