@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useApp } from '../../context/AppContext';
-import paymentService from '../../services/paymentService';
+import { processMoMoPayment } from '../../services/paymentsService';
 import Header from '../../components/Header';
 import DriverCard from '../../components/DriverCard';
 import Input from '../../components/Input';
@@ -67,7 +67,7 @@ const ConfirmTripScreen = ({ navigation, route }: { navigation: any; route: any 
     setLoadingStep('Starting MoMo charge…');
 
     try {
-      const paymentResult = await paymentService.processMoMoPayment({
+      const paymentResult = await processMoMoPayment({
         provider,
         phone: momoPhone,
         amount: fare,
