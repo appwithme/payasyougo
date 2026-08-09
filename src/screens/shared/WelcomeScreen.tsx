@@ -57,7 +57,7 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
           style={StyleSheet.absoluteFillObject}
           contentFit="cover"
           nativeControls={false}
-          allowsFullscreen={false}
+          fullscreenOptions={{ enable: false }}
           allowsPictureInPicture={false}
         />
 
