@@ -29,13 +29,13 @@ A mobile transport payment app for **University of Cape Coast (UCC)** — passen
 
 ---
 
-## ✨ What it does
+## What it does
 
 <table>
 <tr>
 <td width="50%" valign="top">
 
-### 🧳 Passengers
+### Passengers
 - Sign up / log in (JWT + optional Google)
 - Pick campus **From → To** with live fares
 - Link a driver by **Driver ID** or **QR scan**
@@ -46,7 +46,7 @@ A mobile transport payment app for **University of Cape Coast (UCC)** — passen
 </td>
 <td width="50%" valign="top">
 
-### 🚕 Drivers
+### Drivers
 - Unique **Driver ID** + QR code for passengers
 - Live wallet, today’s earnings & MoMo withdrawals
 - Trip / payment history
@@ -59,20 +59,20 @@ A mobile transport payment app for **University of Cape Coast (UCC)** — passen
 
 ---
 
-## 🧱 Stack
+## Stack
 
 | Layer | Tech |
 |:------|:-----|
-| 📱 App | React Native · Expo ~54 · TypeScript |
-| 🧭 Nav | React Navigation (tabs + stacks) · floating tab bar |
-| 🔐 Session | SecureStore JWT · React Context |
-| 🖥️ API | Node.js · Express · Prisma |
-| 🗄️ DB | Neon PostgreSQL |
-| 💳 Payments | Paystack Mobile Money (GHS) |
+| App | React Native · Expo ~54 · TypeScript |
+| Nav | React Navigation (tabs + stacks) · floating tab bar |
+| Session | SecureStore JWT · React Context |
+| API | Node.js · Express · Prisma |
+| DB | Neon PostgreSQL |
+| Payments | Paystack Mobile Money (GHS) |
 
 ---
 
-## 🚀 Quick start
+## Quick start
 
 ### Prerequisites
 
@@ -122,7 +122,7 @@ EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=
 EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=
 ```
 
-> 💡 Use your Mac’s **LAN IP** (not `localhost`) when testing on a physical phone. Simulator can use `http://localhost:4000`.
+> Use your Mac’s **LAN IP** (not `localhost`) when testing on a physical phone. Simulator can use `http://localhost:4000`.
 
 ### 4 · Run Expo
 
@@ -144,7 +144,7 @@ Onboarding is stored in AsyncStorage (`payasyougo_onboarding_v6`) and only shown
 
 ---
 
-## 💳 Paystack MoMo (important)
+## Paystack MoMo (important)
 
 Payments use Paystack’s **charge** API; driver **withdrawals** use **transfer** to MoMo. The app collects:
 
@@ -155,7 +155,7 @@ Payments use Paystack’s **charge** API; driver **withdrawals** use **transfer*
 
 Receipt details (route, amount, driver, reference) come from **your database** after Paystack confirms — not from that phone field alone.
 
-### 🧪 Test mode
+### Test mode
 
 With `sk_test_…` keys, **real phone numbers are declined**. Use Paystack’s official test number for **both** passenger payments and driver withdrawals:
 
@@ -185,7 +185,7 @@ In **live / production**, Telecel works the same as MTN: the app sends provider 
 
 ---
 
-## 👤 Seeded test accounts
+## Seeded test accounts
 
 | Role | Name | Phone | Password | Driver ID |
 |:-----|:-----|:------|:---------|:----------|
@@ -224,17 +224,17 @@ Without `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, the login UI shows a setup hint inst
 
 ---
 
-## 📁 Project layout
+## Project layout
 
 ```text
 payasyougo/
-├── 📱 App.tsx / app.json
-├── 🖼️ assets/brand/          # logo, welcome video, MoMo & Telecel marks
-├── 🖼️ assets/id/             # Ghana Card / licence example images
-├── 🖥️ backend/
+├── App.tsx / app.json
+├── assets/brand/          # logo, welcome video, MoMo & Telecel marks
+├── assets/id/             # Ghana Card / licence example images
+├── backend/
 │   ├── prisma/               # schema · migrations · seed
 │   └── src/                  # Express · Paystack · auth
-├── 📂 src/
+├── src/
 │   ├── components/           # Auth sheet, Google button, ID capture, …
 │   ├── data/                 # QA autofill samples
 │   ├── navigation/           # Floating tab bar + stacks
@@ -245,13 +245,13 @@ payasyougo/
 
 ---
 
-## 🗺️ Campus routes
+## Campus routes
 
 Fares live in Neon (seeded). Stops include Science, Casford, Ayensu, Valco, Amissah Arthur, KNH, and more — **bidirectional** pairs where configured.
 
 ---
 
-## 👥 Authors
+## Authors
 
 **University of Cape Coast** — Department of Computer Science and Information Technology
 
@@ -265,7 +265,7 @@ Fares live in Neon (seeded). Stops include Science, Casford, Ayensu, Valco, Amis
 
 ---
 
-## 📄 License
+## License
 
 See [LICENSE](./LICENSE).
 
