@@ -59,46 +59,6 @@ A mobile transport payment app for **University of Cape Coast (UCC)** — passen
 
 ---
 
-## 📱 Screenshots
-
-Captured from the iOS Simulator.
-
-### Get started
-
-| Onboarding | Welcome | Passenger login | Driver login |
-|:---:|:---:|:---:|:---:|
-| <img src="./assets/screenshots/onboarding.png" width="180" alt="Onboarding" /> | <img src="./assets/screenshots/welcome.png" width="180" alt="Welcome" /> | <img src="./assets/screenshots/passenger-login.png" width="180" alt="Passenger login" /> | <img src="./assets/screenshots/driver-login.png" width="180" alt="Driver login" /> |
-
-| Passenger signup | Driver signup |
-|:---:|:---:|
-| <img src="./assets/screenshots/passenger-signup.png" width="180" alt="Passenger signup" /> | <img src="./assets/screenshots/driver-signup.png" width="180" alt="Driver signup" /> |
-
-### Passenger
-
-| Home | Select route | Link driver | Scan QR |
-|:---:|:---:|:---:|:---:|
-| <img src="./assets/screenshots/passenger-home.png" width="180" alt="Passenger home" /> | <img src="./assets/screenshots/book-trip.png" width="180" alt="Book trip" /> | <img src="./assets/screenshots/enter-driver.png" width="180" alt="Enter driver ID" /> | <img src="./assets/screenshots/scan-qr.png" width="180" alt="Scan driver QR" /> |
-
-| Confirm & pay | Payment success | Trip history | Profile |
-|:---:|:---:|:---:|:---:|
-| <img src="./assets/screenshots/confirm-trip.png" width="180" alt="Confirm payment" /> | <img src="./assets/screenshots/payment-success.png" width="180" alt="Payment success" /> | <img src="./assets/screenshots/trip-history.png" width="180" alt="Trip history" /> | <img src="./assets/screenshots/passenger-profile.png" width="180" alt="Passenger profile" /> |
-
-| Edit profile | Settings | Notifications |
-|:---:|:---:|:---:|
-| <img src="./assets/screenshots/passenger-edit-profile.png" width="180" alt="Edit profile" /> | <img src="./assets/screenshots/passenger-settings.png" width="180" alt="Settings" /> | <img src="./assets/screenshots/passenger-notifications.png" width="180" alt="Notifications" /> |
-
-### Driver
-
-| Dashboard | Payments | Wallet | Profile |
-|:---:|:---:|:---:|:---:|
-| <img src="./assets/screenshots/driver-home.png" width="180" alt="Driver dashboard" /> | <img src="./assets/screenshots/driver-txns.png" width="180" alt="Driver transactions" /> | <img src="./assets/screenshots/driver-wallet.png" width="180" alt="Driver wallet" /> | <img src="./assets/screenshots/driver-profile.png" width="180" alt="Driver profile" /> |
-
-| My QR | Edit profile | Settings | Notifications |
-|:---:|:---:|:---:|:---:|
-| <img src="./assets/screenshots/driver-qr.png" width="180" alt="Driver QR" /> | <img src="./assets/screenshots/driver-edit-profile.png" width="180" alt="Driver edit profile" /> | <img src="./assets/screenshots/driver-settings.png" width="180" alt="Driver settings" /> | <img src="./assets/screenshots/driver-notifications.png" width="180" alt="Driver notifications" /> |
-
----
-
 ## 🧱 Stack
 
 | Layer | Tech |
@@ -271,7 +231,6 @@ payasyougo/
 ├── 📱 App.tsx / app.json
 ├── 🖼️ assets/brand/          # logo, welcome video, MoMo & Telecel marks
 ├── 🖼️ assets/id/             # Ghana Card / licence example images
-├── 🖼️ assets/screenshots/    # README gallery
 ├── 🖥️ backend/
 │   ├── prisma/               # schema · migrations · seed
 │   └── src/                  # Express · Paystack · auth
